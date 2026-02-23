@@ -29,7 +29,9 @@ export default function Home() {
       <ServicesSection />
       <FeaturesSection />
       <CTASection />
-      <ZoomParallax images={parallaxImages} />
+      <div className="hidden lg:block">
+        <ZoomParallax images={parallaxImages} />
+      </div>
       <DonationProgramsSection />
       <TestimonialsSection />
       <FAQSection />

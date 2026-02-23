@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 export function DonationProgramsSection() {
   return (
-    <section id="pricing" className="py-32 px-6 bg-gradient-to-b from-slate-50 to-white mt-142">{/* mt-32 untuk jarak dari zoom parallax */}
+    <section id="pricing" className="py-16 md:py-32 px-6 bg-gradient-to-b from-slate-50 to-white lg:mt-122">{/* Added lg:mt-32 for desktop spacing */}
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.div
@@ -214,10 +214,39 @@ export function DonationProgramsSection() {
               </div>
 
               <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Komunitas Donatur</h3>
-                <p className="text-slate-600 text-base leading-relaxed mb-4">
-                  Bergabung dengan <span className="font-semibold">10,000+ donatur</span> yang peduli untuk memakmurkan masjid di seluruh Indonesia.
-                </p>
+                {/* Avatar Profiles */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex -space-x-3">
+                    <img 
+                      src="https://i.pravatar.cc/150?img=12" 
+                      alt="Donatur 1" 
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                    />
+                    <img 
+                      src="https://i.pravatar.cc/150?img=47" 
+                      alt="Donatur 2" 
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                    />
+                    <img 
+                      src="https://i.pravatar.cc/150?img=33" 
+                      alt="Donatur 3" 
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                    />
+                    <img 
+                      src="https://i.pravatar.cc/150?img=32" 
+                      alt="Donatur 4" 
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                    />
+                    <img 
+                      src="https://i.pravatar.cc/150?img=15" 
+                      alt="Donatur 5" 
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                    />
+                    <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">+10K</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Komunitas Image */}
                 <div className="relative rounded-xl overflow-hidden shadow-md border border-slate-200 mb-4">
@@ -228,13 +257,26 @@ export function DonationProgramsSection() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-600">Donatur Aktif Hari Ini</span>
-                    <span className="font-semibold text-slate-900">234</span>
+                    <span className="font-semibold text-slate-900">234 (75%)</span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full w-3/4 bg-gradient-to-r from-pink-500 to-rose-600 rounded-full"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-3">
+                      <div className="text-xs text-slate-500 mb-1">Total Donatur</div>
+                      <div className="text-lg font-bold text-slate-900">10,234</div>
+                      <div className="text-xs text-green-600">↑ 15%</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-lg p-3">
+                      <div className="text-xs text-slate-500 mb-1">Aktif Bulan Ini</div>
+                      <div className="text-lg font-bold text-slate-900">8,456</div>
+                      <div className="text-xs text-green-600">↑ 22%</div>
+                    </div>
                   </div>
                 </div>
               </div>

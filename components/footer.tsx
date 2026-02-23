@@ -4,7 +4,7 @@ import Image from "next/image"
 
 export function Footer() {
   return (
-    <div className="relative">
+    <div className="relative lg:mt-32">{/* Added lg:mt-32 for desktop spacing */}
       <div className="absolute -top-[30vw] sm:-top-[25vw] md:-top-[20vw] left-0 right-0 w-full h-[40vw] z-0 overflow-hidden">
         <Image src="/images/masjid2.png" alt="Masjid Background" fill className="object-cover object-center" priority />
       </div>

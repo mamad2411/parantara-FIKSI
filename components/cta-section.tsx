@@ -3,7 +3,7 @@ import { AnimatedRevenueChart } from "./animated-revenue-chart"
 
 export function CTASection() {
   return (
-    <section className="py-32 pt-48 lg:pt-32 px-6 relative overflow-hidden max-w-full">
+    <section className="py-16 md:py-32 pt-32 md:pt-48 lg:pt-32 px-6 relative overflow-hidden max-w-full">
       <div className="absolute top-12 lg:inset-0 left-0 right-0 flex items-center justify-center pointer-events-none select-none z-0 max-w-full overflow-hidden">
         <span className="text-[20vw] font-bold font-sans tracking-tighter leading-none text-zinc-200 whitespace-nowrap lg:hidden">
           BERKAH

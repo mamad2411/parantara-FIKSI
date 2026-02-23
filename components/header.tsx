@@ -8,6 +8,7 @@ import Image from "next/image"
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
   const isScrolled = true
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -106,7 +107,6 @@ export function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
-            {/* Dropdown Button */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -125,7 +125,6 @@ export function Header() {
                 } group-hover:text-white`} />
               </button>
 
-              {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div className={`absolute top-full right-0 mt-2 w-40 rounded-lg shadow-lg border overflow-hidden ${
                   isScrolled ? "bg-white border-zinc-200" : "bg-background border-border"
@@ -138,7 +137,6 @@ export function Header() {
                     }`}
                     onClick={() => {
                       setIsDropdownOpen(false)
-                      // Handle Masuk action
                     }}
                   >
                     Masuk
@@ -151,7 +149,6 @@ export function Header() {
                     }`}
                     onClick={() => {
                       setIsDropdownOpen(false)
-                      // Handle Daftar action
                     }}
                   >
                     Daftar
@@ -164,7 +161,6 @@ export function Header() {
                     }`}
                     onClick={() => {
                       setIsDropdownOpen(false)
-                      // Handle Jamaah action
                     }}
                   >
                     Jamaah
@@ -267,42 +263,68 @@ export function Header() {
             <div
               className={`flex flex-col gap-3 mt-4 pt-4 border-t ${isScrolled ? "border-zinc-200" : "border-border"}`}
             >
-              <button
-                className={`relative px-5 py-2 rounded-lg text-sm font-medium border w-fit transition-all duration-300 group ${
-                  isScrolled 
-                    ? "border-zinc-300 text-zinc-700" 
-                    : "border-border text-foreground"
-                }`}
-              >
-                <span className={`absolute inset-0 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center ${
-                  isScrolled ? "bg-black" : "bg-foreground"
-                }`} />
-                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Masuk</span>
-              </button>
-              <button
-                className={`relative px-5 py-2 rounded-lg text-sm font-medium border w-fit transition-all duration-300 group ${
-                  isScrolled 
-                    ? "border-zinc-300 text-zinc-700" 
-                    : "border-border text-foreground"
-                }`}
-              >
-                <span className={`absolute inset-0 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center ${
-                  isScrolled ? "bg-black" : "bg-foreground"
-                }`} />
-                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Daftar</span>
-              </button>
-              <button
-                className={`relative px-5 py-2 rounded-lg text-sm font-medium border w-fit transition-all duration-300 group ${
-                  isScrolled 
-                    ? "border-zinc-300 text-zinc-700" 
-                    : "border-border text-foreground"
-                }`}
-              >
-                <span className={`absolute inset-0 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center ${
-                  isScrolled ? "bg-black" : "bg-foreground"
-                }`} />
-                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Jamaah</span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
+                  className={`relative flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium border w-fit transition-all duration-300 group ${
+                    isScrolled 
+                      ? "border-zinc-300 text-zinc-700" 
+                      : "border-border text-foreground"
+                  }`}
+                >
+                  <span className={`absolute inset-0 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 origin-center ${
+                    isScrolled ? "bg-black" : "bg-foreground"
+                  }`} />
+                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">Masuk</span>
+                  <ChevronDown className={`w-4 h-4 relative z-10 transition-all duration-300 ${
+                    isMobileDropdownOpen ? "rotate-180" : ""
+                  } group-hover:text-white`} />
+                </button>
+
+                {isMobileDropdownOpen && (
+                  <div className={`mt-2 rounded-lg shadow-lg border overflow-hidden ${
+                    isScrolled ? "bg-white border-zinc-200" : "bg-background border-border"
+                  }`}>
+                    <button
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors ${
+                        isScrolled 
+                          ? "text-zinc-700 hover:bg-zinc-50" 
+                          : "text-foreground hover:bg-muted"
+                      }`}
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false)
+                      }}
+                    >
+                      Masuk
+                    </button>
+                    <button
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors border-t ${
+                        isScrolled 
+                          ? "text-zinc-700 hover:bg-zinc-50 border-zinc-200" 
+                          : "text-foreground hover:bg-muted border-border"
+                      }`}
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false)
+                      }}
+                    >
+                      Daftar
+                    </button>
+                    <button
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors border-t ${
+                        isScrolled 
+                          ? "text-zinc-700 hover:bg-zinc-50 border-zinc-200" 
+                          : "text-foreground hover:bg-muted border-border"
+                      }`}
+                      onClick={() => {
+                        setIsMobileDropdownOpen(false)
+                      }}
+                    >
+                      Jamaah
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button
                 className={`relative flex items-center gap-0 border rounded-full pl-5 pr-1 py-1 w-fit transition-all duration-300 group overflow-hidden ${
                   isScrolled ? "border-zinc-300" : "border-border"

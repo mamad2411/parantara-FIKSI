@@ -1,8 +1,67 @@
+"use client"
+
+import { Check } from "lucide-react"
+import { motion } from "framer-motion"
+import { RealtimePropertyCard } from "./realtime-property-card"
+
+const features = [
+  "Daftar masjid dalam 5 menit",
+  "Verifikasi profil termasuk",
+  "Notifikasi real-time",
+  "Dukungan 24/7",
+  "Tanpa biaya tersembunyi",
+  "Pembayaran aman",
+]
+
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-32 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Konten features akan ditambahkan di sini */}
+    <section id="features" className="py-32 px-6 relative overflow-hidden max-w-full">
+      <div className="absolute top-[49%] lg:top-[85%] xl:top-[80%] -translate-y-1/2 left-0 right-0 lg:left-[46%] flex justify-center pointer-events-none z-20 max-w-full overflow-hidden">
+        <span className="font-bold text-center text-[20vw] sm:text-[14vw] md:text-[12vw] lg:text-[12vw] leading-none tracking-tighter text-zinc-200 whitespace-nowrap">
+          KELOLA
+        </span>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1 mt-30 lg:-mt-20">
+            <RealtimePropertyCard />
+          </div>
+
+          <div className="order-1 lg:order-2 space-y-8 lg:-mt-50">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
+                Kelola donasi masjid dengan mudah
+              </h2>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                Pantau pemasukan, kelola program masjid, dan berkomunikasi dengan donatur dari satu antarmuka yang intuitif dan modern.
+              </p>
+            </motion.div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex items-center p-3 rounded-xl hover:bg-zinc-50 transition-colors duration-300 gap-2 py-1"
+                >
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                  </div>
+                  <span className="text-sm text-foreground">{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
