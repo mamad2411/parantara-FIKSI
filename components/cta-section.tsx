@@ -108,15 +108,15 @@ export function CTASection() {
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-16">
           <div className="text-center">
-            <p className="text-7xl font-light text-foreground">50K+</p>
+            <p className="text-7xl md:text-5xl lg:text-7xl font-light text-foreground">50K+</p>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Donatur</p>
           </div>
           <div className="text-center">
-            <p className="text-7xl font-light text-foreground">15K+</p>
+            <p className="text-7xl md:text-5xl lg:text-7xl font-light text-foreground">15K+</p>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Masjid Terdaftar</p>
           </div>
           <div className="text-center">
-            <p className="text-7xl font-light text-foreground">Rp 120M+</p>
+            <p className="text-7xl md:text-5xl lg:text-7xl font-light text-foreground">Rp 120M+</p>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Donasi</p>
           </div>
         </div>

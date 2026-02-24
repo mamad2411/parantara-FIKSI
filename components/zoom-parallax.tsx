@@ -97,7 +97,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 									<div className="relative h-[15vh] w-[15vw] bg-white rounded-3xl p-2 md:p-3 flex items-center justify-center shadow-xl overflow-hidden border border-slate-100">
 										<h3 className="relative text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base font-bold text-center leading-tight px-1">
 											<span className="text-yellow-500">Jadikan</span>{' '}
-											<span className="text-blue-600">Buku</span>
+											<span className="text-blue-600">Dana</span>
 											<br />
 											<span className="text-blue-600">Masjid</span>{' '}
 											<span className="text-yellow-500">sebagai</span>

@@ -39,7 +39,7 @@ export default function TeamPage() {
           href: "#team",
         }}
         backgroundImage="/images/hero/sky2.jpeg"
-        rightImage="/images/tim/masjid.png"
+        rightImage="/images/tim/heroo.png"
         contactInfo={{
           website: "",
           phone: "",
