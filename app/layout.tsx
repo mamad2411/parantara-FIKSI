@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Geist_Mono, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { CookieConsentBanner } from "@/components/cookie-consent"
 import "./globals.css"
 
 const _inter = Inter({ subsets: ["latin"] })
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="id">
       <body className={`font-sans antialiased`}>
         {children}
+        <CookieConsentBanner />
         <Analytics />
       </body>
     </html>

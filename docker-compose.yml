@@ -1,116 +1,59 @@
-
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: danamasjid_db
+    container_name: danamasjid-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-danamasjid}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-danamasjid123}
-      POSTGRES_DB: ${DB_NAME:-danamasjid}
+      POSTGRES_USER: danamasjid
+      POSTGRES_PASSWORD: danamasjid_secure_password
+      POSTGRES_DB: danamasjid
     ports:
-      - "5434:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
-      - ./api/src/db/migrations:/migrations
+      - ./api/src/db/migrations:/docker-entrypoint-initdb.d
     networks:
-      - danamasjid_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-danamasjid}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - danamasjid-network
 
-  # API Service (Elysia)
   api:
     build:
       context: ./api
-      target: development
-    container_name: danamasjid_api
+      dockerfile: Dockerfile
+    container_name: danamasjid-api
     restart: unless-stopped
-    ports:
-      - "3001:3001"  # API di port 3001
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://${DB_USER:-danamasjid}:${DB_PASSWORD:-danamasjid123}@postgres:5432/${DB_NAME:-danamasjid}
-      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
-      FRONTEND_URL: http://localhost:3000
+      DATABASE_URL: postgresql://danamasjid:danamasjid_secure_password@postgres:5432/danamasjid
+      JWT_SECRET: 448c4da52de0323a95dd440c3ad5c8b6ea491675769477b7431a0005c706be3f
+      JWT_EXPIRES_IN: 7d
+      # SMTP Configuration
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_USER: danamasjid48@gmail.com
+      SMTP_PASS: qkuhfmkxkuidrpdk
+      SMTP_FROM: danamasjid48@gmail.com
+      # Firebase Configuration
+      FIREBASE_API_KEY: AIzaSyBny76tC-JI2EH42o4ib2Gy0dfFTN5WYFw
+      FIREBASE_AUTH_DOMAIN: danamasjid.firebaseapp.com
+      FIREBASE_PROJECT_ID: danamasjid
+      FIREBASE_STORAGE_BUCKET: danamasjid.firebasestorage.app
+      FIREBASE_MESSAGING_SENDER_ID: 392583750035
+      FIREBASE_APP_ID: 1:392583750035:web:46a42d528d01fcac5f4866
+      FIREBASE_MEASUREMENT_ID: G-9L1LHKQM2F
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
     volumes:
       - ./api:/app
       - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
-      - danamasjid_network
-    command: bun run dev
-
-  # Frontend Service (Next.js)
-  frontend:
-    build:
-      context: .
-      target: development
-    container_name: danamasjid_frontend
-    restart: unless-stopped
-    ports:
-      - "3002:3000"
-    environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      API_URL: http://api:3001  # Internal communication
-    volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/.next
-    depends_on:
-      - api
-    networks:
-      - danamasjid_network
-    command: npm run dev
-
-  # Migration Service (one-time run)
-  migration:
-    build:
-      context: ./api
-      target: migration
-    container_name: danamasjid_migration
-    environment:
-      DATABASE_URL: postgresql://${DB_USER:-danamasjid}:${DB_PASSWORD:-danamasjid123}@postgres:5432/${DB_NAME:-danamasjid}
-    volumes:
-      - ./api/src/db/migrations:/app/src/db/migrations
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - danamasjid_network
-    command: bun run migrate
-    profiles:
-      - migrate
-
-  # PgAdmin (optional - for DB management)
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: danamasjid_pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@danamasjid.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - danamasjid_network
-    depends_on:
-      - postgres
-
-networks:
-  danamasjid_network:
-    driver: bridge
+      - danamasjid-network
 
 volumes:
   postgres_data:
-  pgadmin_data:
+
+networks:
+  danamasjid-network:
+    driver: bridge

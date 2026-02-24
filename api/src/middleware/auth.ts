@@ -1,67 +1,44 @@
-// middleware/auth.ts
-import { Elysia } from 'elysia';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { query } from '../db/connection';
-import { type Admin, isAdmin } from '../types/database';
+import { JWTPayload } from '../utils/jwt';
 
-export interface AuthState {
-    admin: Admin;
+// Extend Express Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: JWTPayload;
+    }
+  }
 }
 
-const JWT_SECRET = Bun.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this';
+const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
 
-export function generateToken(admin: Admin): string {
-    return jwt.sign(
-        { id: admin.id, email: admin.email },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-    );
-}
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        message: 'Token tidak ditemukan'
+      });
+      return;
+    }
 
-export function verifyToken(token: string): { id: number; email: string } {
-    return jwt.verify(token, JWT_SECRET) as { id: number; email: string };
-}
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JWTPayload;
+    req.user = decoded;
+    next();
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      res.status(401).json({
+        success: false,
+        message: 'Token sudah kadaluarsa'
+      });
+      return;
+    }
+    res.status(401).json({
+      success: false,
+      message: 'Token tidak valid'
+    });
+  }
+};
 
-export const authMiddleware = new Elysia({ name: 'auth-middleware' })
-    .derive(async ({ request, set }) => {
-        const authHeader = request.headers.get('Authorization');
-
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            set.status = 401;
-            throw new Error('Token tidak ditemukan. Silakan login terlebih dahulu.');
-        }
-
-        const token = authHeader.substring(7);
-
-        try {
-            const decoded = verifyToken(token);
-
-            // Query dengan typing Admin
-            const result = await query<Admin>(
-                'SELECT id, email, name FROM admins WHERE id = $1',
-                [decoded.id]
-            );
-
-            if (result.rows.length === 0) {
-                set.status = 401;
-                throw new Error('Admin tidak ditemukan.');
-            }
-
-            const admin = result.rows[0];
-
-            // Validasi dengan type guard
-            if (!isAdmin(admin)) {
-                set.status = 500;
-                throw new Error('Data admin tidak valid.');
-            }
-
-            return { admin };
-        } catch (error) {
-            if (error instanceof jwt.JsonWebTokenError) {
-                set.status = 401;
-                throw new Error('Token tidak valid atau sudah expired.');
-            }
-            throw error;
-        }
-    })
-    .state('admin', {} as Admin);
+export default authMiddleware;

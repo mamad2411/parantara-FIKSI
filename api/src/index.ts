@@ -1,39 +1,51 @@
-import { Elysia } from 'elysia';
-import { cors } from '@elysiajs/cors';
-import { swagger } from '@elysiajs/swagger';
-import { authRoutes } from './routes/auth';
-import { adminRoutes } from './routes/admin';
+import 'dotenv/config';
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import authRoutes from './routes/authRoutes';
+import { apiLimiter } from './middleware/security';
 
-const app = new Elysia()
-    .use(cors())
-    .use(swagger({
-        path: '/docs',
-        documentation: {
-            info: { 
-                title: 'Dana Masjid API', 
-                version: '1.0.0',
-                description: 'API untuk manajemen keuangan masjid'
-            },
-            tags: [
-                { name: 'Auth', description: 'Endpoint autentikasi admin' }
-            ]
-        },
-    }))
-    
-    // Home route
-    .get('/', () => ({ 
-        message: 'Dana Masjid API',
-        docs: '/docs'
-    }))
-    
-    // API Routes - cuma auth doang
-    .group('/api', (app) => {
-        return app
-            .use(authRoutes)
-            .use(adminRoutes)
-    })
-    
-    .listen(3001);
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-console.log(`\n🕌 Dana Masjid API running on http://localhost:${3001}`);
-console.log(`📚 Swagger docs: http://localhost:${3001}/docs\n`);
+// Security middleware
+app.use(helmet());
+app.use(cors());
+app.use(apiLimiter);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Health check
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: 'API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint tidak ditemukan'
+  });
+});
+
+// Error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    success: false,
+    message: 'Terjadi kesalahan server'
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📍 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
+});

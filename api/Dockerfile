@@ -1,25 +1,13 @@
-# api/Dockerfile
-FROM oven/bun:latest AS base
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock ./
-RUN bun install
+COPY package*.json ./
 
-# Copy source code
+RUN npm install
+
 COPY . .
 
-# Development stage
-FROM base AS development
 EXPOSE 3001
-CMD ["bun", "run", "dev"]
 
-# Production stage
-FROM base AS production
-RUN bun run build
-EXPOSE 3001
-CMD ["bun", "run", "start"]
-
-# Migration stage
-FROM base AS migration
-CMD ["bun", "run", "migrate"]
+CMD ["npm", "run", "dev"]
