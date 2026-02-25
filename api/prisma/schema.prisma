@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Masjid {
+  id          String   @id @default(cuid())
+  nama        String
+  alamat      String
+  deskripsi   String?
+  gambar      String?
+  email       String?
+  telepon     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  donasi      Donasi[]
+  program     Program[]
+  
+  @@map("masjid")
+}
+
+model Program {
+  id          String   @id @default(cuid())
+  nama        String
+  deskripsi   String
+  target      Decimal  @db.Decimal(15, 2)
+  terkumpul   Decimal  @default(0) @db.Decimal(15, 2)
+  gambar      String?
+  status      String   @default("aktif")
+  masjidId    String
+  masjid      Masjid   @relation(fields: [masjidId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  donasi      Donasi[]
+  
+  @@map("program")
+}
+
+model Donasi {
+  id          String   @id @default(cuid())
+  jumlah      Decimal  @db.Decimal(15, 2)
+  nama        String
+  email       String?
+  telepon     String?
+  pesan       String?
+  anonim      Boolean  @default(false)
+  status      String   @default("pending")
+  metodeBayar String?
+  masjidId    String
+  masjid      Masjid   @relation(fields: [masjidId], references: [id], onDelete: Cascade)
+  programId   String?
+  program     Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("donasi")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  nama        String
+  password    String
+  role        String   @default("user")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("users")
+}

@@ -7,6 +7,7 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
+    "prepare": "husky",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:build": "docker-compose build",
@@ -16,8 +17,11 @@
     "docker:db": "docker-compose exec postgres psql -U danamasjid danamasjid",
     "docker:migrate": "docker-compose run --rm migration",
     "docker:clean": "docker-compose down -v --remove-orphans",
-    "db:migrate": "cd api && bun run migrate",
-    "db:seed": "cd api && bun run seed"
+    "db:migrate": "cd api && npm run db:migrate",
+    "db:generate": "cd api && npm run db:generate",
+    "db:push": "cd api && npm run db:push",
+    "db:studio": "cd api && npm run db:studio",
+    "db:seed": "cd api && npm run db:seed"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -83,6 +87,7 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.1.7",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
