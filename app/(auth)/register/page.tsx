@@ -403,12 +403,12 @@ export default function RegisterPage() {
       {/* Main Register Card - Split Screen */}
       <motion.div
         variants={cardVariants}
-        className="relative z-20 w-full max-w-7xl min-h-[700px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border-0"
+        className="relative z-20 w-full max-w-7xl min-h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border-0"
       >
         {/* Left Side - Register Form */}
         <motion.div
           variants={slideLeftVariants}
-          className="w-full lg:w-1/2 p-8 md:p-16 flex flex-col relative"
+          className="w-full lg:w-1/2 p-6 md:p-12 flex flex-col relative"
         >
           {/* Back Link - Top Left */}
           <motion.div
@@ -537,7 +537,7 @@ export default function RegisterPage() {
             </motion.div>
 
             {/* Register Form with Steps */}
-            <form onSubmit={handleSubmit} className="space-y-5 overflow-hidden">
+            <form onSubmit={handleSubmit} className="space-y-4 overflow-hidden">
               {/* Success/Error Messages with Animation */}
               <AnimatePresence mode="wait">
                 {error && (
@@ -1057,7 +1057,7 @@ export default function RegisterPage() {
         variants={footerVariants}
         className="absolute bottom-6 left-0 right-0 text-center text-xs text-white/90 z-20"
       >
-        Hak Cipta @danamasjid 2025 | Kebijakan Privasi
+
       </motion.div>
     </motion.div>
   )
