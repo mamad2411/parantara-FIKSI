@@ -106,18 +106,27 @@ export const xssProtection = () => {
   return async (c: Context, next: Next) => {
     const body = await c.req.json().catch(() => ({}))
     
+    // Use DOMPurify or proper HTML sanitization library instead of regex
+    // Regex-based HTML filtering is insufficient for XSS protection
     const xssPatterns = [
-      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /<iframe/gi,
-      /<object/gi,
-      /<embed/gi
+      /data:text\/html/gi,
+      /vbscript:/gi
     ]
+    
+    // Additional check for HTML tags - use proper HTML parser in production
+    const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form']
+    const checkForDangerousTags = (str: string): boolean => {
+      const lowerStr = str.toLowerCase()
+      return dangerousTags.some(tag => 
+        lowerStr.includes(`<${tag}`) || lowerStr.includes(`</${tag}>`)
+      )
+    }
     
     const checkValue = (value: any): boolean => {
       if (typeof value === 'string') {
-        return xssPatterns.some(pattern => pattern.test(value))
+        return xssPatterns.some(pattern => pattern.test(value)) || checkForDangerousTags(value)
       }
       if (typeof value === 'object' && value !== null) {
         return Object.values(value).some(v => checkValue(v))
