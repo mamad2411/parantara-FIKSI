@@ -1,0 +1,177 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isValidEmail(email) {
+      return email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
+    }
+    
+    function isValidString(str, minLen, maxLen) {
+      return str is string && 
+             str.size() >= minLen && 
+             str.size() <= maxLen;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Allow read if signed in and is owner
+      allow read: if isOwner(userId);
+      
+      // Allow create only if signed in and creating own document
+      allow create: if isSignedIn() && 
+                      isOwner(userId) &&
+                      request.resource.data.keys().hasAll(['uid', 'email', 'name', 'createdAt']) &&
+                      isValidEmail(request.resource.data.email) &&
+                      isValidString(request.resource.data.name, 2, 100) &&
+                      request.resource.data.uid == userId &&
+                      request.resource.data.createdAt is timestamp;
+      
+      // Allow update only if owner and not changing critical fields
+      allow update: if isOwner(userId) &&
+                      request.resource.data.uid == resource.data.uid &&
+                      request.resource.data.email == resource.data.email &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Prevent deletion
+      allow delete: if false;
+    }
+    
+    // Mosques collection
+    match /mosques/{mosqueId} {
+      // Allow read if signed in
+      allow read: if isSignedIn();
+      
+      // Allow create only if signed in and is the admin
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['userId', 'name', 'address', 'city', 'adminEmail', 'createdAt']) &&
+                      isValidString(request.resource.data.name, 3, 200) &&
+                      isValidString(request.resource.data.address, 10, 500) &&
+                      isValidString(request.resource.data.city, 2, 100) &&
+                      isValidEmail(request.resource.data.adminEmail) &&
+                      request.resource.data.createdAt is timestamp;
+      
+      // Allow update only if owner
+      allow update: if isSignedIn() && 
+                      resource.data.userId == request.auth.uid &&
+                      request.resource.data.userId == resource.data.userId &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Allow delete only if owner
+      allow delete: if isSignedIn() && 
+                      resource.data.userId == request.auth.uid;
+    }
+    
+    // Donations collection
+    match /donations/{donationId} {
+      // Allow read if signed in
+      allow read: if isSignedIn();
+      
+      // Allow create if signed in
+      allow create: if isSignedIn() &&
+                      request.resource.data.keys().hasAll(['userId', 'mosqueId', 'amount', 'createdAt']) &&
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.amount is number &&
+                      request.resource.data.amount > 0 &&
+                      request.resource.data.createdAt is timestamp;
+      
+      // Prevent updates and deletes
+      allow update: if false;
+      allow delete: if false;
+    }
+    
+    // Transactions collection
+    match /transactions/{transactionId} {
+      // Allow read only if owner or mosque admin
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/mosques/$(resource.data.mosqueId)).data.userId == request.auth.uid
+      );
+      
+      // Allow create if signed in
+      allow create: if isSignedIn() &&
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['userId', 'mosqueId', 'amount', 'status', 'createdAt']) &&
+                      request.resource.data.amount is number &&
+                      request.resource.data.amount > 0 &&
+                      request.resource.data.status in ['pending', 'completed', 'failed'] &&
+                      request.resource.data.createdAt is timestamp;
+      
+      // Allow update only status field by mosque admin
+      allow update: if isSignedIn() &&
+                      get(/databases/$(database)/documents/mosques/$(resource.data.mosqueId)).data.userId == request.auth.uid &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+                      request.resource.data.status in ['pending', 'completed', 'failed'];
+      
+      // Prevent deletion
+      allow delete: if false;
+    }
+    
+    // Reports collection (mosque financial reports)
+    match /reports/{reportId} {
+      // Allow read if signed in
+      allow read: if isSignedIn();
+      
+      // Allow create/update only by mosque admin
+      allow create, update: if isSignedIn() &&
+                              get(/databases/$(database)/documents/mosques/$(request.resource.data.mosqueId)).data.userId == request.auth.uid;
+      
+      // Allow delete only by mosque admin
+      allow delete: if isSignedIn() &&
+                      get(/databases/$(database)/documents/mosques/$(resource.data.mosqueId)).data.userId == request.auth.uid;
+    }
+    
+    // Subscribers collection (newsletter)
+    match /subscribers/{subscriberId} {
+      // Public read for count
+      allow read: if true;
+      
+      // Allow create with valid email
+      allow create: if request.resource.data.keys().hasAll(['email', 'createdAt']) &&
+                      isValidEmail(request.resource.data.email) &&
+                      request.resource.data.createdAt is timestamp;
+      
+      // Prevent updates and deletes
+      allow update: if false;
+      allow delete: if false;
+    }
+    
+    // Admin collection (for admin users)
+    match /admins/{adminId} {
+      // Only admins can read
+      allow read: if isSignedIn() && 
+                    exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      
+      // Prevent creation, updates, and deletion through client
+      allow create, update, delete: if false;
+    }
+    
+    // Audit logs (security events)
+    match /audit_logs/{logId} {
+      // Only admins can read
+      allow read: if isSignedIn() && 
+                    exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      
+      // Allow system to create logs
+      allow create: if true;
+      
+      // Prevent updates and deletion
+      allow update, delete: if false;
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

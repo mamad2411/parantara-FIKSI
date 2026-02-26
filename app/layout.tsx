@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { CookieConsentBanner } from "@/components/cookie-consent"
 import { QueryProvider } from "@/components/providers"
 import { RecaptchaProvider } from "@/components/providers"
+import { AuthProvider } from "@/lib/auth-context"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -71,13 +72,15 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
       <body className={`font-sans antialiased`}>
-        <QueryProvider>
-          <RecaptchaProvider>
-            {children}
-            <CookieConsentBanner />
-            <Analytics />
-          </RecaptchaProvider>
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <RecaptchaProvider>
+              {children}
+              <CookieConsentBanner />
+              <Analytics />
+            </RecaptchaProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   )

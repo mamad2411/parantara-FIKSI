@@ -44,6 +44,11 @@ const nextConfig = {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
           },
+          // XSS Filter
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
           // Referrer Policy
           {
             key: 'Referrer-Policy',
@@ -52,30 +57,42 @@ const nextConfig = {
           // Permissions Policy
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
           },
           // Cross-Origin-Opener-Policy
           {
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin-allow-popups'
           },
-          // Content Security Policy
+          // Cross-Origin-Embedder-Policy
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'credentialless'
+          },
+          // Cross-Origin-Resource-Policy
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-site'
+          },
+          // Content Security Policy with Trusted Types
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com https://vercel.live",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com https://vercel.live https://apis.google.com https://accounts.google.com https://*.firebaseapp.com https://*.googleapis.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://www.google.com https://va.vercel-scripts.com https://vercel.live wss://ws-us3.pusher.com https://danamasjid-api.danamsjid-api.workers.dev",
-              "frame-src 'self' https://www.google.com https://vercel.live",
+              "connect-src 'self' https://www.google.com https://va.vercel-scripts.com https://vercel.live wss://ws-us3.pusher.com https://danamasjid-api.danamsjid-api.workers.dev https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com",
+              "frame-src 'self' https://www.google.com https://vercel.live https://accounts.google.com https://*.firebaseapp.com",
               "media-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
               "frame-ancestors 'self'",
-              "upgrade-insecure-requests"
+              "upgrade-insecure-requests",
+              "block-all-mixed-content",
+              "require-trusted-types-for 'script'"
             ].join('; ')
           }
         ],

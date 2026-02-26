@@ -2,6 +2,14 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { sendEmail, generateOTP, getOTPEmailHTML, getWelcomeEmailHTML, getSubscribeWelcomeEmailHTML } from './utils/emailWorker'
+import { 
+  advancedRateLimit, 
+  sqlInjectionProtection, 
+  xssProtection, 
+  replayAttackProtection,
+  securityHeaders,
+  validateInput
+} from './middleware/apiSecurity'
 
 // Types
 type Bindings = {
@@ -24,6 +32,24 @@ const otpStorage = new Map<string, { otp: string; expires: number; data?: any }>
 
 // Middleware
 app.use('*', logger())
+
+// Security headers
+app.use('*', securityHeaders())
+
+// Replay attack protection
+app.use('*', replayAttackProtection())
+
+// XSS Protection
+app.use('*', xssProtection())
+
+// SQL Injection Protection
+app.use('*', sqlInjectionProtection())
+
+// Rate limiting - 100 requests per minute
+app.use('*', advancedRateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 100
+}))
 
 app.use('*', async (c, next) => {
   const origin = c.req.header('origin') || ''
@@ -69,7 +95,12 @@ app.get('/health', (c) => {
 // ============================================
 // SUBSCRIBE ENDPOINT
 // ============================================
-app.post('/api/subscribe', async (c) => {
+app.post('/api/subscribe', 
+  advancedRateLimit({ windowMs: 60 * 1000, maxRequests: 5 }), // 5 per minute
+  validateInput({
+    email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+  }),
+  async (c) => {
   try {
     const { email } = await c.req.json()
 
@@ -165,7 +196,14 @@ app.post('/api/auth/register', async (c) => {
 })
 
 // Register Step 1 - Send OTP
-app.post('/api/auth/register/step1', async (c) => {
+app.post('/api/auth/register/step1',
+  advancedRateLimit({ windowMs: 60 * 1000, maxRequests: 3 }), // 3 per minute
+  validateInput({
+    email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
+    phone: { required: true, type: 'string', minLength: 10, maxLength: 15 }
+  }),
+  async (c) => {
   try {
     const { email, name, phone } = await c.req.json()
 
@@ -322,7 +360,13 @@ app.post('/api/auth/register/complete', async (c) => {
 })
 
 // Login
-app.post('/api/auth/login', async (c) => {
+app.post('/api/auth/login',
+  advancedRateLimit({ windowMs: 60 * 1000, maxRequests: 5 }), // 5 per minute
+  validateInput({
+    email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    password: { required: true, type: 'string', minLength: 6 }
+  }),
+  async (c) => {
   try {
     const { email, password } = await c.req.json()
 
@@ -357,7 +401,12 @@ app.post('/api/auth/login', async (c) => {
 })
 
 // Forgot Password
-app.post('/api/auth/forgot-password', async (c) => {
+app.post('/api/auth/forgot-password',
+  advancedRateLimit({ windowMs: 60 * 1000, maxRequests: 3 }), // 3 per minute
+  validateInput({
+    email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+  }),
+  async (c) => {
   try {
     const { email } = await c.req.json()
 

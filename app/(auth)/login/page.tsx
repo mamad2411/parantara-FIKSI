@@ -5,16 +5,50 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { useAuth } from "@/lib/auth-context"
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const { signInWithEmail, signInWithGoogle } = useAuth()
+  
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.preventDefault()
     setTimeout(() => {
       router.push("/register")
     }, 100)
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true)
+      setError("")
+      await signInWithGoogle()
+      router.push("/dashboard")
+    } catch (err: any) {
+      setError(err.message || "Gagal login dengan Google")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      setLoading(true)
+      setError("")
+      await signInWithEmail(email, password)
+      router.push("/dashboard")
+    } catch (err: any) {
+      setError("Email atau password salah")
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Animation variants
@@ -215,12 +249,22 @@ export default function LoginPage() {
             </motion.div>
 
             {/* Login Form */}
-            <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-5" onSubmit={handleEmailSignIn}>
+              {/* Error Message */}
+              {error && (
+                <motion.div variants={itemVariants} className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                  {error}
+                </motion.div>
+              )}
+
               {/* Email/Phone Input */}
               <motion.div variants={itemVariants} className="relative">
                 <input
-                  type="text"
-                  placeholder="Masukkan Email / No. Telepon"
+                  type="email"
+                  placeholder="Masukkan Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base"
                 />
                 <button
@@ -238,6 +282,9 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Kata Sandi"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base"
                 />
                 <button
@@ -269,9 +316,10 @@ export default function LoginPage() {
               <motion.div variants={itemVariants}>
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-md text-base transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+                  disabled={loading}
+                  className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 rounded-xl font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all shadow-md text-base transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 disabled:opacity-50"
                 >
-                  Masuk
+                  {loading ? "Loading..." : "Masuk"}
                 </button>
               </motion.div>
             </form>
@@ -288,7 +336,12 @@ export default function LoginPage() {
 
             {/* Google Login Button */}
             <motion.div variants={itemVariants}>
-              <button className="w-full flex items-center justify-center gap-3 px-6 py-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+              <button 
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 px-6 py-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50"
+              >
                 <svg className="w-6 h-6" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"

@@ -5,14 +5,17 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import { useAuth } from "@/lib/auth-context"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const { signUpWithEmail, signInWithGoogle } = useAuth()
+  
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const router = useRouter()
   
   const [formData, setFormData] = useState({
     // Step 1
@@ -208,8 +211,17 @@ export default function RegisterPage() {
         }
         handleNext()
       } else if (currentStep === 4) {
-        // Step 4: Complete registration
-        const response = await fetch(`${API_URL}/api/auth/register/complete`, {
+        // Step 4: Complete registration with Firebase
+        await signUpWithEmail(formData.email, formData.password, {
+          name: formData.name,
+          phone: formData.phone,
+          mosqueName: formData.mosqueName,
+          mosqueAddress: formData.mosqueAddress,
+          mosqueCity: formData.mosqueCity
+        })
+
+        // Also send to API for email notification
+        await fetch(`${API_URL}/api/auth/register/complete`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -223,13 +235,7 @@ export default function RegisterPage() {
           })
         })
 
-        const data = await response.json()
-
-        if (data.success) {
-          router.push('/login')
-        } else {
-          setError(data.message || 'Gagal menyelesaikan registrasi')
-        }
+        router.push('/dashboard')
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.')
@@ -701,7 +707,19 @@ export default function RegisterPage() {
               <motion.div variants={itemVariants}>
                 <button 
                   type="button"
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                  onClick={async () => {
+                    try {
+                      setLoading(true)
+                      setError("")
+                      await signInWithGoogle()
+                      router.push("/dashboard")
+                    } catch (err: any) {
+                      setError(err.message || "Gagal login dengan Google")
+                      setLoading(false)
+                    }
+                  }}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24">
                     <path
