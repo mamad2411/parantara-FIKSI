@@ -19,79 +19,56 @@ export function HeroSection() {
     const video = videoRef.current
     if (!video) return
 
-    // Optimize video performance
-    video.playbackRate = 1.0
+    // Force hardware acceleration
+    video.style.transform = 'translateZ(0)'
+    video.style.backfaceVisibility = 'hidden'
     
-    // Preload and buffer optimization
+    // Optimize video loading
     video.preload = 'auto'
+    video.playsInline = true
     
-    // Reduce quality on mobile for better performance
-    if (window.innerWidth < 768) {
-      video.playbackRate = 0.9 // Slightly slower on mobile
+    // Ensure video starts from beginning
+    video.currentTime = 0
+    
+    // Play video immediately when loaded
+    const playVideo = () => {
+      video.play().catch(err => console.log('Video autoplay prevented:', err))
+    }
+    
+    if (video.readyState >= 3) {
+      playVideo()
+    } else {
+      video.addEventListener('loadeddata', playVideo, { once: true })
     }
 
-    let isReversing = false
-    let animationFrameId: number
-    let lastTime = 0
-    const fps = 30 // Target 30fps for smoother performance
-    const frameInterval = 1000 / fps
-
-    const reverseVideo = (currentTime: number) => {
-      if (!lastTime) lastTime = currentTime
-      const deltaTime = currentTime - lastTime
-
-      if (deltaTime >= frameInterval) {
-        if (video.currentTime <= 0) {
-          isReversing = false
-          video.play()
-          return
-        }
-        video.currentTime -= 0.033 // ~30fps backwards
-        lastTime = currentTime - (deltaTime % frameInterval)
-      }
-      
-      animationFrameId = requestAnimationFrame(reverseVideo)
+    // Simple loop without reverse (much smoother)
+    const handleEnded = () => {
+      video.currentTime = 0
+      video.play()
     }
 
-    const handleTimeUpdate = () => {
-      if (video.currentTime >= 14 && !isReversing) {
-        isReversing = true
-        video.pause()
-        lastTime = 0
-        animationFrameId = requestAnimationFrame(reverseVideo)
-      }
-    }
-
-    video.addEventListener('timeupdate', handleTimeUpdate)
+    video.addEventListener('ended', handleEnded)
     
     return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate)
-      cancelAnimationFrame(animationFrameId)
+      video.removeEventListener('ended', handleEnded)
     }
   }, [])
 
   useEffect(() => {
     let rafId: number
-    let currentProgress = 0
+    let ticking = false
 
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      const maxScroll = 400
-      const targetProgress = Math.min(scrollY / maxScroll, 1)
-
-      const smoothUpdate = () => {
-        currentProgress += (targetProgress - currentProgress) * 0.1
-
-        if (Math.abs(targetProgress - currentProgress) > 0.001) {
-          setScrollProgress(currentProgress)
-          rafId = requestAnimationFrame(smoothUpdate)
-        } else {
-          setScrollProgress(targetProgress)
-        }
+      if (!ticking) {
+        rafId = requestAnimationFrame(() => {
+          const scrollY = window.scrollY
+          const maxScroll = 400
+          const progress = Math.min(scrollY / maxScroll, 1)
+          setScrollProgress(progress)
+          ticking = false
+        })
+        ticking = true
       }
-
-      cancelAnimationFrame(rafId)
-      smoothUpdate()
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
@@ -114,27 +91,32 @@ export function HeroSection() {
         <div
           className="w-full overflow-hidden"
           style={{
-            transform: `scale(${scale}) translateZ(0)`, // Add translateZ for GPU acceleration
+            transform: `scale(${scale}) translate3d(0, 0, 0)`,
             borderRadius: `${borderRadius}px`,
             height: `${heightVh}vh`,
-            willChange: 'transform, border-radius',
-            backfaceVisibility: 'hidden', // Prevent flickering
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            perspective: 1000,
+            WebkitPerspective: 1000,
           }}
         >
           <video 
             ref={videoRef}
             autoPlay 
-            loop 
+            loop
             muted 
             playsInline
             preload="auto"
             className="w-full h-full object-cover"
             style={{
               willChange: 'transform',
-              transform: 'translateZ(0)', // Force GPU acceleration
+              transform: 'translate3d(0, 0, 0)', // Force GPU acceleration
+              backfaceVisibility: 'hidden',
             }}
-            src="/vidio/vidio1.mp4"
-          />
+          >
+            <source src="/vidio/vidio1.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
 
