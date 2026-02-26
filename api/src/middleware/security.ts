@@ -131,9 +131,12 @@ export const preventHPP = hpp({
 
 // Detect and block suspicious patterns in request body
 export const detectSuspiciousPatterns = (req: Request, res: Response, next: NextFunction) => {
+  // Use proper HTML sanitization library (DOMPurify) instead of regex for XSS
+  // Regex-based HTML filtering is insufficient and can be bypassed
   const suspiciousPatterns = [
-    /<script[^>]*>.*?<\/script>/gi, // XSS attempts
     /javascript:/gi, // JavaScript protocol
+    /data:text\/html/gi, // Data URI XSS
+    /vbscript:/gi, // VBScript protocol
     /on\w+\s*=/gi, // Event handlers (onclick, onerror, etc)
     /\$where/gi, // MongoDB $where operator
     /\$ne/gi, // MongoDB $ne operator (when not expected)
@@ -143,10 +146,19 @@ export const detectSuspiciousPatterns = (req: Request, res: Response, next: Next
     /insert.*into/gi, // SQL injection
     /delete.*from/gi, // SQL injection
   ];
+  
+  // Check for dangerous HTML tags using string matching (not regex)
+  const dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'svg']
+  const checkForDangerousTags = (str: string): boolean => {
+    const lowerStr = str.toLowerCase()
+    return dangerousTags.some(tag => 
+      lowerStr.includes(`<${tag}`) || lowerStr.includes(`</${tag}>`)
+    )
+  }
 
   const checkValue = (value: any): boolean => {
     if (typeof value === 'string') {
-      return suspiciousPatterns.some(pattern => pattern.test(value));
+      return suspiciousPatterns.some(pattern => pattern.test(value)) || checkForDangerousTags(value);
     }
     if (typeof value === 'object' && value !== null) {
       return Object.values(value).some(checkValue);

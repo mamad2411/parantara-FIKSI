@@ -1,5 +1,15 @@
 import nodemailer, { Transporter } from 'nodemailer';
 
+// HTML escape function to prevent XSS
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // Create transporter
 const transporter: Transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -198,7 +208,7 @@ export const sendOTPEmail = async (email: string, name: string, otpCode: string)
             </div>
             
             <div class="content">
-              <div class="greeting">Halo, ${name}!</div>
+              <div class="greeting">Halo, ${escapeHtml(name)}!</div>
               
               <div class="message">
                 Terima kasih telah mendaftar di DanaMasjid. Untuk melanjutkan proses registrasi, 
@@ -207,7 +217,7 @@ export const sendOTPEmail = async (email: string, name: string, otpCode: string)
               
               <div class="otp-box">
                 <div class="otp-label">Kode Verifikasi OTP Anda</div>
-                <div class="otp-code">${otpCode}</div>
+                <div class="otp-code">${escapeHtml(otpCode)}</div>
                 <div class="otp-validity">Kode ini berlaku selama 10 menit</div>
               </div>
 
@@ -410,10 +420,10 @@ export const sendWelcomeEmail = async (email: string, name: string, mosqueName: 
             </div>
             
             <div class="content">
-              <div class="greeting">Halo, ${name}!</div>
+              <div class="greeting">Halo, ${escapeHtml(name)}!</div>
               
               <div class="message">
-                Selamat! Akun admin DanaMasjid Anda untuk <strong>${mosqueName}</strong> telah berhasil dibuat.
+                Selamat! Akun admin DanaMasjid Anda untuk <strong>${escapeHtml(mosqueName)}</strong> telah berhasil dibuat.
               </div>
               
               <div class="features">

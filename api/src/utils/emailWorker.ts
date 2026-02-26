@@ -99,9 +99,14 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   }
 }
 
-// Generate OTP
+// Generate OTP using cryptographically secure random
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+  // Use crypto.getRandomValues for secure random generation
+  const array = new Uint32Array(1)
+  crypto.getRandomValues(array)
+  // Generate 6-digit OTP (100000-999999)
+  const otp = (array[0] % 900000) + 100000
+  return otp.toString()
 }
 
 // Email templates
