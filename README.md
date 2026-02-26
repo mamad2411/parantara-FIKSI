@@ -36,8 +36,6 @@ DanaMasjid dibangun dengan standar keamanan tertinggi:
 - Data validation
 - Audit logging
 
-**Lihat detail:** [SECURITY-SUMMARY.md](./SECURITY-SUMMARY.md)
-
 ## 🚀 Tech Stack
 
 ### Frontend
@@ -96,30 +94,6 @@ cp .env.example .env
 
 # Deploy to Cloudflare Workers
 npx wrangler deploy
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-#### Frontend (.env.local)
-```env
-NEXT_PUBLIC_API_URL=https://your-api.workers.dev
-NEXT_PUBLIC_FIREBASE_API_KEY=your_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_site_key
-```
-
-#### Backend (Cloudflare Secrets)
-```bash
-npx wrangler secret put JWT_SECRET
-npx wrangler secret put DATABASE_URL
-npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put RECAPTCHA_SECRET_KEY
 ```
 
 ## 📚 Documentation
