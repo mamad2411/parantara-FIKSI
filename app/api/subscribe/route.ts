@@ -1,5 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 
+// Handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  })
+}
+
+// Handle GET requests
+export async function GET() {
+  return NextResponse.json(
+    { success: false, message: "Method not allowed. Use POST." },
+    { status: 405 }
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()
