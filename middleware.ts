@@ -105,11 +105,13 @@ export function middleware(request: NextRequest) {
   const ip = getClientIP(request)
   const pathname = request.nextUrl.pathname
 
-  // Skip middleware for static files and API routes (they have their own protection)
+  // Skip middleware for static files, API routes, and Next.js internals
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
-    pathname.includes('.')
+    pathname.startsWith('/_vercel') ||
+    pathname.includes('.') ||
+    pathname === '/favicon.ico'
   ) {
     return NextResponse.next()
   }
