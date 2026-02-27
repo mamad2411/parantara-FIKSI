@@ -36,7 +36,6 @@ DanaMasjid dibangun dengan standar keamanan tertinggi:
 - Data validation
 - Audit logging
 
-
 ## 🚀 Tech Stack
 
 ### Frontend
