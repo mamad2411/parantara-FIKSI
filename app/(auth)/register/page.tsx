@@ -255,11 +255,19 @@ export default function RegisterPage() {
     e.preventDefault()
     setError("")
     setSuccess("")
+    
+    console.log('=== FORM SUBMIT ===')
+    console.log('Current Step:', currentStep)
+    console.log('Form Data:', formData)
+    console.log('Password Strength:', passwordStrength)
+    console.log('Password Match:', passwordMatch)
+    
     setLoading(true)
 
     try {
       if (currentStep === 1) {
         // Step 1: Send OTP using TanStack Query
+        console.log('Step 1: Sending OTP...')
         const result = await registerStep1Mutation.mutateAsync({
           name: formData.name,
           email: formData.email,
@@ -269,12 +277,15 @@ export default function RegisterPage() {
         if (result.success) {
           setResendCountdown(60)
           setSuccess('Kode OTP telah dikirim ke email Anda')
+          console.log('Step 1: OTP sent successfully')
           handleNext()
         } else {
           setError(result.message || 'Gagal mengirim OTP')
+          console.error('Step 1: Failed to send OTP')
         }
       } else if (currentStep === 2) {
         // Step 2: Verify OTP using TanStack Query
+        console.log('Step 2: Verifying OTP...')
         const otpString = formData.otp.join('')
         if (otpString.length !== 6) {
           setError('Masukkan 6 digit kode OTP')
@@ -289,33 +300,42 @@ export default function RegisterPage() {
 
         if (result.success) {
           setSuccess('Verifikasi berhasil!')
+          console.log('Step 2: OTP verified successfully')
           handleNext()
         } else {
           setError(result.message || 'Kode OTP tidak valid')
+          console.error('Step 2: OTP verification failed')
         }
       } else if (currentStep === 3) {
         // Step 3: Validate password
+        console.log('Step 3: Validating and registering...')
+        
         if (!formData.password) {
           setError('Masukkan password')
           setLoading(false)
+          console.error('Step 3: Password empty')
           return
         }
         
         const strength = calculatePasswordStrength(formData.password)
+        console.log('Step 3: Password strength:', strength)
+        
         if (strength === 'weak') {
           setError('Password terlalu lemah. Gunakan minimal password sedang.')
           setLoading(false)
+          console.error('Step 3: Password too weak')
           return
         }
         
         if (formData.password !== formData.confirmPassword) {
           setError('Password tidak cocok')
           setLoading(false)
+          console.error('Step 3: Password mismatch')
           return
         }
         
         // Complete registration with Firebase
-        console.log('Starting Firebase registration...', {
+        console.log('Step 3: Starting Firebase registration...', {
           email: formData.email,
           name: formData.name,
           phone: formData.phone
@@ -326,19 +346,24 @@ export default function RegisterPage() {
           phone: formData.phone
         })
 
-        console.log('Firebase registration successful:', user.uid)
+        console.log('Step 3: Firebase registration successful! User ID:', user.uid)
         setSuccess('Pendaftaran berhasil! Mengalihkan ke pendaftaran masjid...')
         
         setTimeout(() => {
+          console.log('Step 3: Redirecting to /daftar-masjid')
           router.push('/daftar-masjid')
         }, 1500)
       }
     } catch (err: any) {
-      console.error('Registration error:', err)
+      console.error('=== REGISTRATION ERROR ===')
+      console.error('Error object:', err)
+      console.error('Error message:', err?.message)
+      console.error('Error code:', err?.code)
       const errorMessage = err?.message || err?.code || 'Terjadi kesalahan. Silakan coba lagi.'
       setError(errorMessage)
     } finally {
       setLoading(false)
+      console.log('=== FORM SUBMIT END ===')
     }
   }
 
@@ -950,22 +975,6 @@ export default function RegisterPage() {
                             )}
                           </motion.div>
                         )}
-                      </motion.div>
-
-                      <motion.div 
-                        variants={itemVariants} 
-                        custom={6}
-                        className="bg-blue-50 border border-blue-200 rounded-xl p-4"
-                      >
-                        <p className="text-sm text-blue-800 mb-2">
-                          <strong>Tips Password Kuat:</strong>
-                        </p>
-                        <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                          <li>Minimal 10 karakter untuk password kuat</li>
-                          <li>Kombinasi huruf besar dan kecil</li>
-                          <li>Tambahkan angka dan simbol (!@#$%)</li>
-                          <li>Hindari kata yang mudah ditebak</li>
-                        </ul>
                       </motion.div>
                     </>
                   )}
