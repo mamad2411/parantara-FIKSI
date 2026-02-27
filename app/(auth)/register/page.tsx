@@ -787,35 +787,67 @@ export default function RegisterPage() {
                         <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="space-y-2"
+                          className="space-y-3"
                         >
+                          {/* Progress Bars */}
                           <div className="flex gap-2">
-                            <div className={`h-2 flex-1 rounded-full transition-all ${
-                              passwordStrength === 'weak' ? 'bg-red-500' :
-                              passwordStrength === 'medium' ? 'bg-yellow-500' :
-                              'bg-green-500'
-                            }`} />
-                            <div className={`h-2 flex-1 rounded-full transition-all ${
-                              passwordStrength === 'medium' ? 'bg-yellow-500' :
-                              passwordStrength === 'strong' ? 'bg-green-500' :
-                              'bg-gray-200'
-                            }`} />
-                            <div className={`h-2 flex-1 rounded-full transition-all ${
-                              passwordStrength === 'strong' ? 'bg-green-500' : 'bg-gray-200'
-                            }`} />
+                            <motion.div 
+                              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                                passwordStrength === 'weak' ? 'bg-red-500' :
+                                passwordStrength === 'medium' ? 'bg-yellow-500' :
+                                'bg-green-500'
+                              }`}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.3 }}
+                              style={{ transformOrigin: 'left' }}
+                            />
+                            <motion.div 
+                              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                                passwordStrength === 'medium' ? 'bg-yellow-500' :
+                                passwordStrength === 'strong' ? 'bg-green-500' :
+                                'bg-gray-200'
+                              }`}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: passwordStrength !== 'weak' ? 1 : 0 }}
+                              transition={{ duration: 0.3, delay: 0.1 }}
+                              style={{ transformOrigin: 'left' }}
+                            />
+                            <motion.div 
+                              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                                passwordStrength === 'strong' ? 'bg-green-500' : 'bg-gray-200'
+                              }`}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: passwordStrength === 'strong' ? 1 : 0 }}
+                              transition={{ duration: 0.3, delay: 0.2 }}
+                              style={{ transformOrigin: 'left' }}
+                            />
                           </div>
+                          
+                          {/* Status Text */}
                           <div className="flex items-center justify-between">
-                            <p className={`text-sm font-medium ${
-                              passwordStrength === 'weak' ? 'text-red-600' :
-                              passwordStrength === 'medium' ? 'text-yellow-600' :
-                              'text-green-600'
-                            }`}>
-                              {passwordStrength === 'weak' && '❌ Password Lemah'}
-                              {passwordStrength === 'medium' && '⚠️ Password Sedang'}
-                              {passwordStrength === 'strong' && '✅ Password Kuat'}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm font-semibold ${
+                                passwordStrength === 'weak' ? 'text-red-600' :
+                                passwordStrength === 'medium' ? 'text-yellow-600' :
+                                'text-green-600'
+                              }`}>
+                                {passwordStrength === 'weak' && '🔴 Lemah'}
+                                {passwordStrength === 'medium' && '🟡 Sedang'}
+                                {passwordStrength === 'strong' && '🟢 Kuat'}
+                              </p>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                passwordStrength === 'weak' ? 'bg-red-100 text-red-700' :
+                                passwordStrength === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {passwordStrength === 'weak' && '33%'}
+                                {passwordStrength === 'medium' && '66%'}
+                                {passwordStrength === 'strong' && '100%'}
+                              </span>
+                            </div>
                             {passwordStrength === 'weak' && (
-                              <p className="text-xs text-red-500">Minimal sedang untuk lanjut</p>
+                              <p className="text-xs text-red-600 font-medium">Minimal sedang</p>
                             )}
                           </div>
                         </motion.div>
