@@ -8,12 +8,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { VideoBackground } from "@/components/auth/video-background"
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
+import { useRegisterStep1, useVerifyOTP } from "@/hooks/api"
 
 export default function RegisterPage() {
   const router = useRouter()
   const { signUpWithEmail, signInWithGoogle } = useAuth()
+  
+  // TanStack Query mutations
+  const registerStep1Mutation = useRegisterStep1()
+  const verifyOTPMutation = useVerifyOTP()
   
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
@@ -220,28 +223,22 @@ export default function RegisterPage() {
 
     try {
       if (currentStep === 1) {
-        // Step 1: Send OTP
-        const response = await fetch(`${API_URL}/api/auth/register/step1`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
-          })
+        // Step 1: Send OTP using TanStack Query
+        const result = await registerStep1Mutation.mutateAsync({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
         })
 
-        const data = await response.json()
-
-        if (data.success) {
+        if (result.success) {
           setResendCountdown(60)
           setSuccess('Kode OTP telah dikirim ke email Anda')
           handleNext()
         } else {
-          setError(data.message || 'Gagal mengirim OTP')
+          setError(result.message || 'Gagal mengirim OTP')
         }
       } else if (currentStep === 2) {
-        // Step 2: Verify OTP
+        // Step 2: Verify OTP using TanStack Query
         const otpString = formData.otp.join('')
         if (otpString.length !== 6) {
           setError('Masukkan 6 digit kode OTP')
@@ -249,22 +246,16 @@ export default function RegisterPage() {
           return
         }
         
-        const response = await fetch(`${API_URL}/api/auth/register/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email,
-            otp: otpString
-          })
+        const result = await verifyOTPMutation.mutateAsync({
+          email: formData.email,
+          otp: otpString
         })
 
-        const data = await response.json()
-
-        if (data.success) {
+        if (result.success) {
           setSuccess('Verifikasi berhasil!')
           handleNext()
         } else {
-          setError(data.message || 'Kode OTP tidak valid')
+          setError(result.message || 'Kode OTP tidak valid')
         }
       } else if (currentStep === 3) {
         // Step 3: Validate password
@@ -345,21 +336,17 @@ export default function RegisterPage() {
     setSuccess("")
     
     try {
-      const response = await fetch(`${API_URL}/api/auth/register/step1`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone
-        })
+      const result = await registerStep1Mutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone
       })
-      const data = await response.json()
-      if (data.success) {
+      
+      if (result.success) {
         setResendCountdown(60)
         setSuccess('Kode OTP telah dikirim ulang')
       } else {
-        setError(data.message || 'Gagal mengirim OTP')
+        setError(result.message || 'Gagal mengirim OTP')
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.')

@@ -6,39 +6,31 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSubscribe } from "@/hooks/api"
 
 export function MasjidHeroV2() {
   const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
+  const subscribeMutation = useSubscribe()
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setMessage("")
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""
-      const response = await fetch(`${apiUrl}/api/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
+      const result = await subscribeMutation.mutateAsync({ email })
 
-      const data = await response.json()
-
-      if (data.success) {
-        setMessage("Terima kasih! Cek email Anda untuk langkah selanjutnya.")
+      if (result.success) {
         setEmail("")
-      } else {
-        setMessage("❌ " + (data.message || "Gagal berlangganan. Silakan coba lagi."))
       }
     } catch (error) {
-      setMessage("Terjadi kesalahan. Silakan coba lagi.")
-    } finally {
-      setLoading(false)
+      // Error handled by mutation
     }
   }
+
+  const message = subscribeMutation.isSuccess 
+    ? "Terima kasih! Cek email Anda untuk langkah selanjutnya."
+    : subscribeMutation.isError
+    ? `❌ ${subscribeMutation.error?.message || "Gagal berlangganan. Silakan coba lagi."}`
+    : ""
 
   return (
     <main>
@@ -107,7 +99,7 @@ export function MasjidHeroV2() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      disabled={loading}
+                      disabled={subscribeMutation.isPending}
                     />
 
                     <div className="md:pr-1.5 lg:pr-1">
@@ -115,9 +107,11 @@ export function MasjidHeroV2() {
                         type="submit"
                         aria-label="subscribe"
                         className="bg-blue-600 hover:bg-blue-700 h-12 px-6"
-                        disabled={loading}
+                        disabled={subscribeMutation.isPending}
                       >
-                        <span className="hidden md:block">{loading ? "Mengirim..." : "Daftar Sekarang"}</span>
+                        <span className="hidden md:block">
+                          {subscribeMutation.isPending ? "Mengirim..." : "Daftar Sekarang"}
+                        </span>
                         <Mail className="relative mx-auto size-5 md:hidden" strokeWidth={2} />
                       </Button>
                     </div>
