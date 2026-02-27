@@ -75,8 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUpWithEmail = async (email: string, password: string, userData: any) => {
     try {
+      console.log('Creating Firebase user account...')
       const result = await createUserWithEmailAndPassword(auth, email, password)
       const user = result.user
+      console.log('Firebase user created:', user.uid)
 
       // Save userId to localStorage
       localStorage.setItem('userId', user.uid)
@@ -85,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
 
       // Save user data to Firestore
+      console.log('Saving user data to Firestore...')
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
@@ -93,11 +96,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString(),
         provider: 'email'
       })
+      console.log('User data saved to Firestore successfully')
       
       return user
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error)
-      throw error
+      
+      // Provide more specific error messages
+      let errorMessage = 'Terjadi kesalahan saat mendaftar'
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'Email sudah terdaftar. Silakan gunakan email lain atau login.'
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password terlalu lemah. Gunakan password yang lebih kuat.'
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Format email tidak valid.'
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Koneksi internet bermasalah. Silakan coba lagi.'
+      }
+      
+      throw new Error(errorMessage)
     }
   }
 

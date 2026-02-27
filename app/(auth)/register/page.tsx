@@ -305,18 +305,28 @@ export default function RegisterPage() {
         }
         
         // Complete registration with Firebase
-        await signUpWithEmail(formData.email, formData.password, {
+        console.log('Starting Firebase registration...', {
+          email: formData.email,
+          name: formData.name,
+          phone: formData.phone
+        })
+        
+        const user = await signUpWithEmail(formData.email, formData.password, {
           name: formData.name,
           phone: formData.phone
         })
 
+        console.log('Firebase registration successful:', user.uid)
         setSuccess('Pendaftaran berhasil! Mengalihkan ke pendaftaran masjid...')
+        
         setTimeout(() => {
           router.push('/daftar-masjid')
         }, 1500)
       }
-    } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+    } catch (err: any) {
+      console.error('Registration error:', err)
+      const errorMessage = err?.message || err?.code || 'Terjadi kesalahan. Silakan coba lagi.'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
