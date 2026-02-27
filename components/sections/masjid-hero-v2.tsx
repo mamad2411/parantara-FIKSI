@@ -6,7 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { useSubscribe } from "@/hooks/api/use-subscribe"
+import { useSubscribe } from "@/lib/hooks/use-subscribe"
 
 export function MasjidHeroV2() {
   const [email, setEmail] = useState("")

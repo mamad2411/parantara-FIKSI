@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { VideoBackground } from "@/components/auth/video-background"
-import { useRegisterStep1, useVerifyOTP } from "@/hooks/api/use-auth"
+import { useRegisterStep1, useVerifyOTP } from "@/lib/hooks/use-auth"
 
 export default function RegisterPage() {
   const router = useRouter()
