@@ -7,7 +7,7 @@ import { useState } from "react"
 const teamMembers = [
   {
     name: "Ahmad Zaidan Ali",
-    position: "Frontend Developer & UI UIX Designer",
+    position: "Full Stack Developer",
     description: "Tim HidupTebe",
     image: "/images/team/member1.jpg",
     github: "chaali03",

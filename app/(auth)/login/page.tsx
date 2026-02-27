@@ -1,9 +1,9 @@
 ﻿// @ts-nocheck
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
@@ -11,6 +11,7 @@ import { VideoBackground } from "@/components/auth/video-background"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signInWithEmail, signInWithGoogle } = useAuth()
   
   const [email, setEmail] = useState("")
@@ -18,6 +19,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [redirectMessage, setRedirectMessage] = useState("")
+  
+  // Get redirect message from URL
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message) {
+      setRedirectMessage(message)
+    }
+  }, [searchParams])
 
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -30,8 +40,16 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError("")
-      await signInWithGoogle()
-      router.push("/dashboard")
+      const user = await signInWithGoogle()
+      
+      // Check if user has completed mosque registration
+      const hasCompletedRegistration = await checkMosqueRegistration(user.uid)
+      
+      if (hasCompletedRegistration) {
+        router.push("/dashboard")
+      } else {
+        router.push("/daftar-masjid")
+      }
     } catch (err: any) {
       setError(err.message || "Gagal login dengan Google")
     } finally {
@@ -44,12 +62,38 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError("")
-      await signInWithEmail(email, password)
-      router.push("/dashboard")
+      const user = await signInWithEmail(email, password)
+      
+      // Check if user has completed mosque registration
+      const hasCompletedRegistration = await checkMosqueRegistration(user.uid)
+      
+      if (hasCompletedRegistration) {
+        router.push("/dashboard")
+      } else {
+        router.push("/daftar-masjid")
+      }
     } catch (err: any) {
       setError("Email atau password salah")
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Check if user has completed mosque registration
+  const checkMosqueRegistration = async (userId: string) => {
+    try {
+      // Check localStorage first for faster response
+      const registrationStatus = localStorage.getItem(`mosque_registration_${userId}`)
+      if (registrationStatus === 'completed') {
+        return true
+      }
+      
+      // TODO: Check with API/Firebase if mosque registration is completed
+      // For now, return false to always redirect to registration
+      return false
+    } catch (error) {
+      console.error('Error checking mosque registration:', error)
+      return false
     }
   }
 
@@ -308,6 +352,20 @@ export default function LoginPage() {
 
             {/* Login Form */}
             <form className="space-y-5" onSubmit={handleEmailSignIn}>
+              {/* Redirect Message with Animation */}
+              <AnimatePresence>
+                {redirectMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm"
+                  >
+                    {redirectMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Error Message with Animation */}
               <AnimatePresence>
                 {error && (

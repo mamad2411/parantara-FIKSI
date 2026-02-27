@@ -30,13 +30,9 @@ export default function RegisterPage() {
     // Step 3
     password: "",
     confirmPassword: "",
-    // Step 4
-    mosqueName: "",
-    mosqueAddress: "",
-    mosqueCity: "",
   })
 
-  const totalSteps = 4
+  const totalSteps = 3
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -289,34 +285,16 @@ export default function RegisterPage() {
         }
         setSuccess('Password valid!')
         handleNext()
-      } else if (currentStep === 4) {
-        // Step 4: Complete registration with Firebase
+      } else if (currentStep === 3) {
+        // Step 3: Complete registration with Firebase (without mosque info)
         await signUpWithEmail(formData.email, formData.password, {
           name: formData.name,
-          phone: formData.phone,
-          mosqueName: formData.mosqueName,
-          mosqueAddress: formData.mosqueAddress,
-          mosqueCity: formData.mosqueCity
+          phone: formData.phone
         })
 
-        // Also send to API for email notification
-        await fetch(`${API_URL}/api/auth/register/complete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            password: formData.password,
-            mosqueName: formData.mosqueName,
-            mosqueAddress: formData.mosqueAddress,
-            mosqueCity: formData.mosqueCity
-          })
-        })
-
-        setSuccess('Pendaftaran berhasil! Mengalihkan...')
+        setSuccess('Pendaftaran berhasil! Mengalihkan ke pendaftaran masjid...')
         setTimeout(() => {
-          router.push('/dashboard')
+          router.push('/daftar-masjid')
         }, 1500)
       }
     } catch (err) {
@@ -481,7 +459,7 @@ export default function RegisterPage() {
               variants={itemVariants} 
               className="flex items-center justify-center gap-3 mb-6"
             >
-              {[1, 2, 3, 4].map((step) => (
+              {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <motion.div 
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
@@ -502,7 +480,7 @@ export default function RegisterPage() {
                       step
                     )}
                   </motion.div>
-                  {step < 4 && (
+                  {step < 3 && (
                     <motion.div 
                       className={`w-12 h-1 mx-1 transition-all ${
                         currentStep > step ? "bg-green-500" : "bg-gray-200"
@@ -526,13 +504,11 @@ export default function RegisterPage() {
                 {currentStep === 1 && "Informasi Pribadi"}
                 {currentStep === 2 && "Verifikasi OTP"}
                 {currentStep === 3 && "Keamanan Akun"}
-                {currentStep === 4 && "Informasi Masjid"}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
                 {currentStep === 1 && "Masukkan data diri Anda untuk memulai"}
                 {currentStep === 2 && "Masukkan kode 6 digit yang telah dikirim"}
                 {currentStep === 3 && "Buat password yang kuat untuk akun Anda"}
-                {currentStep === 4 && "Informasi lengkap tentang masjid Anda"}
               </p>
             </motion.div>
 
@@ -659,14 +635,31 @@ export default function RegisterPage() {
                         <motion.div 
                           className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
                           animate={{ 
-                            scale: [1, 1.1, 1],
-                            rotate: [0, 5, -5, 0]
+                            scale: [1, 1.15, 1],
+                            rotate: [0, 8, -8, 0]
                           }}
-                          transition={{ duration: 2, repeat: Infinity }}
+                          transition={{ 
+                            duration: 2, 
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
                         >
-                          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <motion.svg 
+                            className="w-8 h-8 text-blue-600" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                            animate={{
+                              y: [0, -3, 0],
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
+                          </motion.svg>
                         </motion.div>
                         <p className="text-sm text-gray-600">
                           Kode verifikasi telah dikirim ke<br />
@@ -812,76 +805,6 @@ export default function RegisterPage() {
                       </motion.div>
                     </>
                   )}
-
-                  {/* Step 4: Mosque Information */}
-                  {currentStep === 4 && (
-                    <>
-                      <motion.div 
-                        variants={itemVariants} 
-                        custom={4}
-                        className="relative"
-                        whileHover={{ scale: 1.01 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="Nama Masjid"
-                          value={formData.mosqueName}
-                          onChange={(e) => setFormData({...formData, mosqueName: e.target.value})}
-                          className="w-full px-5 py-4 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base shadow-sm"
-                          autoComplete="organization"
-                          required
-                        />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                          </svg>
-                        </div>
-                      </motion.div>
-
-                      <motion.div 
-                        variants={itemVariants} 
-                        custom={5}
-                        className="relative"
-                        whileHover={{ scale: 1.01 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        <textarea
-                          placeholder="Alamat Lengkap Masjid"
-                          value={formData.mosqueAddress}
-                          onChange={(e) => setFormData({...formData, mosqueAddress: e.target.value})}
-                          className="w-full px-5 py-4 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base resize-none shadow-sm"
-                          autoComplete="street-address"
-                          rows={3}
-                          required
-                        />
-                      </motion.div>
-
-                      <motion.div 
-                        variants={itemVariants} 
-                        custom={6}
-                        className="relative"
-                        whileHover={{ scale: 1.01 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="Kota/Kabupaten"
-                          value={formData.mosqueCity}
-                          onChange={(e) => setFormData({...formData, mosqueCity: e.target.value})}
-                          className="w-full px-5 py-4 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base shadow-sm"
-                          autoComplete="address-level2"
-                          required
-                        />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
                 </motion.div>
               </AnimatePresence>
 
@@ -957,7 +880,7 @@ export default function RegisterPage() {
                       setLoading(true)
                       setError("")
                       await signInWithGoogle()
-                      router.push("/dashboard")
+                      router.push("/daftar-masjid")
                     } catch (err: any) {
                       setError(err.message || "Gagal login dengan Google")
                       setLoading(false)

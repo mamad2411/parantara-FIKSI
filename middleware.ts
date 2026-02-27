@@ -116,6 +116,31 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Protected routes that require authentication
+  const protectedRoutes = ['/daftar-masjid', '/dashboard']
+  const authRoutes = ['/login', '/register']
+  
+  // Check if route is protected
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  
+  // Get auth token from cookies
+  const authToken = request.cookies.get('auth_token')?.value
+  const isAuthenticated = !!authToken
+  
+  // Redirect to login if accessing protected route without auth
+  if (isProtectedRoute && !isAuthenticated) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    loginUrl.searchParams.set('message', 'mari kita realisasikan tranparansi untuk umat')
+    return NextResponse.redirect(loginUrl)
+  }
+  
+  // Redirect to dashboard if accessing auth routes while authenticated
+  if (isAuthRoute && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
   // Check for suspicious requests
   if (isSuspiciousRequest(request)) {
     console.warn(`[Security] Suspicious request blocked from IP: ${ip}`)

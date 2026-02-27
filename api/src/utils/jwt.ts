@@ -1,9 +1,11 @@
 import jwt from 'jsonwebtoken';
 
 export interface JWTPayload {
+  id?: string;
   userId: string;
   email: string;
-  role: 'admin' | 'user' | 'mosque_admin';
+  name?: string;
+  role?: 'admin' | 'user' | 'mosque_admin';
   mosqueName?: string;
   iat?: number;
   exp?: number;
