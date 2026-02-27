@@ -9,6 +9,7 @@ export { MasjidHeroV2 } from "./masjid-hero-v2"
 export { FeaturesSection } from "./features-section"
 export { ServicesSection } from "./services-section"
 export { StatsSection } from "./stats-section"
+export { BerkahStatsSection } from "./berkah-stats-section"
 
 // Pricing Sections
 export { PricingSection } from "./pricing-section"

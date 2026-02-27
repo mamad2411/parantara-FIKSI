@@ -635,6 +635,133 @@ app.get('/api/masjid/:id', async (c) => {
   }
 })
 
+// Register Masjid - Multi-step verification
+app.post('/api/masjid/register',
+  advancedRateLimit({ windowMs: 60 * 1000, maxRequests: 2 }), // 2 per minute
+  validateInput({
+    mosqueName: { required: true, type: 'string', minLength: 3, maxLength: 100 },
+    mosqueAddress: { required: true, type: 'string', minLength: 10, maxLength: 500 },
+    province: { required: true, type: 'string' },
+    city: { required: true, type: 'string' },
+    district: { required: true, type: 'string' },
+    subDistrict: { required: true, type: 'string' },
+    postalCode: { required: true, type: 'string', pattern: /^\d{5}$/ },
+    aktaPendirian: { required: true, type: 'string' },
+    skKemenkumham: { required: true, type: 'string' },
+    npwpMasjid: { required: true, type: 'string', pattern: /^\d{15}$/ },
+    nomorRekening: { required: true, type: 'string' },
+    namaBank: { required: true, type: 'string' },
+    namaKetua: { required: true, type: 'string' },
+    nikKetua: { required: true, type: 'string', pattern: /^\d{16}$/ },
+    kontakKetua: { required: true, type: 'string' },
+    namaBendahara: { required: true, type: 'string' },
+    nikBendahara: { required: true, type: 'string', pattern: /^\d{16}$/ },
+    kontakBendahara: { required: true, type: 'string' },
+    namaSekretaris: { required: true, type: 'string' },
+    nikSekretaris: { required: true, type: 'string', pattern: /^\d{16}$/ },
+    kontakSekretaris: { required: true, type: 'string' },
+    adminEmail: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    adminPassword: { required: true, type: 'string', minLength: 6 }
+  }),
+  async (c) => {
+  try {
+    // Get form data (multipart/form-data for file uploads)
+    const formData = await c.req.parseBody()
+    
+    // Validate password strength
+    const password = formData.adminPassword as string
+    const passwordValidation = validatePasswordStrength(password)
+    if (!passwordValidation.isValid) {
+      return c.json(
+        { success: false, message: passwordValidation.message },
+        400
+      )
+    }
+
+    // Hash password
+    const hashedPassword = await hashPassword(password)
+
+    // Validate NIK uniqueness (all 3 NIKs must be different)
+    const nikKetua = formData.nikKetua as string
+    const nikBendahara = formData.nikBendahara as string
+    const nikSekretaris = formData.nikSekretaris as string
+    
+    if (nikKetua === nikBendahara || nikKetua === nikSekretaris || nikBendahara === nikSekretaris) {
+      return c.json(
+        { success: false, message: 'NIK pengurus harus berbeda satu sama lain' },
+        400
+      )
+    }
+
+    // TODO: Save to database with status "pending_verification"
+    // TODO: Upload files to storage (R2, S3, etc.)
+    // TODO: Send notification email to admin for verification
+    
+    console.log(`New mosque registration: ${formData.mosqueName}`)
+    console.log(`Location: ${formData.city}, ${formData.province}`)
+    console.log(`Admin email: ${formData.adminEmail}`)
+    console.log(`NPWP: ${formData.npwpMasjid}`)
+    console.log(`Ketua: ${formData.namaKetua} (NIK: ${nikKetua})`)
+    
+    // Send confirmation email to admin
+    await sendEmail({
+      to: formData.adminEmail as string,
+      subject: '🕌 Pendaftaran Masjid Berhasil - Menunggu Verifikasi',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">🕌 DanaMasjid</h1>
+          </div>
+          <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Pendaftaran Berhasil!</h2>
+            <p style="color: #4b5563; line-height: 1.6;">
+              Terima kasih telah mendaftarkan <strong>${formData.mosqueName}</strong> di platform DanaMasjid.
+            </p>
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+              <h3 style="color: #1f2937; margin-top: 0;">Status Pendaftaran</h3>
+              <p style="color: #4b5563; margin: 10px 0;">
+                <strong>Status:</strong> <span style="color: #f59e0b;">⏳ Menunggu Verifikasi</span>
+              </p>
+              <p style="color: #4b5563; margin: 10px 0;">
+                <strong>Estimasi Waktu:</strong> 1-3 Hari Kerja
+              </p>
+            </div>
+            <p style="color: #4b5563; line-height: 1.6;">
+              Tim kami akan melakukan verifikasi dokumen dan data yang Anda kirimkan. 
+              Anda akan menerima email notifikasi setelah proses verifikasi selesai.
+            </p>
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="color: #92400e; margin: 0; font-size: 14px;">
+                <strong>⚠️ Catatan:</strong> Pastikan email Anda aktif untuk menerima notifikasi verifikasi.
+              </p>
+            </div>
+            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+              Jika ada pertanyaan, hubungi kami di support@danamasjid.com
+            </p>
+          </div>
+        </div>
+      `,
+      resendApiKey: c.env.RESEND_API_KEY
+    })
+
+    return c.json({
+      success: true,
+      message: 'Pendaftaran berhasil! Menunggu verifikasi admin (1-3 hari kerja)',
+      data: {
+        mosqueName: formData.mosqueName,
+        status: 'pending_verification',
+        adminEmail: formData.adminEmail
+      }
+    })
+  } catch (error) {
+    console.error('Mosque registration error:', error)
+    return c.json(
+      { success: false, message: 'Gagal mendaftar. Silakan coba lagi.' },
+      500
+    )
+  }
+})
+
 // ============================================
 // ERROR HANDLING
 // ============================================

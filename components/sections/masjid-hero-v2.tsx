@@ -42,8 +42,8 @@ export function MasjidHeroV2() {
 
   return (
     <main>
-      <section className="overflow-hidden min-h-screen">
-        <div className="relative mx-auto max-w-7xl px-6 py-32 lg:py-40">
+      <section className="overflow-hidden min-h-[700px] lg:min-h-[750px]">
+        <div className="relative mx-auto max-w-7xl px-6 py-24 lg:py-32">
           <div className="lg:flex lg:items-center lg:gap-12">
             <div className="relative z-10 mx-auto max-w-2xl text-center lg:ml-0 lg:w-3/5 lg:text-left">
               <motion.div
@@ -171,7 +171,7 @@ export function MasjidHeroV2() {
             <div className="relative h-full w-full">
               <Image
                 className="rounded-2xl shadow-2xl object-cover"
-                src="/images/login/loginnn.webp"
+                src="/images/masjid/interior.webp"
                 alt="Masjid illustration"
                 fill
                 priority

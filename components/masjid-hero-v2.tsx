@@ -171,7 +171,7 @@ export function MasjidHeroV2() {
             <div className="relative h-full w-full">
               <Image
                 className="rounded-2xl shadow-2xl object-cover"
-                src="/images/login/loginnn.webp"
+                src="/images/masjid/interior.webp"
                 alt="Masjid illustration"
                 fill
                 priority

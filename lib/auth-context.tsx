@@ -15,10 +15,10 @@ import { auth, googleProvider, db } from './firebase'
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signInWithGoogle: () => Promise<void>
+  signInWithGoogle: () => Promise<User>
   signOut: () => Promise<void>
-  signUpWithEmail: (email: string, password: string, userData: any) => Promise<void>
-  signInWithEmail: (email: string, password: string) => Promise<void>
+  signUpWithEmail: (email: string, password: string, userData: any) => Promise<User>
+  signInWithEmail: (email: string, password: string) => Promise<User>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -45,6 +45,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, googleProvider)
       const user = result.user
 
+      // Save userId to localStorage
+      localStorage.setItem('userId', user.uid)
+      
+      // Set auth cookie for middleware
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+
       // Save user data to Firestore
       const userRef = doc(db, 'users', user.uid)
       const userSnap = await getDoc(userRef)
@@ -59,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           provider: 'google'
         })
       }
+      
+      return user
     } catch (error) {
       console.error('Google sign in error:', error)
       throw error
@@ -70,33 +78,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await createUserWithEmailAndPassword(auth, email, password)
       const user = result.user
 
+      // Save userId to localStorage
+      localStorage.setItem('userId', user.uid)
+      
+      // Set auth cookie for middleware
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+
       // Save user data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
         name: userData.name,
         phone: userData.phone,
-        mosqueName: userData.mosqueName,
-        mosqueAddress: userData.mosqueAddress,
-        mosqueCity: userData.mosqueCity,
         createdAt: new Date().toISOString(),
         provider: 'email'
       })
-
-      // Also save mosque data
-      if (userData.mosqueName) {
-        await setDoc(doc(db, 'mosques', user.uid), {
-          userId: user.uid,
-          name: userData.mosqueName,
-          address: userData.mosqueAddress,
-          city: userData.mosqueCity,
-          adminEmail: user.email,
-          adminName: userData.name,
-          adminPhone: userData.phone,
-          createdAt: new Date().toISOString(),
-          status: 'active'
-        })
-      }
+      
+      return user
     } catch (error) {
       console.error('Sign up error:', error)
       throw error
@@ -105,7 +103,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const result = await signInWithEmailAndPassword(auth, email, password)
+      const user = result.user
+      
+      // Save userId to localStorage
+      localStorage.setItem('userId', user.uid)
+      
+      // Set auth cookie for middleware
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+      
+      return user
     } catch (error) {
       console.error('Sign in error:', error)
       throw error
@@ -115,6 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       await firebaseSignOut(auth)
+      
+      // Clear auth cookie
+      document.cookie = 'auth_token=; path=/; max-age=0'
+      
+      // Clear localStorage
+      localStorage.removeItem('userId')
     } catch (error) {
       console.error('Sign out error:', error)
       throw error

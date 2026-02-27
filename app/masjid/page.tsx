@@ -239,8 +239,19 @@ export default function MasjidPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-r from-blue-600 to-blue-700 mt-16">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative py-24 px-4 mt-16 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/masjid/masjid.webp"
+            alt="Masjid Background"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -254,7 +265,7 @@ export default function MasjidPage() {
               Daftarkan masjid Anda sekarang dan mulai terima donasi secara transparan dan amanah
             </p>
             <Link 
-              href="/login"
+              href="/daftar-masjid"
               className="inline-block px-10 py-5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
             >
               Daftarkan Masjid Sekarang

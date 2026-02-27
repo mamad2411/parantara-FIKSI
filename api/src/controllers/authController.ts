@@ -201,11 +201,13 @@ export const completeRegistration = async (req: Request, res: Response): Promise
     await sendWelcomeEmail(email, name, mosqueName);
 
     // Generate JWT token
+    const secret = process.env.JWT_SECRET || 'default-secret-key';
     const token = generateToken({
-      id: admin.id,
+      userId: admin.id.toString(),
+      id: admin.id.toString(),
       email: admin.email,
       name: admin.name
-    });
+    }, secret);
 
     res.status(201).json({
       success: true,
@@ -274,11 +276,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate JWT token
+    const secret = process.env.JWT_SECRET || 'default-secret-key';
     const token = generateToken({
-      id: admin.id,
+      userId: admin.id.toString(),
+      id: admin.id.toString(),
       email: admin.email,
       name: admin.name
-    });
+    }, secret);
 
     res.status(200).json({
       success: true,
@@ -308,9 +312,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // Get current admin profile
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
+    const userId = req.user?.userId || req.user?.id;
+    
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'User tidak terautentikasi'
+      });
+      return;
+    }
+
     const result = await pool.query(
       'SELECT id, name, email, phone, mosque_name, mosque_address, mosque_city, created_at FROM admins WHERE id = $1',
-      [req.user?.id]
+      [userId]
     );
 
     if (result.rows.length === 0) {
