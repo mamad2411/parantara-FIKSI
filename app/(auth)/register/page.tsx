@@ -88,7 +88,7 @@ export default function RegisterPage() {
     }
   }, [formData.password, formData.confirmPassword])
 
-  // Check email availability with debounce
+  // Check email availability with Firebase Auth
   useEffect(() => {
     if (!formData.email || !formData.email.includes('@')) {
       setEmailAvailable(null)
@@ -98,16 +98,21 @@ export default function RegisterPage() {
     const checkEmail = async () => {
       setEmailChecking(true)
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/check-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email })
-        })
-        const data = await response.json()
-        setEmailAvailable(data.available)
-      } catch (error) {
-        console.error('Error checking email:', error)
-        setEmailAvailable(null)
+        // Use Firebase Auth fetchSignInMethodsForEmail
+        const { fetchSignInMethodsForEmail } = await import('firebase/auth')
+        const { auth } = await import('@/lib/firebase')
+        
+        const signInMethods = await fetchSignInMethodsForEmail(auth, formData.email)
+        // If signInMethods array is empty, email is available
+        setEmailAvailable(signInMethods.length === 0)
+      } catch (error: any) {
+        // If error code is auth/invalid-email, still show as available but invalid format
+        if (error?.code === 'auth/invalid-email') {
+          setEmailAvailable(null)
+        } else {
+          console.error('Error checking email:', error)
+          setEmailAvailable(null)
+        }
       } finally {
         setEmailChecking(false)
       }
