@@ -15,7 +15,7 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className={`absolute inset-0 w-full h-full ${className}`}
       >
         <video
@@ -23,9 +23,12 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={posterSrc}
           className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            willChange: 'opacity',
+          }}
         >
           <source src={videoSrc} type="video/mp4" />
         </video>
@@ -35,7 +38,7 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-sky-900/30 to-cyan-900/40 backdrop-blur-[2px]"
       />
     </>
