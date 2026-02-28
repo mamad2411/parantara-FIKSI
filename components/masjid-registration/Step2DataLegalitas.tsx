@@ -494,7 +494,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
                   "<strong>Nama masjid, alamat, dan nomor NPWP</strong> harus jelas dan dapat dibaca",
                   "Nomor NPWP harus mengandung <strong>16 digit</strong>",
                   "NPWP harus diterbitkan oleh <strong>Direktorat Jenderal Pajak</strong>",
-                  "Jika belum memiliki NPWP masjid, pelajari cara mendapatkannya <a href='https://www.pajak.go.id/id/npwp' target='_blank' rel='noopener noreferrer' class='text-blue-600 underline hover:text-blue-700'>di sini (pajak.go.id)</a>"
+                  "Jika belum memiliki NPWP masjid, pelajari cara mendapatkannya <a href='https://simas.kemenag.go.id/page/daftarmasjidmushalla' target='_blank' rel='noopener noreferrer' class='text-blue-600 underline hover:text-blue-700'>di sini (simas.kemenag.go.id)</a>"
                 ]
               }}
             />

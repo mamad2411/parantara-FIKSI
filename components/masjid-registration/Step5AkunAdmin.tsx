@@ -8,7 +8,7 @@ interface Step5Props {
   setShowPassword: (show: boolean) => void
 }
 
-export default function Step5AkunAdmin({ formData, setFormData, showPassword, setShowPassword }: Step5Props) {
+export default function Step6AkunAdmin({ formData, setFormData, showPassword, setShowPassword }: Step5Props) {
   return (
     <div className="space-y-6 md:space-y-8">
       <div>

@@ -15,7 +15,7 @@ import {
   Step1DataMasjid,
   Step2DataLegalitas,
   Step3PerwakilanResmi,
-  Step4UploadDokumen,
+  Step4ReviewData,
   Step5AkunAdmin
 } from "@/components/masjid-registration"
 import {
@@ -211,15 +211,7 @@ export default function DaftarMasjidPage() {
         break
         
       case 4:
-        if (!formData.skKepengurusan || !formData.suratRekomendasiRTRW || 
-            !formData.fotoTampakDepan || !formData.fotoInterior || 
-            !formData.dokumenStatusTanah || !formData.ktpKetua) {
-          toast.error("Dokumen wajib harus diupload (SK Kepengurusan, Surat Rekomendasi, Foto Masjid, Status Tanah, KTP Ketua)", {
-            duration: 4000,
-            position: 'top-center',
-          })
-          return false
-        }
+        // Step 4 is review, no validation needed
         break
         
       case 5:
@@ -556,7 +548,7 @@ export default function DaftarMasjidPage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Step 4: Dokumen */}
+                {/* Step 4: Review Data */}
                 <div className="relative">
                   <div className="flex items-center gap-3">
                     <motion.div 
@@ -578,7 +570,7 @@ export default function DaftarMasjidPage() {
                     <span className={`font-semibold text-base ${
                       currentStep >= 4 ? 'text-gray-900' : 'text-gray-400'
                     }`}>
-                      Upload Dokumen
+                      Review Data
                     </span>
                   </div>
                   
@@ -592,15 +584,11 @@ export default function DaftarMasjidPage() {
                       >
                         <div className="flex items-center gap-2 text-blue-600 font-medium">
                           <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                          <span>SK Kepengurusan</span>
+                          <span>Periksa Data</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-400">
                           <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                          <span>Surat Rekomendasi</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                          <span>Foto & Dokumen</span>
+                          <span>Konfirmasi</span>
                         </div>
                       </motion.div>
                     )}
@@ -610,13 +598,13 @@ export default function DaftarMasjidPage() {
                         animate={{ opacity: 1 }}
                         className="ml-11 mt-1 text-xs text-gray-500"
                       >
-                        ✓ {[formData.skKepengurusan, formData.suratRekomendasiRTRW, formData.fotoTampakDepan, formData.fotoInterior, formData.dokumenStatusTanah, formData.ktpKetua].filter(Boolean).length} dokumen
+                        ✓ Data telah direview
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
 
-                {/* Step 5: Akun */}
+                {/* Step 5: Akun Admin */}
                 <div className="relative">
                   <div className="flex items-center gap-3">
                     <motion.div 
@@ -656,7 +644,7 @@ export default function DaftarMasjidPage() {
                         </div>
                         <div className="flex items-center gap-2 text-gray-400">
                           <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                          <span>Review Data</span>
+                          <span>Keamanan Akun</span>
                         </div>
                       </motion.div>
                     )}
@@ -747,9 +735,8 @@ export default function DaftarMasjidPage() {
                     <span className={currentStep >= 3 ? "font-semibold" : ""}>Perwakilan</span>
                   </div>
                   <div className={`flex flex-col items-center gap-0.5 md:gap-1 ${currentStep >= 4 ? "text-white" : "text-blue-200"}`}>
-                    <Upload className="w-3 h-3 md:w-4 md:h-4" />
-                    <span className={`${currentStep >= 4 ? "font-semibold" : ""} hidden sm:inline`}>Dokumen</span>
-                    <span className={`${currentStep >= 4 ? "font-semibold" : ""} sm:hidden`}>Dok</span>
+                    <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className={currentStep >= 4 ? "font-semibold" : ""}>Review</span>
                   </div>
                   <div className={`flex flex-col items-center gap-0.5 md:gap-1 ${currentStep >= 5 ? "text-white" : "text-blue-200"}`}>
                     <Lock className="w-3 h-3 md:w-4 md:h-4" />
@@ -805,11 +792,12 @@ export default function DaftarMasjidPage() {
                       />
                     )}
 
-                    {/* STEP 4: Upload Dokumen */}
+                    {/* STEP 4: Review Data */}
                     {currentStep === 4 && (
-                      <Step4UploadDokumen 
+                      <Step4ReviewData 
                         formData={formData}
-                        handleFileChange={handleFileChange}
+                        setFormData={setFormData}
+                        setCurrentStep={setCurrentStep}
                       />
                     )}
 
