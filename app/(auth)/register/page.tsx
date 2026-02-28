@@ -134,6 +134,7 @@ export default function RegisterPage() {
 
     const checkNickname = async () => {
       setNicknameChecking(true)
+      console.log('Checking nickname:', formData.nickname)
       try {
         const { collection, query, where, getDocs } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
@@ -144,7 +145,9 @@ export default function RegisterPage() {
         const querySnapshot = await getDocs(q)
         
         // If no documents found, nickname is available
-        setNicknameAvailable(querySnapshot.empty)
+        const available = querySnapshot.empty
+        console.log('Nickname check result:', available ? 'Available' : 'Taken')
+        setNicknameAvailable(available)
       } catch (error) {
         console.error('Error checking nickname:', error)
         setNicknameAvailable(null)
@@ -329,6 +332,9 @@ export default function RegisterPage() {
     console.log('=== FORM SUBMIT ===')
     console.log('Current Step:', currentStep)
     console.log('Form Data:', formData)
+    console.log('Nickname:', formData.nickname)
+    console.log('Nickname Available:', nicknameAvailable)
+    console.log('Email Available:', emailAvailable)
     console.log('Password Strength:', passwordStrength)
     console.log('Password Match:', passwordMatch)
     
