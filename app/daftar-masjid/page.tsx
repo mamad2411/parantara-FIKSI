@@ -10,6 +10,7 @@ import {
   CheckCircle2, AlertCircle, ArrowLeft, ArrowRight,
   Shield, Lock, Eye, EyeOff
 } from "lucide-react"
+import toast, { Toaster } from 'react-hot-toast'
 import {
   Step1DataMasjid,
   Step2DataLegalitas,
@@ -41,7 +42,6 @@ export default function DaftarMasjidPage() {
   const [direction, setDirection] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [csrfToken, setCSRFToken] = useState("")
   const [honeypot, setHoneypot] = useState("") // Bot detection
@@ -143,7 +143,10 @@ export default function DaftarMasjidPage() {
       const validation = validateFileUpload(file)
       
       if (!validation.valid) {
-        setError(validation.error || "File tidak valid")
+        toast.error(validation.error || "File tidak valid", {
+          duration: 4000,
+          position: 'top-center',
+        })
         return
       }
     }
@@ -151,28 +154,39 @@ export default function DaftarMasjidPage() {
   }
 
   const validateStep = (step: number): boolean => {
-    setError("")
     
     switch (step) {
       case 1:
         if (!formData.mosqueName || !formData.mosqueAddress || !formData.province || 
             !formData.regency || !formData.district || !formData.village || !formData.postalCode) {
-          setError("Semua field harus diisi")
+          toast.error("Semua field harus diisi", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (formData.postalCode.length !== 5 || !/^\d+$/.test(formData.postalCode)) {
-          setError("Kode pos harus 5 digit angka")
+          toast.error("Kode pos harus 5 digit angka", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         break
         
       case 2:
         if (!formData.aktaPendirian || !formData.skKemenkumham || !formData.npwpMasjid) {
-          setError("Semua field legalitas harus diisi")
+          toast.error("Semua field legalitas harus diisi", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (formData.npwpMasjid.length !== 15 || !/^\d+$/.test(formData.npwpMasjid)) {
-          setError("NPWP harus 15 digit angka")
+          toast.error("NPWP harus 15 digit angka", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         break
@@ -181,11 +195,17 @@ export default function DaftarMasjidPage() {
         if (!formData.namaDepan || !formData.namaBelakang || !formData.jenisKelamin || 
             !formData.pekerjaan || !formData.emailPerwakilan || !formData.tanggalLahir ||
             !formData.nomorHandphone || !formData.alamatTempat || !formData.nomorKTP || !formData.fotoKTP) {
-          setError("Semua field perwakilan resmi harus diisi")
+          toast.error("Semua field perwakilan resmi harus diisi", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (formData.nomorKTP.length !== 16 || !/^\d+$/.test(formData.nomorKTP)) {
-          setError("Nomor KTP harus 16 digit angka")
+          toast.error("Nomor KTP harus 16 digit angka", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         break
@@ -194,26 +214,41 @@ export default function DaftarMasjidPage() {
         if (!formData.skKepengurusan || !formData.suratRekomendasiRTRW || 
             !formData.fotoTampakDepan || !formData.fotoInterior || 
             !formData.dokumenStatusTanah || !formData.ktpKetua) {
-          setError("Dokumen wajib harus diupload (SK Kepengurusan, Surat Rekomendasi, Foto Masjid, Status Tanah, KTP Ketua)")
+          toast.error("Dokumen wajib harus diupload (SK Kepengurusan, Surat Rekomendasi, Foto Masjid, Status Tanah, KTP Ketua)", {
+            duration: 4000,
+            position: 'top-center',
+          })
           return false
         }
         break
         
       case 5:
         if (!formData.adminEmail || !formData.adminPassword || !formData.adminConfirmPassword) {
-          setError("Semua field akun admin harus diisi")
+          toast.error("Semua field akun admin harus diisi", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (formData.adminPassword !== formData.adminConfirmPassword) {
-          setError("Password tidak cocok")
+          toast.error("Password tidak cocok", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (formData.adminPassword.length < 6) {
-          setError("Password minimal 6 karakter")
+          toast.error("Password minimal 6 karakter", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         if (!/(?=.*[A-Z])(?=.*[0-9])/.test(formData.adminPassword)) {
-          setError("Password harus mengandung huruf kapital dan angka")
+          toast.error("Password harus mengandung huruf kapital dan angka", {
+            duration: 3000,
+            position: 'top-center',
+          })
           return false
         }
         break
@@ -230,17 +265,18 @@ export default function DaftarMasjidPage() {
     }
     
     if (currentStep < totalSteps) {
-      setSuccess("Data tersimpan! Lanjut ke tahap berikutnya")
+      toast.success("Data tersimpan! Lanjut ke tahap berikutnya", {
+        duration: 2000,
+        position: 'top-center',
+      })
       setTimeout(() => {
-        setSuccess("")
         handleNext()
-      }, 1000)
+      }, 800)
       return
     }
     
     // Final submission
     setLoading(true)
-    setError("")
     
     try {
       const formDataToSend = new FormData()
@@ -273,15 +309,24 @@ export default function DaftarMasjidPage() {
         const userId = localStorage.getItem('userId') || 'current_user'
         localStorage.setItem(`mosque_registration_${userId}`, 'completed')
         
-        setSuccess("Pendaftaran berhasil! Menunggu verifikasi admin...")
+        toast.success("Pendaftaran berhasil! Menunggu verifikasi admin...", {
+          duration: 3000,
+          position: 'top-center',
+        })
         setTimeout(() => {
           router.push("/dashboard")
         }, 2000)
       } else {
-        setError(data.message || "Gagal mendaftar")
+        toast.error(data.message || "Gagal mendaftar", {
+          duration: 4000,
+          position: 'top-center',
+        })
       }
     } catch (err) {
-      setError("Terjadi kesalahan. Silakan coba lagi.")
+      toast.error("Terjadi kesalahan. Silakan coba lagi.", {
+        duration: 4000,
+        position: 'top-center',
+      })
     } finally {
       setLoading(false)
     }
@@ -313,6 +358,9 @@ export default function DaftarMasjidPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 py-3 sm:py-4 md:py-8 px-3 sm:px-4 lg:px-8">
+      {/* Toast Container */}
+      <Toaster />
+      
       <div className="w-full mx-auto flex gap-4 sm:gap-6 lg:gap-8">
         {/* Sidebar Navigation - Desktop Only (XL and above) */}
         <div className="hidden xl:block w-72 2xl:w-80 flex-shrink-0">
@@ -720,32 +768,6 @@ export default function DaftarMasjidPage() {
             className="bg-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
             {/* Form Content */}
             <div className="p-4 sm:p-6 md:p-8 lg:p-12">
-              {/* Error/Success Messages */}
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl flex items-start gap-2 sm:gap-3"
-                  >
-                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs sm:text-sm text-red-700">{error}</p>
-                  </motion.div>
-                )}
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg sm:rounded-xl flex items-start gap-2 sm:gap-3"
-                  >
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs sm:text-sm text-green-700">{success}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               <form onSubmit={handleSubmit}>
                 <AnimatePresence mode="wait" custom={direction}>
                   <motion.div
