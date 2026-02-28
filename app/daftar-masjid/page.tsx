@@ -73,18 +73,10 @@ export default function DaftarMasjidPage() {
     mosqueName: "",
     mosqueAddress: "",
     province: "",
-    city: "",
+    regency: "",
     district: "",
-    subDistrict: "",
+    village: "",
     postalCode: "",
-    
-    // Step 2: Data Legalitas
-    aktaPendirian: null,
-    skKemenkumham: null,
-    npwpMasjid: "",
-    npwpDokumen: null,
-    suratPernyataan: null,
-    sertifikatPendaftaran: null,
     
     // Step 2: Data Legalitas
     aktaPendirian: "",
@@ -164,7 +156,7 @@ export default function DaftarMasjidPage() {
     switch (step) {
       case 1:
         if (!formData.mosqueName || !formData.mosqueAddress || !formData.province || 
-            !formData.city || !formData.district || !formData.subDistrict || !formData.postalCode) {
+            !formData.regency || !formData.district || !formData.village || !formData.postalCode) {
           setError("Semua field harus diisi")
           return false
         }
