@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set auth cookie for middleware
       document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
 
-      // Save user data to Firestore
+      // Save user data to Firestore with registration tracking
       console.log('Saving user data to Firestore...')
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
@@ -94,7 +94,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: userData.name,
         phone: userData.phone,
         createdAt: new Date().toISOString(),
-        provider: 'email'
+        provider: 'email',
+        registrationCompleted: false, // Track if mosque registration is completed
+        registrationDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), // 48 hours from now
+        accountStatus: 'pending_mosque_registration', // pending_mosque_registration, active, suspended
+        lastLoginAt: new Date().toISOString(),
+        deviceFingerprint: navigator.userAgent // Simple device tracking
       })
       console.log('User data saved to Firestore successfully')
       
@@ -123,6 +128,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithEmailAndPassword(auth, email, password)
       const user = result.user
       
+      // Get user data from Firestore
+      const userRef = doc(db, 'users', user.uid)
+      const userSnap = await getDoc(userRef)
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data()
+        const currentDevice = navigator.userAgent
+        const now = new Date()
+        
+        // Check if registration deadline has passed
+        if (userData.registrationDeadline && !userData.registrationCompleted) {
+          const deadline = new Date(userData.registrationDeadline)
+          if (now > deadline) {
+            // Account suspended - need reactivation
+            await setDoc(userRef, {
+              ...userData,
+              accountStatus: 'suspended',
+              suspendedAt: now.toISOString(),
+              suspensionReason: 'registration_incomplete'
+            }, { merge: true })
+            
+            // Sign out immediately
+            await firebaseSignOut(auth)
+            
+            throw new Error('ACCOUNT_SUSPENDED')
+          }
+        }
+        
+        // Check device fingerprint
+        if (userData.deviceFingerprint && userData.deviceFingerprint !== currentDevice) {
+          // Different device - require verification
+          throw new Error('DEVICE_NOT_RECOGNIZED')
+        }
+        
+        // Update last login
+        await setDoc(userRef, {
+          lastLoginAt: now.toISOString(),
+          deviceFingerprint: currentDevice
+        }, { merge: true })
+      }
+      
       // Save userId to localStorage
       localStorage.setItem('userId', user.uid)
       
@@ -130,8 +176,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
       
       return user
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in error:', error)
+      
+      // Handle custom errors
+      if (error.message === 'ACCOUNT_SUSPENDED') {
+        throw new Error('Akun Anda telah dinonaktifkan karena belum menyelesaikan pendaftaran masjid dalam 48 jam. Silakan verifikasi email Anda untuk mengaktifkan kembali.')
+      }
+      
+      if (error.message === 'DEVICE_NOT_RECOGNIZED') {
+        throw new Error('DEVICE_NOT_RECOGNIZED')
+      }
+      
       throw error
     }
   }
