@@ -2,6 +2,7 @@
 import { Building2, MapPin, CheckCircle, XCircle, Navigation, Map as MapIcon, Search, Crosshair } from "lucide-react"
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
+import toast from "react-hot-toast"
 import { 
   getProvinces, 
   getRegencies, 
@@ -212,21 +213,29 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
             longitude: longitude.toString() 
           })
           setLoadingLocation(false)
+          toast.success("Lokasi berhasil didapatkan!")
         },
         (error) => {
           console.error("Error getting location:", error)
-          alert("Tidak dapat mengakses lokasi. Pastikan Anda memberikan izin lokasi.")
+          toast.error("Tidak dapat mengakses lokasi. Pastikan Anda memberikan izin lokasi.")
           setLoadingLocation(false)
         }
       )
     } else {
-      alert("Browser Anda tidak mendukung geolocation")
+      toast.error("Browser Anda tidak mendukung geolocation")
       setLoadingLocation(false)
     }
   }
 
   const searchCoordinates = async () => {
     const fullAddress = `${formData.mosqueAddress}, ${formData.village}, ${formData.district}, ${formData.regency}, ${formData.province}`
+    
+    if (!formData.mosqueAddress || !formData.province) {
+      toast.error("Mohon isi alamat dan provinsi terlebih dahulu")
+      return
+    }
+
+    toast.loading("Mencari koordinat...", { id: "geocoding" })
     
     try {
       // Use Nominatim (OpenStreetMap) Geocoding API - Free and no API key needed
@@ -247,12 +256,13 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
           longitude: longitude.toString() 
         })
         setShowMap(true)
+        toast.success("Koordinat berhasil ditemukan!", { id: "geocoding" })
       } else {
-        alert("Lokasi tidak ditemukan. Coba gunakan 'Lokasi Terkini' atau masukkan koordinat manual.")
+        toast.error("Lokasi tidak ditemukan. Coba gunakan 'Lokasi Terkini' atau masukkan koordinat manual.", { id: "geocoding" })
       }
     } catch (error) {
       console.error("Error geocoding:", error)
-      alert("Gagal mencari koordinat. Silakan coba lagi.")
+      toast.error("Gagal mencari koordinat. Silakan coba lagi.", { id: "geocoding" })
     }
   }
 

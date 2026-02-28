@@ -1,6 +1,5 @@
 export { default as Step1DataMasjid } from './Step1DataMasjid'
 export { default as Step2DataLegalitas } from './Step2DataLegalitas'
 export { default as Step3PerwakilanResmi } from './Step3PerwakilanResmi'
-export { Step4Security2FA } from './Step4Security2FA'
-export { default as Step5ReviewData } from './Step4ReviewData'
-export { default as Step6AkunAdmin } from './Step5AkunAdmin'
+export { default as Step4ReviewData } from './Step4ReviewData'
+export { default as Step5AkunAdmin } from './Step5AkunAdmin'

@@ -15,9 +15,8 @@ import {
   Step1DataMasjid,
   Step2DataLegalitas,
   Step3PerwakilanResmi,
-  Step4Security2FA,
-  Step5ReviewData,
-  Step6AkunAdmin
+  Step4ReviewData,
+  Step5AkunAdmin
 } from "@/components/masjid-registration"
 import {
   sanitizeInput,
@@ -117,7 +116,7 @@ export default function DaftarMasjidPage() {
     recaptchaToken: "",
   })
 
-  const totalSteps = 6
+  const totalSteps = 5
 
   const provinces = [
     "DKI Jakarta", "Jawa Barat", "Jawa Tengah", "Jawa Timur", "Banten",
@@ -605,7 +604,7 @@ export default function DaftarMasjidPage() {
                   </AnimatePresence>
                 </div>
 
-                {/* Step 5: Akun Admin */}
+                {/* Step 5: Akun Admin & 2FA */}
                 <div className="relative">
                   <div className="flex items-center gap-3">
                     <motion.div 
@@ -627,7 +626,7 @@ export default function DaftarMasjidPage() {
                     <span className={`font-semibold text-base ${
                       currentStep >= 5 ? 'text-gray-900' : 'text-gray-400'
                     }`}>
-                      Buat Akun Admin
+                      Akun Admin & 2FA
                     </span>
                   </div>
                   
@@ -645,7 +644,7 @@ export default function DaftarMasjidPage() {
                         </div>
                         <div className="flex items-center gap-2 text-gray-400">
                           <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                          <span>Keamanan Akun</span>
+                          <span>Keamanan 2FA</span>
                         </div>
                       </motion.div>
                     )}
@@ -793,26 +792,18 @@ export default function DaftarMasjidPage() {
                       />
                     )}
 
-                    {/* STEP 4: Security 2FA */}
+                    {/* STEP 4: Review Data */}
                     {currentStep === 4 && (
-                      <Step4Security2FA 
-                        onNext={() => setCurrentStep(5)}
-                        onBack={() => setCurrentStep(3)}
-                      />
-                    )}
-
-                    {/* STEP 5: Review Data */}
-                    {currentStep === 5 && (
-                      <Step5ReviewData 
+                      <Step4ReviewData 
                         formData={formData}
                         setFormData={setFormData}
                         setCurrentStep={setCurrentStep}
                       />
                     )}
 
-                    {/* STEP 6: Akun Admin */}
-                    {currentStep === 6 && (
-                      <Step6AkunAdmin 
+                    {/* STEP 5: Akun Admin & 2FA */}
+                    {currentStep === 5 && (
+                      <Step5AkunAdmin 
                         formData={formData}
                         setFormData={setFormData}
                         showPassword={showPassword}
