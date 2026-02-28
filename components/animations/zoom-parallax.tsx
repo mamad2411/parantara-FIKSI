@@ -64,13 +64,13 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 	const mockupScale = useTransform(mockupProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
 
 	// Combined scales (initial * zoom)
-	const combinedScale1 = useTransform([initialScale1, scale4], ([init, zoom]) => init * zoom);
-	const combinedScale2 = useTransform([initialScale2, scale5], ([init, zoom]) => init * zoom);
-	const combinedScale3 = useTransform([initialScale3, scale6], ([init, zoom]) => init * zoom);
-	const combinedScale4 = useTransform([initialScale4, scale5], ([init, zoom]) => init * zoom);
-	const combinedScale5 = useTransform([initialScale5, scale6], ([init, zoom]) => init * zoom);
-	const combinedScale6 = useTransform([initialScale6, scale8], ([init, zoom]) => init * zoom);
-	const combinedScale7 = useTransform([initialScale7, scale9], ([init, zoom]) => init * zoom);
+	const combinedScale1 = useTransform([initialScale1, scale4], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale2 = useTransform([initialScale2, scale5], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale3 = useTransform([initialScale3, scale6], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale4 = useTransform([initialScale4, scale5], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale5 = useTransform([initialScale5, scale6], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale6 = useTransform([initialScale6, scale8], ([init, zoom]: [number, number]) => init * zoom);
+	const combinedScale7 = useTransform([initialScale7, scale9], ([init, zoom]: [number, number]) => init * zoom);
 
 	const combinedScales = [combinedScale1, combinedScale2, combinedScale3, combinedScale4, combinedScale5, combinedScale6, combinedScale7];
 	const opacities = [opacity1, opacity2, opacity3, opacity4, opacity5, opacity6, opacity7];
