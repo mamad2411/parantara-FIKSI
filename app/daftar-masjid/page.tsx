@@ -215,34 +215,8 @@ export default function DaftarMasjidPage() {
         break
         
       case 5:
-        if (!formData.adminEmail || !formData.adminPassword || !formData.adminConfirmPassword) {
-          toast.error("Semua field akun admin harus diisi", {
-            duration: 3000,
-            position: 'top-center',
-          })
-          return false
-        }
-        if (formData.adminPassword !== formData.adminConfirmPassword) {
-          toast.error("Password tidak cocok", {
-            duration: 3000,
-            position: 'top-center',
-          })
-          return false
-        }
-        if (formData.adminPassword.length < 6) {
-          toast.error("Password minimal 6 karakter", {
-            duration: 3000,
-            position: 'top-center',
-          })
-          return false
-        }
-        if (!/(?=.*[A-Z])(?=.*[0-9])/.test(formData.adminPassword)) {
-          toast.error("Password harus mengandung huruf kapital dan angka", {
-            duration: 3000,
-            position: 'top-center',
-          })
-          return false
-        }
+        // Step 5 is now just 2FA setup (optional), no validation needed
+        // Email is already set from logged in user
         break
     }
     
