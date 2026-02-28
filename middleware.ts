@@ -117,12 +117,13 @@ export function middleware(request: NextRequest) {
   }
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/daftar-masjid', '/dashboard']
+  const protectedRoutes = ['/dashboard']
   const authRoutes = ['/login', '/register']
   
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  const isDaftarMasjid = pathname.startsWith('/daftar-masjid')
   
   // Get auth token from cookies
   const authToken = request.cookies.get('auth_token')?.value
@@ -136,9 +137,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
   
-  // Redirect to dashboard if accessing auth routes while authenticated
+  // Redirect to daftar-masjid if accessing auth routes while authenticated
+  // (User needs to complete mosque registration first)
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/daftar-masjid', request.url))
+  }
+  
+  // Allow access to daftar-masjid if authenticated
+  if (isDaftarMasjid && !isAuthenticated) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   // Check for suspicious requests
