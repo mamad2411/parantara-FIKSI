@@ -1,7 +1,8 @@
 // @ts-nocheck
-import { FileText, Shield, Upload, CheckCircle2, X, Eye } from "lucide-react"
+import { FileText, Shield, Upload, CheckCircle2, X, Eye, Image as ImageIcon } from "lucide-react"
 import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
+import toast, { Toaster } from 'react-hot-toast'
 
 interface Step2Props {
   formData: any
@@ -11,6 +12,8 @@ interface Step2Props {
 export default function Step2DataLegalitas({ formData, setFormData }: Step2Props) {
   const [dragActive, setDragActive] = useState<string | null>(null)
   const [activeGuideline, setActiveGuideline] = useState<any>(null)
+  const [previewImage, setPreviewImage] = useState<{ [key: string]: string }>({})
+  const [showPreview, setShowPreview] = useState<string | null>(null)
 
   const handleDrag = (e: React.DragEvent, fieldName: string) => {
     e.preventDefault()
@@ -34,16 +37,23 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
 
   const handleFileChange = (fieldName: string, file: File | null) => {
     if (file) {
-      // Validate file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Ukuran file maksimal 2MB")
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024 // 5MB
+      if (file.size > maxSize) {
+        toast.error(`Ukuran file maksimal 5MB. File Anda: ${(file.size / 1024 / 1024).toFixed(2)}MB`, {
+          duration: 4000,
+          position: 'top-center',
+        })
         return
       }
       
       // Validate file type
       const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"]
       if (!allowedTypes.includes(file.type)) {
-        alert("Format file harus PDF atau JPG/PNG")
+        toast.error("Format file harus PDF atau JPG/PNG", {
+          duration: 4000,
+          position: 'top-center',
+        })
         return
       }
       
@@ -55,29 +65,54 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           img.onload = () => {
             // Check minimum dimensions (at least 800x600)
             if (img.width < 800 || img.height < 600) {
-              alert("Resolusi gambar minimal 800x600 pixels untuk kualitas yang baik")
+              toast.error(`Resolusi gambar minimal 800x600 pixels. Resolusi Anda: ${img.width}x${img.height}`, {
+                duration: 5000,
+                position: 'top-center',
+              })
               return
             }
             
-            // Check maximum dimensions (max 4000x4000)
-            if (img.width > 4000 || img.height > 4000) {
-              alert("Resolusi gambar maksimal 4000x4000 pixels")
+            // Check maximum dimensions (max 5000x5000)
+            if (img.width > 5000 || img.height > 5000) {
+              toast.error(`Resolusi gambar maksimal 5000x5000 pixels. Resolusi Anda: ${img.width}x${img.height}`, {
+                duration: 5000,
+                position: 'top-center',
+              })
               return
             }
             
             // Check aspect ratio (should be reasonable)
             const aspectRatio = img.width / img.height
-            if (aspectRatio < 0.5 || aspectRatio > 2) {
-              alert("Rasio aspek gambar tidak wajar. Pastikan gambar tidak terlalu panjang atau lebar")
+            if (aspectRatio < 0.4 || aspectRatio > 2.5) {
+              toast.error("Rasio aspek gambar tidak wajar. Pastikan gambar tidak terlalu panjang atau lebar", {
+                duration: 5000,
+                position: 'top-center',
+              })
               return
             }
             
             // All validations passed
-            console.log(`Image validated: ${img.width}x${img.height}, ${(file.size / 1024).toFixed(0)}KB`)
+            console.log(`✅ Image validated: ${img.width}x${img.height}, ${(file.size / 1024).toFixed(0)}KB`)
+            
+            // Store preview
+            setPreviewImage(prev => ({
+              ...prev,
+              [fieldName]: e.target?.result as string
+            }))
+            
             setFormData({ ...formData, [fieldName]: file })
+            
+            toast.success(`File berhasil diupload! ${img.width}x${img.height} (${(file.size / 1024).toFixed(0)}KB)`, {
+              duration: 3000,
+              position: 'top-center',
+              icon: '✅',
+            })
           }
           img.onerror = () => {
-            alert("File gambar rusak atau tidak valid")
+            toast.error("File gambar rusak atau tidak valid", {
+              duration: 4000,
+              position: 'top-center',
+            })
           }
           img.src = e.target?.result as string
         }
@@ -85,12 +120,26 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
       } else {
         // For PDF, just set it
         setFormData({ ...formData, [fieldName]: file })
+        toast.success(`File PDF berhasil diupload! (${(file.size / 1024).toFixed(0)}KB)`, {
+          duration: 3000,
+          position: 'top-center',
+          icon: '📄',
+        })
       }
     }
   }
 
   const removeFile = (fieldName: string) => {
     setFormData({ ...formData, [fieldName]: null })
+    setPreviewImage(prev => {
+      const newPrev = { ...prev }
+      delete newPrev[fieldName]
+      return newPrev
+    })
+    toast.success("File berhasil dihapus", {
+      duration: 2000,
+      position: 'top-center',
+    })
   }
 
   const openGuideline = (guideline: any) => {
@@ -152,24 +201,56 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           <label htmlFor={id} className="cursor-pointer block">
             <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-sm font-medium text-gray-700 mb-1">{placeholder}</p>
-            <p className="text-xs text-gray-500">Accepted Format: .jpeg, .jpg, .png, .pdf</p>
+            <p className="text-xs text-gray-500">Format: .jpeg, .jpg, .png, .pdf (Max 5MB)</p>
+            <p className="text-xs text-blue-600 mt-1">Resolusi: 800x600 - 5000x5000 pixels</p>
           </label>
         ) : (
-          <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-200">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(0)} KB</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-200">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(0)} KB</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {previewImage[id] && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(id)}
+                    className="p-1.5 hover:bg-blue-50 rounded-full transition-colors"
+                    title="Preview gambar"
+                  >
+                    <Eye className="w-4 h-4 text-blue-600" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeFile(id)}
+                  className="p-1.5 hover:bg-red-50 rounded-full transition-colors"
+                  title="Hapus file"
+                >
+                  <X className="w-4 h-4 text-red-600" />
+                </button>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => removeFile(id)}
-              className="p-1 hover:bg-red-50 rounded-full transition-colors"
-            >
-              <X className="w-4 h-4 text-red-600" />
-            </button>
+            
+            {/* Thumbnail Preview */}
+            {previewImage[id] && (
+              <div className="relative rounded-lg overflow-hidden border-2 border-green-200 bg-gray-50">
+                <img 
+                  src={previewImage[id]} 
+                  alt="Preview" 
+                  className="w-full h-32 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setShowPreview(id)}
+                />
+                <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3" />
+                  Preview
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -178,6 +259,9 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
 
   return (
     <>
+      {/* Toast Container */}
+      <Toaster />
+      
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -387,6 +471,51 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
                   ))}
                 </ol>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Image Preview Modal */}
+      <AnimatePresence>
+        {showPreview && previewImage[showPreview] && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPreview(null)}
+              className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowPreview(null)}
+                className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+
+              {/* Image */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="max-w-5xl max-h-[90vh] w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img 
+                  src={previewImage[showPreview]} 
+                  alt="Preview" 
+                  className="w-full h-full object-contain rounded-lg"
+                />
+                <div className="mt-4 text-center">
+                  <p className="text-white text-sm">
+                    {formData[showPreview]?.name} - {(formData[showPreview]?.size / 1024).toFixed(0)} KB
+                  </p>
+                </div>
+              </motion.div>
             </motion.div>
           </>
         )}
