@@ -2,8 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { CookieConsentBanner } from "@/components/cookie-consent"
-import { QueryProvider } from "@/components/providers"
-import { RecaptchaProvider } from "@/components/providers"
+import { QueryProvider, RecaptchaProvider, SecurityProvider } from "@/components/providers"
 import { AuthProvider } from "@/lib/auth-context"
 import { ScrollProgress } from "@/components/ui/scroll-progress"
 import { BackToTop } from "@/components/ui/back-to-top"
@@ -79,16 +78,18 @@ export default function RootLayout({
       </head>
       <body className={`font-sans antialiased`}>
         <ScrollProgress />
-        <AuthProvider>
-          <QueryProvider>
-            <RecaptchaProvider>
-              {children}
-              <CookieConsentBanner />
-              <BackToTop />
-              <Analytics />
-            </RecaptchaProvider>
-          </QueryProvider>
-        </AuthProvider>
+        <SecurityProvider>
+          <AuthProvider>
+            <QueryProvider>
+              <RecaptchaProvider>
+                {children}
+                <CookieConsentBanner />
+                <BackToTop />
+                <Analytics />
+              </RecaptchaProvider>
+            </QueryProvider>
+          </AuthProvider>
+        </SecurityProvider>
       </body>
     </html>
   )
