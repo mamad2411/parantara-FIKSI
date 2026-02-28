@@ -33,20 +33,48 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 	const scale8 = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 8]);
 	const scale9 = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 9]);
 
-	// All images appear together at the start
-	const opacity1 = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
-	const opacity2 = useTransform(scrollYProgress, [0, 0.15], [0, 1]);
-	const opacity3 = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
-	const opacity4 = useTransform(scrollYProgress, [0, 0.25], [0, 1]);
-	const opacity5 = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
-	const opacity6 = useTransform(scrollYProgress, [0, 0.35], [0, 1]);
-	const opacity7 = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
+	// Staggered entrance animations for each image
+	const opacity1 = useTransform(scrollYProgress, [0, 0.08], [0, 1]);
+	const opacity2 = useTransform(scrollYProgress, [0.02, 0.12], [0, 1]);
+	const opacity3 = useTransform(scrollYProgress, [0.04, 0.16], [0, 1]);
+	const opacity4 = useTransform(scrollYProgress, [0.06, 0.20], [0, 1]);
+	const opacity5 = useTransform(scrollYProgress, [0.08, 0.24], [0, 1]);
+	const opacity6 = useTransform(scrollYProgress, [0.10, 0.28], [0, 1]);
+	const opacity7 = useTransform(scrollYProgress, [0.12, 0.32], [0, 1]);
+
+	// Initial scale animations (start smaller, grow to normal)
+	const initialScale1 = useTransform(scrollYProgress, [0, 0.08], [0.5, 1]);
+	const initialScale2 = useTransform(scrollYProgress, [0.02, 0.12], [0.5, 1]);
+	const initialScale3 = useTransform(scrollYProgress, [0.04, 0.16], [0.5, 1]);
+	const initialScale4 = useTransform(scrollYProgress, [0.06, 0.20], [0.5, 1]);
+	const initialScale5 = useTransform(scrollYProgress, [0.08, 0.24], [0.5, 1]);
+	const initialScale6 = useTransform(scrollYProgress, [0.10, 0.28], [0.5, 1]);
+	const initialScale7 = useTransform(scrollYProgress, [0.12, 0.32], [0.5, 1]);
+
+	// Y position animations (slide up from below)
+	const initialY1 = useTransform(scrollYProgress, [0, 0.08], [50, 0]);
+	const initialY2 = useTransform(scrollYProgress, [0.02, 0.12], [50, 0]);
+	const initialY3 = useTransform(scrollYProgress, [0.04, 0.16], [50, 0]);
+	const initialY4 = useTransform(scrollYProgress, [0.06, 0.20], [50, 0]);
+	const initialY5 = useTransform(scrollYProgress, [0.08, 0.24], [50, 0]);
+	const initialY6 = useTransform(scrollYProgress, [0.10, 0.28], [50, 0]);
+	const initialY7 = useTransform(scrollYProgress, [0.12, 0.32], [50, 0]);
 
 	const mockupY = useTransform(mockupProgress, [0, 1], [100, -100]);
 	const mockupScale = useTransform(mockupProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
 
-	const scales = [scale4, scale5, scale6, scale5, scale6, scale8, scale9];
+	// Combined scales (initial * zoom)
+	const combinedScale1 = useTransform([initialScale1, scale4], ([init, zoom]) => init * zoom);
+	const combinedScale2 = useTransform([initialScale2, scale5], ([init, zoom]) => init * zoom);
+	const combinedScale3 = useTransform([initialScale3, scale6], ([init, zoom]) => init * zoom);
+	const combinedScale4 = useTransform([initialScale4, scale5], ([init, zoom]) => init * zoom);
+	const combinedScale5 = useTransform([initialScale5, scale6], ([init, zoom]) => init * zoom);
+	const combinedScale6 = useTransform([initialScale6, scale8], ([init, zoom]) => init * zoom);
+	const combinedScale7 = useTransform([initialScale7, scale9], ([init, zoom]) => init * zoom);
+
+	const combinedScales = [combinedScale1, combinedScale2, combinedScale3, combinedScale4, combinedScale5, combinedScale6, combinedScale7];
 	const opacities = [opacity1, opacity2, opacity3, opacity4, opacity5, opacity6, opacity7];
+	const initialYs = [initialY1, initialY2, initialY3, initialY4, initialY5, initialY6, initialY7];
 
 	return (
 		<>
@@ -54,15 +82,20 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 				<div className="sticky top-0 h-screen overflow-hidden">
 					<div className="absolute inset-0 flex items-center justify-center translate-y-[10vh]">
 						{images.map(({ src, alt }, index) => {
-							const scale = scales[index % scales.length];
+							const combinedScale = combinedScales[index % combinedScales.length];
 							const opacity = opacities[index % opacities.length];
+							const initialY = initialYs[index % initialYs.length];
 
 						// Text cards for index 2, 3, and 6
 						if (index === 2) {
 							return (
 								<motion.div
 									key={index}
-									style={{ scale, opacity }}
+									style={{ 
+										scale: combinedScale,
+										opacity,
+										y: initialY
+									}}
 									className="absolute inset-0 flex items-center justify-center [&>div]:!-top-[10vh] [&>div]:!-left-[25vw] [&>div]:!h-[45vh] [&>div]:!w-[20vw]"
 								>
 									<div className="relative h-[45vh] w-[20vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20">
@@ -82,7 +115,11 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 							return (
 								<motion.div
 									key={index}
-									style={{ scale, opacity }}
+									style={{ 
+										scale: combinedScale,
+										opacity,
+										y: initialY
+									}}
 									className="absolute inset-0 flex items-center justify-center [&>div]:!left-[27.5vw] [&>div]:!h-[25vh] [&>div]:!w-[25vw]"
 								>
 									<div className="relative h-[25vh] w-[25vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20">
@@ -103,7 +140,11 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 							return (
 								<motion.div
 									key={index}
-									style={{ scale, opacity }}
+									style={{ 
+										scale: combinedScale,
+										opacity,
+										y: initialY
+									}}
 									className="absolute inset-0 flex items-center justify-center [&>div]:!top-[22.5vh] [&>div]:!left-[25vw] [&>div]:!h-[15vh] [&>div]:!w-[15vw]"
 								>
 									<div className="relative h-[15vh] w-[15vw] bg-white rounded-3xl p-2 md:p-3 flex items-center justify-center shadow-xl overflow-hidden border border-slate-100">
@@ -128,7 +169,11 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 						return (
 							<motion.div
 								key={index}
-								style={{ scale, opacity }}
+								style={{ 
+									scale: combinedScale,
+									opacity,
+									y: initialY
+								}}
 								className={`absolute inset-0 flex items-center justify-center ${
 									index === 0 ? '' :
 									index === 1 ? '[&>div]:!-top-[30vh] [&>div]:!left-[5vw] [&>div]:!h-[30vh] [&>div]:!w-[35vw]' : 
