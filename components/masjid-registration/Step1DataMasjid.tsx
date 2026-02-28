@@ -63,9 +63,22 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
   // Validate regency input
   useEffect(() => {
     if (formData.regency && regencies.length > 0) {
-      const found = regencies.find(r => 
-        r.name.toLowerCase() === formData.regency.toLowerCase()
+      const input = formData.regency.toLowerCase().trim()
+      
+      // Try exact match first
+      let found = regencies.find(r => 
+        r.name.toLowerCase() === input
       )
+      
+      // If not found, try fuzzy match (contains)
+      if (!found) {
+        found = regencies.find(r => {
+          const name = r.name.toLowerCase()
+          // Check if input is contained in name or vice versa
+          return name.includes(input) || input.includes(name.replace(/^(kota|kabupaten)\s+/i, ''))
+        })
+      }
+      
       if (found) {
         setValidation(prev => ({ ...prev, regency: { valid: true, message: '✓ Kota/Kabupaten valid' }}))
         loadDistricts(found.id)
@@ -81,9 +94,21 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
   // Validate district input
   useEffect(() => {
     if (formData.district && districts.length > 0) {
-      const found = districts.find(d => 
-        d.name.toLowerCase() === formData.district.toLowerCase()
+      const input = formData.district.toLowerCase().trim()
+      
+      // Try exact match first
+      let found = districts.find(d => 
+        d.name.toLowerCase() === input
       )
+      
+      // If not found, try fuzzy match (contains)
+      if (!found) {
+        found = districts.find(d => {
+          const name = d.name.toLowerCase()
+          return name.includes(input) || input.includes(name)
+        })
+      }
+      
       if (found) {
         setValidation(prev => ({ ...prev, district: { valid: true, message: '✓ Kecamatan valid' }}))
         loadVillages(found.id)
@@ -99,9 +124,21 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
   // Validate village input
   useEffect(() => {
     if (formData.village && villages.length > 0) {
-      const found = villages.find(v => 
-        v.name.toLowerCase() === formData.village.toLowerCase()
+      const input = formData.village.toLowerCase().trim()
+      
+      // Try exact match first
+      let found = villages.find(v => 
+        v.name.toLowerCase() === input
       )
+      
+      // If not found, try fuzzy match (contains)
+      if (!found) {
+        found = villages.find(v => {
+          const name = v.name.toLowerCase()
+          return name.includes(input) || input.includes(name)
+        })
+      }
+      
       if (found) {
         setValidation(prev => ({ ...prev, village: { valid: true, message: '✓ Kelurahan/Desa valid' }}))
       } else {
