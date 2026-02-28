@@ -35,6 +35,113 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
     }
   }
 
+  // Validate if image is a document (not just a random photo)
+  const validateDocumentContent = async (imageDataUrl: string, fieldName: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        
+        if (!ctx) {
+          resolve(true) // Skip validation if canvas not supported
+          return
+        }
+        
+        ctx.drawImage(img, 0, 0)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const data = imageData.data
+        
+        // 1. Check if image is mostly white/light (documents are usually on white paper)
+        let whitePixels = 0
+        let totalPixels = data.length / 4
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i]
+          const g = data[i + 1]
+          const b = data[i + 2]
+          const brightness = (r + g + b) / 3
+          
+          if (brightness > 200) {
+            whitePixels++
+          }
+        }
+        
+        const whitePercentage = (whitePixels / totalPixels) * 100
+        
+        // 2. Check for text-like patterns (high contrast edges)
+        let edgePixels = 0
+        const edgeThreshold = 50
+        
+        for (let y = 1; y < canvas.height - 1; y++) {
+          for (let x = 1; x < canvas.width - 1; x++) {
+            const idx = (y * canvas.width + x) * 4
+            const brightness = (data[idx] + data[idx + 1] + data[idx + 2]) / 3
+            
+            const rightIdx = (y * canvas.width + (x + 1)) * 4
+            const rightBrightness = (data[rightIdx] + data[rightIdx + 1] + data[rightIdx + 2]) / 3
+            
+            const bottomIdx = ((y + 1) * canvas.width + x) * 4
+            const bottomBrightness = (data[bottomIdx] + data[bottomIdx + 1] + data[bottomIdx + 2]) / 3
+            
+            if (Math.abs(brightness - rightBrightness) > edgeThreshold || 
+                Math.abs(brightness - bottomBrightness) > edgeThreshold) {
+              edgePixels++
+            }
+          }
+        }
+        
+        const edgePercentage = (edgePixels / totalPixels) * 100
+        
+        // 3. Check color variance (documents have low color variance)
+        let colorVariance = 0
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i]
+          const g = data[i + 1]
+          const b = data[i + 2]
+          const variance = Math.abs(r - g) + Math.abs(g - b) + Math.abs(b - r)
+          colorVariance += variance
+        }
+        const avgColorVariance = colorVariance / totalPixels
+        
+        console.log(`Document Analysis for ${fieldName}:`, {
+          whitePercentage: whitePercentage.toFixed(2) + '%',
+          edgePercentage: edgePercentage.toFixed(2) + '%',
+          avgColorVariance: avgColorVariance.toFixed(2)
+        })
+        
+        // Document validation criteria:
+        // - At least 40% white/light background (documents are on paper)
+        // - At least 5% edges (text creates edges)
+        // - Low color variance (documents are not colorful photos)
+        
+        const isDocument = whitePercentage >= 40 && edgePercentage >= 5 && avgColorVariance < 80
+        
+        if (!isDocument) {
+          const reasons = []
+          if (whitePercentage < 40) reasons.push('latar belakang tidak seperti dokumen')
+          if (edgePercentage < 5) reasons.push('tidak terdeteksi teks atau konten dokumen')
+          if (avgColorVariance >= 80) reasons.push('terlalu banyak warna seperti foto biasa')
+          
+          toast.error(
+            `Gambar tidak terdeteksi sebagai dokumen resmi. Kemungkinan: ${reasons.join(', ')}. Pastikan upload scan/foto dokumen yang jelas.`,
+            {
+              duration: 6000,
+              position: 'top-center',
+            }
+          )
+        }
+        
+        resolve(isDocument)
+      }
+      
+      img.onerror = () => resolve(true) // Skip validation on error
+      img.src = imageDataUrl
+    })
+  }
+
   const handleFileChange = (fieldName: string, file: File | null) => {
     if (file) {
       // Validate file size (max 5MB)
@@ -60,9 +167,9 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
       // For images, validate dimensions and quality
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           const img = new Image()
-          img.onload = () => {
+          img.onload = async () => {
             // Check minimum dimensions (at least 800x600)
             if (img.width < 800 || img.height < 600) {
               toast.error(`Resolusi gambar minimal 800x600 pixels. Resolusi Anda: ${img.width}x${img.height}`, {
@@ -91,8 +198,14 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               return
             }
             
+            // Validate document content
+            const isValidDocument = await validateDocumentContent(e.target?.result as string, fieldName)
+            if (!isValidDocument) {
+              return
+            }
+            
             // All validations passed
-            console.log(`✅ Image validated: ${img.width}x${img.height}, ${(file.size / 1024).toFixed(0)}KB`)
+            console.log(`Image validated: ${img.width}x${img.height}, ${(file.size / 1024).toFixed(0)}KB`)
             
             // Store preview
             setPreviewImage(prev => ({
@@ -102,10 +215,9 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
             
             setFormData({ ...formData, [fieldName]: file })
             
-            toast.success(`File berhasil diupload! ${img.width}x${img.height} (${(file.size / 1024).toFixed(0)}KB)`, {
+            toast.success(`File berhasil diupload dan tervalidasi sebagai dokumen resmi. ${img.width}x${img.height} (${(file.size / 1024).toFixed(0)}KB)`, {
               duration: 3000,
               position: 'top-center',
-              icon: '✅',
             })
           }
           img.onerror = () => {
@@ -120,10 +232,9 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
       } else {
         // For PDF, just set it
         setFormData({ ...formData, [fieldName]: file })
-        toast.success(`File PDF berhasil diupload! (${(file.size / 1024).toFixed(0)}KB)`, {
+        toast.success(`File PDF berhasil diupload. (${(file.size / 1024).toFixed(0)}KB)`, {
           duration: 3000,
           position: 'top-center',
-          icon: '📄',
         })
       }
     }
