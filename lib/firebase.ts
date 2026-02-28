@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore'
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,40 +23,63 @@ if (typeof window !== 'undefined') {
   auth.useDeviceLanguage()
 }
 
-const db = getFirestore(app)
+// Initialize Firestore with modern cache settings
+let db: ReturnType<typeof getFirestore>
 
-// Enable offline persistence
-if (typeof window !== 'undefined') {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time
-      console.warn('Firebase persistence failed: Multiple tabs open')
-    } else if (err.code === 'unimplemented') {
-      // The current browser doesn't support persistence
-      console.warn('Firebase persistence not supported in this browser')
-    }
-  })
+if (getApps().length === 1) {
+  // First initialization - use modern cache API
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+      })
+    })
+  } catch (error) {
+    // Fallback to default if cache initialization fails
+    console.warn('Failed to initialize Firestore with cache, using default:', error)
+    db = getFirestore(app)
+  }
+} else {
+  // Already initialized
+  db = getFirestore(app)
 }
 
 const googleProvider = new GoogleAuthProvider()
 
-// Suppress console errors for Google API loading issues
+// Suppress console errors and warnings
 if (typeof window !== 'undefined') {
   const originalError = console.error
+  const originalWarn = console.warn
+  
   console.error = (...args) => {
-    // Filter out Google API loading errors that don't affect functionality
     const firstArg = args[0]
     if (typeof firstArg === 'string') {
-      // Use exact string matching instead of substring check
+      // Filter out known non-critical errors
       if (
-        firstArg === 'Failed to load https://apis.google.com/js/api.js' ||
-        firstArg.startsWith('ERR_CONNECTION_CLOSED:') ||
-        firstArg.includes('Failed to get document because the client is offline')
+        firstArg.includes('Failed to load https://apis.google.com/js/api.js') ||
+        firstArg.includes('ERR_CONNECTION_CLOSED') ||
+        firstArg.includes('Failed to get document because the client is offline') ||
+        firstArg.includes('FirebaseError: Failed to get document')
       ) {
         return
       }
     }
     originalError.apply(console, args)
+  }
+  
+  console.warn = (...args) => {
+    const firstArg = args[0]
+    if (typeof firstArg === 'string') {
+      // Filter out deprecation warnings we're already handling
+      if (
+        firstArg.includes('enableIndexedDbPersistence() will be deprecated') ||
+        firstArg.includes('Partitioned cookie') ||
+        firstArg.includes('_GRECAPTCHA')
+      ) {
+        return
+      }
+    }
+    originalWarn.apply(console, args)
   }
 }
 

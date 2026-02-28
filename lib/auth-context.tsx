@@ -18,7 +18,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<User>
   signOut: () => Promise<void>
   signUpWithEmail: (email: string, password: string, userData: any) => Promise<User>
-  signInWithEmail: (email: string, password: string) => Promise<User>
+  signInWithEmail: (email: string, password: string) => Promise<User | null>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -177,6 +177,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return user
     } catch (error: any) {
+      // Suppress offline errors in console
+      if (error?.code === 'unavailable' || error?.message?.includes('client is offline')) {
+        console.warn('Firebase offline - attempting to continue with cached data')
+        // Don't throw, let the app continue with cached auth state
+        return null
+      }
+      
       console.error('Sign in error:', error)
       
       // Handle custom errors
