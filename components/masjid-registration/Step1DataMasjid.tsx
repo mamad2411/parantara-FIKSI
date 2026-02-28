@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Building2, MapPin } from "lucide-react"
+import { Building2, MapPin, CheckCircle, XCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { 
   getProvinces, 
@@ -23,124 +23,126 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
   const [regencies, setRegencies] = useState<Regency[]>([])
   const [districts, setDistricts] = useState<District[]>([])
   const [villages, setVillages] = useState<Village[]>([])
-  const [loading, setLoading] = useState({
-    provinces: false,
-    regencies: false,
-    districts: false,
-    villages: false
+  
+  const [validation, setValidation] = useState({
+    province: { valid: false, message: '' },
+    regency: { valid: false, message: '' },
+    district: { valid: false, message: '' },
+    village: { valid: false, message: '' },
+    postalCode: { valid: false, message: '' }
   })
-  const [postalCodeError, setPostalCodeError] = useState("")
 
-  // Load provinces on mount
+  // Load all data on mount
   useEffect(() => {
-    loadProvinces()
+    loadAllData()
   }, [])
 
-  const loadProvinces = async () => {
-    setLoading(prev => ({ ...prev, provinces: true }))
-    const data = await getProvinces()
-    setProvinces(data)
-    setLoading(prev => ({ ...prev, provinces: false }))
+  const loadAllData = async () => {
+    const provincesData = await getProvinces()
+    setProvinces(provincesData)
   }
 
-  const handleProvinceChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value
-    const selectedProvince = provinces.find(p => p.id === selectedId)
-    
-    setFormData({ 
-      ...formData, 
-      provinceId: selectedId,
-      province: selectedProvince?.name || '',
-      regencyId: '',
-      regency: '',
-      districtId: '',
-      district: '',
-      villageId: '',
-      village: ''
-    })
-    
-    // Reset dependent dropdowns
-    setRegencies([])
-    setDistricts([])
-    setVillages([])
-    
-    if (selectedId) {
-      setLoading(prev => ({ ...prev, regencies: true }))
-      const data = await getRegencies(selectedId)
-      setRegencies(data)
-      setLoading(prev => ({ ...prev, regencies: false }))
+  // Validate province input
+  useEffect(() => {
+    if (formData.province) {
+      const found = provinces.find(p => 
+        p.name.toLowerCase() === formData.province.toLowerCase()
+      )
+      if (found) {
+        setValidation(prev => ({ ...prev, province: { valid: true, message: '✓ Provinsi valid' }}))
+        loadRegencies(found.id)
+      } else {
+        setValidation(prev => ({ ...prev, province: { valid: false, message: '✗ Provinsi tidak ditemukan' }}))
+        setRegencies([])
+      }
+    } else {
+      setValidation(prev => ({ ...prev, province: { valid: false, message: '' }}))
     }
-  }
+  }, [formData.province, provinces])
 
-  const handleRegencyChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value
-    const selectedRegency = regencies.find(r => r.id === selectedId)
-    
-    setFormData({ 
-      ...formData, 
-      regencyId: selectedId,
-      regency: selectedRegency?.name || '',
-      districtId: '',
-      district: '',
-      villageId: '',
-      village: ''
-    })
-    
-    // Reset dependent dropdowns
-    setDistricts([])
-    setVillages([])
-    
-    if (selectedId) {
-      setLoading(prev => ({ ...prev, districts: true }))
-      const data = await getDistricts(selectedId)
-      setDistricts(data)
-      setLoading(prev => ({ ...prev, districts: false }))
+  // Validate regency input
+  useEffect(() => {
+    if (formData.regency && regencies.length > 0) {
+      const found = regencies.find(r => 
+        r.name.toLowerCase() === formData.regency.toLowerCase()
+      )
+      if (found) {
+        setValidation(prev => ({ ...prev, regency: { valid: true, message: '✓ Kota/Kabupaten valid' }}))
+        loadDistricts(found.id)
+      } else {
+        setValidation(prev => ({ ...prev, regency: { valid: false, message: '✗ Kota/Kabupaten tidak ditemukan' }}))
+        setDistricts([])
+      }
+    } else {
+      setValidation(prev => ({ ...prev, regency: { valid: false, message: '' }}))
     }
-  }
+  }, [formData.regency, regencies])
 
-  const handleDistrictChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value
-    const selectedDistrict = districts.find(d => d.id === selectedId)
-    
-    setFormData({ 
-      ...formData, 
-      districtId: selectedId,
-      district: selectedDistrict?.name || '',
-      villageId: '',
-      village: ''
-    })
-    
-    // Reset dependent dropdown
-    setVillages([])
-    
-    if (selectedId) {
-      setLoading(prev => ({ ...prev, villages: true }))
-      const data = await getVillages(selectedId)
-      setVillages(data)
-      setLoading(prev => ({ ...prev, villages: false }))
+  // Validate district input
+  useEffect(() => {
+    if (formData.district && districts.length > 0) {
+      const found = districts.find(d => 
+        d.name.toLowerCase() === formData.district.toLowerCase()
+      )
+      if (found) {
+        setValidation(prev => ({ ...prev, district: { valid: true, message: '✓ Kecamatan valid' }}))
+        loadVillages(found.id)
+      } else {
+        setValidation(prev => ({ ...prev, district: { valid: false, message: '✗ Kecamatan tidak ditemukan' }}))
+        setVillages([])
+      }
+    } else {
+      setValidation(prev => ({ ...prev, district: { valid: false, message: '' }}))
     }
+  }, [formData.district, districts])
+
+  // Validate village input
+  useEffect(() => {
+    if (formData.village && villages.length > 0) {
+      const found = villages.find(v => 
+        v.name.toLowerCase() === formData.village.toLowerCase()
+      )
+      if (found) {
+        setValidation(prev => ({ ...prev, village: { valid: true, message: '✓ Kelurahan/Desa valid' }}))
+      } else {
+        setValidation(prev => ({ ...prev, village: { valid: false, message: '✗ Kelurahan/Desa tidak ditemukan' }}))
+      }
+    } else {
+      setValidation(prev => ({ ...prev, village: { valid: false, message: '' }}))
+    }
+  }, [formData.village, villages])
+
+  // Validate postal code
+  useEffect(() => {
+    if (formData.postalCode) {
+      if (validatePostalCode(formData.postalCode)) {
+        setValidation(prev => ({ ...prev, postalCode: { valid: true, message: '✓ Kode pos valid' }}))
+      } else {
+        setValidation(prev => ({ ...prev, postalCode: { valid: false, message: '✗ Kode pos harus 5 digit' }}))
+      }
+    } else {
+      setValidation(prev => ({ ...prev, postalCode: { valid: false, message: '' }}))
+    }
+  }, [formData.postalCode])
+
+  const loadRegencies = async (provinceId: string) => {
+    const data = await getRegencies(provinceId)
+    setRegencies(data)
   }
 
-  const handleVillageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value
-    const selectedVillage = villages.find(v => v.id === selectedId)
-    
-    setFormData({ 
-      ...formData, 
-      villageId: selectedId,
-      village: selectedVillage?.name || ''
-    })
+  const loadDistricts = async (regencyId: string) => {
+    const data = await getDistricts(regencyId)
+    setDistricts(data)
+  }
+
+  const loadVillages = async (districtId: string) => {
+    const data = await getVillages(districtId)
+    setVillages(data)
   }
 
   const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 5)
     setFormData({ ...formData, postalCode: value })
-    
-    if (value && !validatePostalCode(value)) {
-      setPostalCodeError('Kode pos harus 5 digit')
-    } else {
-      setPostalCodeError('')
-    }
   }
 
   return (
@@ -178,6 +180,9 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
           <MapPin className="w-5 h-5 text-blue-600" />
           Alamat Lengkap
         </h3>
+        <p className="text-xs text-gray-600 mb-4">
+          Ketik alamat sesuai dengan wilayah yang ada. Sistem akan memvalidasi otomatis.
+        </p>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -199,44 +204,64 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Provinsi <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.provinceId || ''}
-                onChange={handleProvinceChange}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                required
-                disabled={loading.provinces}
-              >
-                <option value="">
-                  {loading.provinces ? 'Memuat...' : 'Pilih Provinsi'}
-                </option>
-                {provinces.map((prov) => (
-                  <option key={prov.id} value={prov.id}>
-                    {prov.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.province || ''}
+                  onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                  className={`w-full px-4 py-3 pr-10 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    validation.province.valid ? 'border-green-500' : 
+                    validation.province.message && !validation.province.valid ? 'border-red-500' : 
+                    'border-gray-900 focus:border-blue-500'
+                  }`}
+                  placeholder="Contoh: Jawa Barat"
+                  required
+                />
+                {validation.province.message && (
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                    validation.province.valid ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {validation.province.valid ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                  </div>
+                )}
+              </div>
+              {validation.province.message && (
+                <p className={`text-xs mt-1 ${validation.province.valid ? 'text-green-600' : 'text-red-600'}`}>
+                  {validation.province.message}
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Kota/Kabupaten <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.regencyId || ''}
-                onChange={handleRegencyChange}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                required
-                disabled={!formData.provinceId || loading.regencies}
-              >
-                <option value="">
-                  {loading.regencies ? 'Memuat...' : 'Pilih Kota/Kabupaten'}
-                </option>
-                {regencies.map((reg) => (
-                  <option key={reg.id} value={reg.id}>
-                    {reg.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.regency || ''}
+                  onChange={(e) => setFormData({ ...formData, regency: e.target.value })}
+                  className={`w-full px-4 py-3 pr-10 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    validation.regency.valid ? 'border-green-500' : 
+                    validation.regency.message && !validation.regency.valid ? 'border-red-500' : 
+                    'border-gray-900 focus:border-blue-500'
+                  }`}
+                  placeholder="Contoh: Bandung"
+                  required
+                />
+                {validation.regency.message && (
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                    validation.regency.valid ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {validation.regency.valid ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                  </div>
+                )}
+              </div>
+              {validation.regency.message && (
+                <p className={`text-xs mt-1 ${validation.regency.valid ? 'text-green-600' : 'text-red-600'}`}>
+                  {validation.regency.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -245,44 +270,64 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Kecamatan <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.districtId || ''}
-                onChange={handleDistrictChange}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                required
-                disabled={!formData.regencyId || loading.districts}
-              >
-                <option value="">
-                  {loading.districts ? 'Memuat...' : 'Pilih Kecamatan'}
-                </option>
-                {districts.map((dist) => (
-                  <option key={dist.id} value={dist.id}>
-                    {dist.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.district || ''}
+                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                  className={`w-full px-4 py-3 pr-10 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    validation.district.valid ? 'border-green-500' : 
+                    validation.district.message && !validation.district.valid ? 'border-red-500' : 
+                    'border-gray-900 focus:border-blue-500'
+                  }`}
+                  placeholder="Contoh: Coblong"
+                  required
+                />
+                {validation.district.message && (
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                    validation.district.valid ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {validation.district.valid ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                  </div>
+                )}
+              </div>
+              {validation.district.message && (
+                <p className={`text-xs mt-1 ${validation.district.valid ? 'text-green-600' : 'text-red-600'}`}>
+                  {validation.district.message}
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Kelurahan/Desa <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.villageId || ''}
-                onChange={handleVillageChange}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                required
-                disabled={!formData.districtId || loading.villages}
-              >
-                <option value="">
-                  {loading.villages ? 'Memuat...' : 'Pilih Kelurahan/Desa'}
-                </option>
-                {villages.map((vill) => (
-                  <option key={vill.id} value={vill.id}>
-                    {vill.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.village || ''}
+                  onChange={(e) => setFormData({ ...formData, village: e.target.value })}
+                  className={`w-full px-4 py-3 pr-10 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                    validation.village.valid ? 'border-green-500' : 
+                    validation.village.message && !validation.village.valid ? 'border-red-500' : 
+                    'border-gray-900 focus:border-blue-500'
+                  }`}
+                  placeholder="Contoh: Dago"
+                  required
+                />
+                {validation.village.message && (
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                    validation.village.valid ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {validation.village.valid ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                  </div>
+                )}
+              </div>
+              {validation.village.message && (
+                <p className={`text-xs mt-1 ${validation.village.valid ? 'text-green-600' : 'text-red-600'}`}>
+                  {validation.village.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -290,21 +335,33 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Kode Pos <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={formData.postalCode || ''}
-              onChange={handlePostalCodeChange}
-              className={`w-full px-4 py-3 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
-                postalCodeError ? 'border-red-500' : 'border-gray-900 focus:border-blue-500'
-              }`}
-              placeholder="5 digit"
-              maxLength={5}
-              required
-            />
-            {postalCodeError && (
-              <p className="text-xs text-red-600 mt-1">{postalCodeError}</p>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.postalCode || ''}
+                onChange={handlePostalCodeChange}
+                className={`w-full px-4 py-3 pr-10 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${
+                  validation.postalCode.valid ? 'border-green-500' : 
+                  validation.postalCode.message && !validation.postalCode.valid ? 'border-red-500' : 
+                  'border-gray-900 focus:border-blue-500'
+                }`}
+                placeholder="5 digit"
+                maxLength={5}
+                required
+              />
+              {validation.postalCode.message && (
+                <div className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                  validation.postalCode.valid ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {validation.postalCode.valid ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                </div>
+              )}
+            </div>
+            {validation.postalCode.message && (
+              <p className={`text-xs mt-1 ${validation.postalCode.valid ? 'text-green-600' : 'text-red-600'}`}>
+                {validation.postalCode.message}
+              </p>
             )}
-            <p className="text-xs text-gray-500 mt-1">Harus 5 digit angka</p>
           </div>
         </div>
       </div>
