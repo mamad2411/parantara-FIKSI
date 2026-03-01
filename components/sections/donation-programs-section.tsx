@@ -75,12 +75,12 @@ export function DonationProgramsSection() {
                 whileInView={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.6, delay: 0.3, type: "spring", stiffness: 200 }}
                 viewport={{ once: true }}
-                className="relative w-full h-32 flex items-center justify-center"
+                className="relative w-full h-20 flex items-center justify-center"
               >
                 <img 
                   src="/images/program/terpercaya.webp" 
                   alt="Terpercaya" 
-                  className="h-full w-auto object-contain"
+                  className="h-34 w-34 object-contain"
                 />
               </motion.div>
               <motion.h3 

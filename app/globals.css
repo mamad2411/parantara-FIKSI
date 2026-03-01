@@ -227,7 +227,6 @@ video {
   transform: translateZ(0);
 }
 
-
 /* Leaflet Map Styles */
 .leaflet-container {
   font-family: inherit;
@@ -265,7 +264,6 @@ video {
 .leaflet-marker-icon {
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
 }
-
 
 /* Performance Optimizations */
 * {

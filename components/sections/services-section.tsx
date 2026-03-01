@@ -117,18 +117,23 @@ export function ServicesSection() {
       `}</style>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div ref={sectionRef} className="relative px-6 lg:px-8 py-16 lg:py-10 mb-3 lg:mt-25 overflow-hidden rounded-3xl">
+        <div ref={sectionRef} className="relative px-6 lg:px-8 py-20 lg:py-24 mb-3 lg:mt-25 overflow-hidden rounded-3xl min-h-[450px] lg:min-h-[550px]">
           {/* Background image that spans full width */}
-          <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
             <img
               src="/images/masjid1.webp"
               alt="Beautiful house"
-              className={`w-full h-full object-cover transition-transform duration-1000 ease-out ${
+              className={`w-full h-[130%] object-cover transition-transform duration-1000 ease-out ${
                 isVisible ? "scale-100" : "scale-110"
               }`}
+              style={{ 
+                minWidth: '100%', 
+                minHeight: '100%',
+                objectPosition: 'center 20%' // Ini akan menaikkan posisi gambar
+              }}
             />
             {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
           </div>
 
           {/* Text content on top */}
