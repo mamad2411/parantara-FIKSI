@@ -121,9 +121,56 @@ export default function RegisterPage() {
       }
     }
 
-    const timer = setTimeout(checkEmail, 500)
+    const timer = setTimeout(checkEmail, 300) // Reduced from 500ms to 300ms
     return () => clearTimeout(timer)
   }, [formData.email])
+
+  // Generate nickname suggestions from full name
+  const generateNicknameSuggestions = (fullName: string): string[] => {
+    if (!fullName) return []
+    
+    // Clean and split name
+    const cleanName = fullName.toLowerCase().replace(/[^a-z\s]/g, '').trim()
+    const nameParts = cleanName.split(/\s+/)
+    
+    if (nameParts.length === 0) return []
+    
+    const suggestions: string[] = []
+    
+    // Generate random 4-digit code
+    const randomCode = Math.floor(1000 + Math.random() * 9000)
+    
+    // Suggestion 1: firstname + code
+    if (nameParts[0]) {
+      suggestions.push(`${nameParts[0]}${randomCode}`)
+    }
+    
+    // Suggestion 2: firstname + lastname initial + code (if has lastname)
+    if (nameParts.length > 1 && nameParts[nameParts.length - 1]) {
+      const lastInitial = nameParts[nameParts.length - 1][0]
+      suggestions.push(`${nameParts[0]}${lastInitial}${randomCode}`)
+    }
+    
+    // Suggestion 3: first 3 letters of each word + code
+    if (nameParts.length > 1) {
+      const combined = nameParts.map(part => part.substring(0, 3)).join('')
+      suggestions.push(`${combined}${randomCode}`)
+    }
+    
+    return suggestions.filter(s => s.length >= 3 && s.length <= 20)
+  }
+
+  // Auto-suggest nickname when name changes
+  const [nicknameSuggestions, setNicknameSuggestions] = useState<string[]>([])
+  
+  useEffect(() => {
+    if (formData.name && formData.name.length >= 3) {
+      const suggestions = generateNicknameSuggestions(formData.name)
+      setNicknameSuggestions(suggestions)
+    } else {
+      setNicknameSuggestions([])
+    }
+  }, [formData.name])
 
   // Check nickname availability in Firestore
   useEffect(() => {
@@ -156,7 +203,7 @@ export default function RegisterPage() {
       }
     }
 
-    const timer = setTimeout(checkNickname, 500)
+    const timer = setTimeout(checkNickname, 300) // Reduced from 500ms to 300ms
     return () => clearTimeout(timer)
   }, [formData.nickname])
 
@@ -682,7 +729,7 @@ export default function RegisterPage() {
             </motion.div>
 
             {/* Register Form with Steps */}
-            <form onSubmit={handleSubmit} className="space-y-4 overflow-hidden">
+            <form onSubmit={handleSubmit} className="space-y-4 overflow-visible">
               {/* Success/Error Messages with Animation */}
               <AnimatePresence mode="wait">
                 {error && (
@@ -717,7 +764,7 @@ export default function RegisterPage() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  className="space-y-5"
+                  className="space-y-5 overflow-visible"
                 >
                   {/* Step 1: Personal Information */}
                   {currentStep === 1 && (
@@ -792,6 +839,24 @@ export default function RegisterPage() {
                         )}
                         {formData.nickname && formData.nickname.length < 3 && (
                           <p className="text-xs text-gray-500 mt-1.5 ml-1">Minimal 3 karakter</p>
+                        )}
+                        {/* Nickname Suggestions */}
+                        {nicknameSuggestions.length > 0 && !formData.nickname && (
+                          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-xs text-blue-700 font-medium mb-2">Saran nickname:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {nicknameSuggestions.map((suggestion, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => setFormData({...formData, nickname: suggestion})}
+                                  className="px-3 py-1.5 bg-white border border-blue-300 rounded-lg text-xs text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition-all duration-200 font-medium"
+                                >
+                                  {suggestion}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </motion.div>
 

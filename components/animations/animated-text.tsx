@@ -13,13 +13,13 @@ export function AnimatedText({ text, delay = 0 }: AnimatedTextProps) {
 
   return (
     <motion.span
-      className="font-bold text-center text-6xl leading-[0.75] tracking-tighter font-serif text-black lg:text-9xl"
+      className="font-bold text-center leading-[0.75] tracking-tighter font-serif text-black block"
       initial="hidden"
       animate="visible"
-      style={{ perspective: 400, display: "inline-block" }}
+      style={{ perspective: 400 }}
     >
       {words.map((word, wordIndex) => (
-        <span key={wordIndex} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+        <span key={wordIndex} style={{ display: "inline-block" }}>
           {word.split("").map((char, index) => {
             const currentIndex = charIndex++
             return (
@@ -42,7 +42,7 @@ export function AnimatedText({ text, delay = 0 }: AnimatedTextProps) {
               </motion.span>
             )
           })}
-          {wordIndex < words.length - 1 && "\u00A0"}
+          {wordIndex < words.length - 1 && " "}
         </span>
       ))}
     </motion.span>
