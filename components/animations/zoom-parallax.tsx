@@ -86,7 +86,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 							const opacity = opacities[index % opacities.length];
 							const initialY = initialYs[index % initialYs.length];
 
-						// Text cards for index 2, 3, and 6
+						// Text cards for index 2, 3, and 6 with geometric patterns
 						if (index === 2) {
 							return (
 								<motion.div
@@ -98,12 +98,22 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 									} as any}
 									className="absolute inset-0 flex items-center justify-center [&>div]:!-top-[10vh] [&>div]:!-left-[25vw] [&>div]:!h-[45vh] [&>div]:!w-[20vw]"
 								>
-									<div className="relative h-[45vh] w-[20vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20">
-										<p className="text-xs md:text-sm font-semibold text-blue-900 mb-2">QS. At-Taubah: 103</p>
-										<p className="text-sm md:text-base text-gray-800 mb-3 text-right leading-relaxed" style={{ fontFamily: 'serif' }}>
+									<div className="relative h-[45vh] w-[20vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20 overflow-hidden">
+										{/* Geometric pattern overlay */}
+										<div className="absolute inset-0 opacity-5">
+											<div className="absolute top-0 right-0 w-24 h-24">
+												<svg viewBox="0 0 100 100" className="w-full h-full">
+													<polygon points="0,0 100,0 50,50" fill="#3B82F6" />
+													<polygon points="0,0 0,100 50,50" fill="#2563EB" />
+												</svg>
+											</div>
+										</div>
+										
+										<p className="text-xs md:text-sm font-semibold text-blue-900 mb-2 relative z-10">QS. At-Taubah: 103</p>
+										<p className="text-sm md:text-base text-gray-800 mb-3 text-right leading-relaxed relative z-10" style={{ fontFamily: 'serif' }}>
 											خُذْ مِنْ أَمْوَٰلِهِمْ صَدَقَةً تُطَهِّرُهُمْ وَتُزَكِّيهِم بِهَا
 										</p>
-										<p className="text-[10px] md:text-xs text-gray-600 leading-relaxed italic">
+										<p className="text-[10px] md:text-xs text-gray-600 leading-relaxed italic relative z-10">
 											&quot;Ambillah zakat dari sebagian harta mereka, dengan zakat itu kamu membersihkan dan mensucikan mereka...&quot;
 										</p>
 									</div>
@@ -122,12 +132,24 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 									} as any}
 									className="absolute inset-0 flex items-center justify-center [&>div]:!left-[27.5vw] [&>div]:!h-[25vh] [&>div]:!w-[25vw]"
 								>
-									<div className="relative h-[25vh] w-[25vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20">
-										<p className="text-xs md:text-sm font-semibold text-blue-900 mb-2">QS. Al-Hadid: 7</p>
-										<p className="text-sm md:text-base text-gray-800 mb-2 text-right leading-relaxed" style={{ fontFamily: 'serif' }}>
+									<div className="relative h-[25vh] w-[25vw] bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-center shadow-lg border border-white/20 overflow-hidden">
+										{/* Geometric pattern overlay */}
+										<div className="absolute inset-0 opacity-5">
+											<div className="absolute bottom-0 left-0 w-20 h-20">
+												<svg viewBox="0 0 100 100" className="w-full h-full">
+													<rect x="0" y="0" width="40" height="40" fill="#3B82F6" />
+													<rect x="60" y="0" width="40" height="40" fill="#2563EB" />
+													<rect x="0" y="60" width="40" height="40" fill="#1D4ED8" />
+													<rect x="60" y="60" width="40" height="40" fill="#3B82F6" />
+												</svg>
+											</div>
+										</div>
+										
+										<p className="text-xs md:text-sm font-semibold text-blue-900 mb-2 relative z-10">QS. Al-Hadid: 7</p>
+										<p className="text-sm md:text-base text-gray-800 mb-2 text-right leading-relaxed relative z-10" style={{ fontFamily: 'serif' }}>
 											وَأَنفِقُوا مِمَّا جَعَلَكُم مُّسْتَخْلَفِينَ فِيهِ
 										</p>
-										<p className="text-[10px] md:text-xs text-gray-600 leading-relaxed italic">
+										<p className="text-[10px] md:text-xs text-gray-600 leading-relaxed italic relative z-10">
 											&quot;...dan nafkahkanlah sebagian dari hartamu...&quot;
 										</p>
 									</div>
@@ -135,7 +157,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 							);
 						}
 
-						// Center bottom text card with white background, blue and yellow text
+						// Center bottom text card with white background, blue and yellow text, and geometric patterns
 						if (index === 6) {
 							return (
 								<motion.div
@@ -148,7 +170,37 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 									className="absolute inset-0 flex items-center justify-center [&>div]:!top-[22.5vh] [&>div]:!left-[25vw] [&>div]:!h-[15vh] [&>div]:!w-[15vw]"
 								>
 									<div className="relative h-[15vh] w-[15vw] bg-white rounded-3xl p-2 md:p-3 flex items-center justify-center shadow-xl overflow-hidden border border-slate-100">
-										<h3 className="relative text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base font-bold text-center leading-tight px-1">
+										{/* Geometric patterns background */}
+										<div className="absolute inset-0 opacity-10">
+											{/* Top left triangles */}
+											<div className="absolute top-0 left-0 w-12 h-12">
+												<svg viewBox="0 0 100 100" className="w-full h-full">
+													<polygon points="0,0 50,0 0,50" fill="#3B82F6" />
+													<polygon points="50,0 100,0 50,50" fill="#2563EB" />
+													<polygon points="0,50 50,50 0,100" fill="#1D4ED8" />
+												</svg>
+											</div>
+											{/* Bottom right circles */}
+											<div className="absolute bottom-0 right-0 w-16 h-16">
+												<svg viewBox="0 0 100 100" className="w-full h-full">
+													<circle cx="25" cy="25" r="15" fill="#3B82F6" />
+													<circle cx="75" cy="25" r="15" fill="#2563EB" />
+													<circle cx="25" cy="75" r="15" fill="#1D4ED8" />
+													<circle cx="75" cy="75" r="15" fill="#3B82F6" />
+												</svg>
+											</div>
+											{/* Center geometric shapes */}
+											<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20">
+												<svg viewBox="0 0 100 100" className="w-full h-full">
+													<rect x="10" y="10" width="30" height="30" fill="#3B82F6" />
+													<rect x="60" y="10" width="30" height="30" fill="#2563EB" />
+													<rect x="10" y="60" width="30" height="30" fill="#1D4ED8" />
+													<rect x="60" y="60" width="30" height="30" fill="#3B82F6" />
+												</svg>
+											</div>
+										</div>
+										
+										<h3 className="relative text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base font-bold text-center leading-tight px-1 z-10">
 											<span className="text-yellow-500">Jadikan</span>{' '}
 											<span className="text-blue-600">Dana</span>
 											<br />
