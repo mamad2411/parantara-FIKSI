@@ -51,8 +51,8 @@ export function HomePage() {
   const expandRadius = progress * getMaxRadius()
 
   return (
-    <div ref={containerRef} className="h-[40vh] bg-background">
-      <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 sticky top-0">
+    <div ref={containerRef} className="h-[36vh] bg-background -mt-16 sm:-mt-24 md:-mt-32 lg:mt-0">
+      <div className="h-screen flex items-start justify-center pt-2 sm:pt-4 md:pt-6 lg:pt-10 sticky top-0">
         <div className="relative w-full max-w-[320px] sm:max-w-[420px] md:max-w-[500px] lg:max-w-[600px]">
           <div
             className={`w-full aspect-square rounded-full flex items-center justify-center transition-all duration-300 ${

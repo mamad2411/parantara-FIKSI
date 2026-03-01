@@ -16,7 +16,7 @@ const features = [
 export function FeaturesSection() {
   return (
     <section id="features" className="py-32 px-6 relative overflow-hidden max-w-full">
-      <div className="absolute top-[48%] md:top-[50%] lg:top-[85%] xl:top-[80%] -translate-y-1/2 left-0 right-0 lg:left-[46%] flex justify-center pointer-events-none z-20 max-w-full overflow-hidden">
+      <div className="absolute top-[48%] md:top-[45%] lg:top-[85%] xl:top-[80%] -translate-y-1/2 left-0 right-0 lg:left-[46%] flex justify-center pointer-events-none z-20 max-w-full overflow-hidden">
         <span className="relative inline-block">
           <span className="relative z-10 font-bold text-center text-[20vw] sm:text-[14vw] md:text-[12vw] lg:text-[12vw] leading-none tracking-tighter text-white whitespace-nowrap px-4">
             KELOLA
