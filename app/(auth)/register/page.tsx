@@ -825,12 +825,12 @@ export default function RegisterPage() {
                           placeholder="Nama Lengkap"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          className="w-full px-5 py-4 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base shadow-sm"
+                          className="w-full pl-5 pr-12 py-4 bg-white border-2 border-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-base shadow-sm"
                           autoComplete="name"
                           required
                         />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                         </div>
@@ -848,7 +848,7 @@ export default function RegisterPage() {
                           placeholder="Nickname (Username)"
                           value={formData.nickname}
                           onChange={(e) => setFormData({...formData, nickname: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
-                          className={`w-full px-5 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
+                          className={`w-full pl-5 pr-12 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
                             nicknameAvailable === false ? 'border-red-500' : 
                             nicknameAvailable === true ? 'border-green-500' : 
                             'border-gray-900 focus:border-blue-500'
@@ -858,19 +858,19 @@ export default function RegisterPage() {
                           maxLength={20}
                           required
                         />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                           {nicknameChecking ? (
                             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                           ) : nicknameAvailable === false ? (
-                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           ) : nicknameAvailable === true ? (
-                            <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
-                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                           )}
@@ -916,7 +916,7 @@ export default function RegisterPage() {
                           placeholder="Email"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
-                          className={`w-full px-5 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
+                          className={`w-full pl-5 pr-12 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
                             emailAvailable === false ? 'border-red-500' : 
                             emailAvailable === true ? 'border-green-500' : 
                             'border-gray-900 focus:border-blue-500'
@@ -924,20 +924,20 @@ export default function RegisterPage() {
                           autoComplete="email"
                           required
                         />
-                        <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                           {emailChecking ? (
                             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                           ) : emailAvailable === false ? (
-                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                           ) : emailAvailable === true ? (
-                            <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           ) : (
-                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                           )}
                         </div>
