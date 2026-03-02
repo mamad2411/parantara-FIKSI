@@ -1,182 +1,142 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Rate limiting configuration
-const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 100 // Max 100 requests per minute per IP
+// Rate limiting store (in-memory for demo, use Redis/KV in production)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
 
-// In-memory store (use Redis in production for distributed systems)
-const requestCounts = new Map<string, { count: number; resetTime: number }>()
+// Rate limit configuration
+const RATE_LIMITS = {
+  '/login': { limit: 10, window: 300000 }, // 10 requests per 5 minutes
+  '/register': { limit: 5, window: 300000 }, // 5 requests per 5 minutes
+  '/forgot-password': { limit: 3, window: 600000 }, // 3 requests per 10 minutes
+  '/api': { limit: 100, window: 60000 }, // 100 requests per minute
+  default: { limit: 200, window: 60000 }, // 200 requests per minute
+}
 
-// Suspicious patterns
-const SUSPICIOUS_PATTERNS = [
-  /\.\./g, // Path traversal
-  /<script/gi, // XSS attempts
-  /union.*select/gi, // SQL injection
-  /javascript:/gi, // XSS
-  /on\w+=/gi, // Event handlers
-]
+function getRateLimit(pathname: string) {
+  for (const [path, config] of Object.entries(RATE_LIMITS)) {
+    if (pathname.startsWith(path)) {
+      return config
+    }
+  }
+  return RATE_LIMITS.default
+}
 
-// Bot user agents (common DDoS bots)
-const BOT_PATTERNS = [
-  /bot/i,
-  /crawler/i,
-  /spider/i,
-  /scraper/i,
-  /curl/i,
-  /wget/i,
-  /python/i,
-  /java/i,
-]
-
-function getClientIP(request: NextRequest): string {
-  // Get real IP from various headers (Vercel provides these)
-  const forwarded = request.headers.get('x-forwarded-for')
-  const realIP = request.headers.get('x-real-ip')
-  const cfIP = request.headers.get('cf-connecting-ip') // Cloudflare
+function checkRateLimit(ip: string, pathname: string): { allowed: boolean; retryAfter?: number } {
+  const config = getRateLimit(pathname)
+  const key = `${ip}:${pathname}`
+  const now = Date.now()
   
-  return forwarded?.split(',')[0] || realIP || cfIP || 'unknown'
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const record = requestCounts.get(ip)
-
-  if (!record || now > record.resetTime) {
-    // New window
-    requestCounts.set(ip, {
-      count: 1,
-      resetTime: now + RATE_LIMIT_WINDOW,
-    })
-    return false
-  }
-
-  record.count++
-
-  if (record.count > MAX_REQUESTS_PER_WINDOW) {
-    return true
-  }
-
-  return false
-}
-
-function isSuspiciousRequest(request: NextRequest): boolean {
-  const url = request.url
-  const userAgent = request.headers.get('user-agent') || ''
-
-  // Check for suspicious patterns in URL
-  for (const pattern of SUSPICIOUS_PATTERNS) {
-    if (pattern.test(url)) {
-      return true
+  // Clean up old entries
+  for (const [k, v] of rateLimitStore.entries()) {
+    if (now > v.resetTime) {
+      rateLimitStore.delete(k)
     }
   }
-
-  // Check for bot user agents (allow legitimate bots)
-  const isLegitimateBot = /googlebot|bingbot|slurp|duckduckbot/i.test(userAgent)
-  if (!isLegitimateBot) {
-    for (const pattern of BOT_PATTERNS) {
-      if (pattern.test(userAgent)) {
-        return true
-      }
+  
+  let entry = rateLimitStore.get(key)
+  
+  if (!entry || now > entry.resetTime) {
+    entry = { count: 0, resetTime: now + config.window }
+    rateLimitStore.set(key, entry)
+  }
+  
+  entry.count++
+  
+  if (entry.count > config.limit) {
+    return {
+      allowed: false,
+      retryAfter: Math.ceil((entry.resetTime - now) / 1000)
     }
   }
-
-  // Check for missing or suspicious user agent
-  if (!userAgent || userAgent.length < 10) {
-    return true
-  }
-
-  return false
+  
+  return { allowed: true }
 }
-
-function cleanupOldRecords() {
-  const now = Date.now()
-  for (const [ip, record] of requestCounts.entries()) {
-    if (now > record.resetTime) {
-      requestCounts.delete(ip)
-    }
-  }
-}
-
-// Cleanup every 5 minutes
-setInterval(cleanupOldRecords, 5 * 60 * 1000)
 
 export function middleware(request: NextRequest) {
-  const ip = getClientIP(request)
-  const pathname = request.nextUrl.pathname
-
-  // Skip middleware for static files, API routes, and Next.js internals
+  const { pathname } = request.nextUrl
+  
+  // Skip middleware for static files
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/_vercel') ||
-    pathname.includes('.') ||
-    pathname === '/favicon.ico'
+    pathname.startsWith('/static') ||
+    pathname.startsWith('/images') ||
+    pathname.startsWith('/vidio') ||
+    pathname.includes('.')
   ) {
     return NextResponse.next()
   }
-
-  // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard']
-  const authRoutes = ['/login', '/register']
   
-  // Check if route is protected
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
-  const isDaftarMasjid = pathname.startsWith('/daftar-masjid')
+  // Get client IP (Vercel provides this via headers)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+             request.headers.get('x-real-ip') || 
+             'unknown'
   
-  // Get auth token from cookies
-  const authToken = request.cookies.get('auth_token')?.value
-  const isAuthenticated = !!authToken
-  
-  // Redirect to login if accessing protected route without auth
-  if (isProtectedRoute && !isAuthenticated) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    loginUrl.searchParams.set('message', 'mari kita realisasikan tranparansi untuk umat')
-    return NextResponse.redirect(loginUrl)
-  }
-  
-  // Redirect to daftar-masjid if accessing auth routes while authenticated
-  // (User needs to complete mosque registration first)
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/daftar-masjid', request.url))
-  }
-  
-  // Allow access to daftar-masjid if authenticated
-  if (isDaftarMasjid && !isAuthenticated) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // Check for suspicious requests
-  if (isSuspiciousRequest(request)) {
-    console.warn(`[Security] Suspicious request blocked from IP: ${ip}`)
-    return new NextResponse('Forbidden', { status: 403 })
-  }
-
   // Rate limiting
-  if (isRateLimited(ip)) {
-    console.warn(`[Security] Rate limit exceeded for IP: ${ip}`)
-    return new NextResponse('Too Many Requests', {
-      status: 429,
-      headers: {
-        'Retry-After': '60',
-        'X-RateLimit-Limit': MAX_REQUESTS_PER_WINDOW.toString(),
-        'X-RateLimit-Remaining': '0',
-        'X-RateLimit-Reset': new Date(Date.now() + RATE_LIMIT_WINDOW).toISOString(),
-      },
-    })
+  const rateCheck = checkRateLimit(ip, pathname)
+  
+  if (!rateCheck.allowed) {
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Too Many Requests',
+        message: 'Terlalu banyak permintaan. Silakan coba lagi nanti.',
+        retryAfter: rateCheck.retryAfter
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateCheck.retryAfter),
+          'X-RateLimit-Limit': String(getRateLimit(pathname).limit),
+          'X-RateLimit-Remaining': '0',
+        }
+      }
+    )
   }
-
-  // Add security headers
+  
+  // Security headers
   const response = NextResponse.next()
   
+  // Add security headers
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  
+  // Add rate limit headers
+  const config = getRateLimit(pathname)
+  const entry = rateLimitStore.get(`${ip}:${pathname}`)
+  response.headers.set('X-RateLimit-Limit', String(config.limit))
+  response.headers.set('X-RateLimit-Remaining', String(Math.max(0, config.limit - (entry?.count || 0))))
+  
+  // Bot detection
+  const userAgent = request.headers.get('user-agent') || ''
+  const suspiciousPatterns = [
+    /bot/i,
+    /crawler/i,
+    /spider/i,
+    /scraper/i,
+  ]
+  
+  const legitimateBots = [
+    /googlebot/i,
+    /bingbot/i,
+    /slurp/i,
+  ]
+  
+  const isSuspicious = suspiciousPatterns.some(pattern => pattern.test(userAgent))
+  const isLegitimate = legitimateBots.some(pattern => pattern.test(userAgent))
+  
+  if (isSuspicious && !isLegitimate && !pathname.startsWith('/api')) {
+    return new NextResponse('Access Denied', {
+      status: 403,
+      headers: {
+        'Content-Type': 'text/plain',
+      }
+    })
+  }
   
   return response
 }
@@ -188,8 +148,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files (public folder)
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }
