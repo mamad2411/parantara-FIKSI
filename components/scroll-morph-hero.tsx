@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useTransform, useSpring, useMotionValue, useScroll } from "framer-motion";
 
 // --- Utility ---
@@ -30,6 +30,8 @@ function FlipCard({
     target,
     content,
 }: FlipCardProps) {
+    const [isFlipped, setIsFlipped] = useState(false);
+
     return (
         <motion.div
             // Smoothly animate to the coordinates defined by the parent
@@ -51,16 +53,19 @@ function FlipCard({
                 position: "absolute",
                 width: IMG_WIDTH,
                 height: IMG_HEIGHT,
-                transformStyle: "preserve-3d", // Essential for the 3D hover effect
+                transformStyle: "preserve-3d",
                 perspective: "1000px",
             }}
             className="cursor-pointer group"
+            onClick={() => setIsFlipped(!isFlipped)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
         >
             <motion.div
                 className="relative h-full w-full"
                 style={{ transformStyle: "preserve-3d" }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
-                whileHover={{ rotateY: 180 }}
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.4, type: "spring", stiffness: 200, damping: 20 }}
             >
                 {/* Front Face */}
                 <div
@@ -72,6 +77,12 @@ function FlipCard({
                         alt={`hero-${index}`}
                         className="h-full w-full object-cover"
                     />
+                    {/* Click hint */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-2">
+                        <span className="text-white text-[8px] font-semibold uppercase tracking-wider">
+                            Klik
+                        </span>
+                    </div>
                 </div>
 
                 {/* Back Face */}
