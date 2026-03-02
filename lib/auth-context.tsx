@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         uid: user.uid,
         email: user.email,
         name: userData.name,
-        phone: userData.phone,
+        nickname: userData.nickname,
         createdAt: new Date().toISOString(),
         provider: 'email',
         registrationCompleted: false, // Track if mosque registration is completed
