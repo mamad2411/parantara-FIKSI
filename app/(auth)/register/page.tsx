@@ -843,38 +843,43 @@ export default function RegisterPage() {
                         whileHover={{ scale: 1.01 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <input
-                          type="text"
-                          placeholder="Nickname (Username)"
-                          value={formData.nickname}
-                          onChange={(e) => setFormData({...formData, nickname: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
-                          className={`w-full pl-5 pr-12 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
-                            nicknameAvailable === false ? 'border-red-500' : 
-                            nicknameAvailable === true ? 'border-green-500' : 
-                            'border-gray-900 focus:border-blue-500'
-                          }`}
-                          autoComplete="username"
-                          minLength={3}
-                          maxLength={20}
-                          required
-                        />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                          {nicknameChecking ? (
-                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                          ) : nicknameAvailable === false ? (
-                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          ) : nicknameAvailable === true ? (
-                            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                          )}
+                        {/* Input wrapper - icon position relative to this */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Nickname (Username)"
+                            value={formData.nickname}
+                            onChange={(e) => setFormData({...formData, nickname: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
+                            className={`w-full pl-5 pr-12 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
+                              nicknameAvailable === false ? 'border-red-500' : 
+                              nicknameAvailable === true ? 'border-green-500' : 
+                              'border-gray-900 focus:border-blue-500'
+                            }`}
+                            autoComplete="username"
+                            minLength={3}
+                            maxLength={20}
+                            required
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            {nicknameChecking ? (
+                              <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            ) : nicknameAvailable === false ? (
+                              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            ) : nicknameAvailable === true ? (
+                              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            )}
+                          </div>
                         </div>
+                        
+                        {/* Validation messages */}
                         {nicknameAvailable === false && (
                           <p className="text-xs text-red-500 mt-1.5 ml-1">Nickname sudah digunakan</p>
                         )}
@@ -884,6 +889,7 @@ export default function RegisterPage() {
                         {formData.nickname && formData.nickname.length < 3 && (
                           <p className="text-xs text-gray-500 mt-1.5 ml-1">Minimal 3 karakter</p>
                         )}
+                        
                         {/* Nickname Suggestions */}
                         {nicknameSuggestions.length > 0 && !formData.nickname && (
                           <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
