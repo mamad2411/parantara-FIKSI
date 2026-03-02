@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "pages:build": "@cloudflare/next-on-pages",
+    "pages:deploy": "wrangler pages deploy .vercel/output/static",
+    "pages:dev": "wrangler pages dev .vercel/output/static --compatibility-date=2024-01-01",
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
@@ -33,8 +36,6 @@
     "@emotion/is-prop-valid": "latest",
     "@hono/node-server": "^1.19.9",
     "@hookform/resolvers": "^3.10.0",
-    "postcss": "^8.5",
-    "tailwindcss": "^4.1.9",
     "@number-flow/react": "^0.5.14",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -89,6 +90,7 @@
     "lucide-react": "^0.454.0",
     "next": "^16.1.6",
     "next-themes": "^0.4.6",
+    "postcss": "^8.5",
     "react": "19.2.0",
     "react-cookie-consent": "^10.0.1",
     "react-day-picker": "9.8.0",
@@ -101,6 +103,7 @@
     "recharts": "2.15.4",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.9",
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "^7.0.0",
     "tw-animate-css": "1.3.3",
@@ -109,6 +112,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "eslint": "^10.0.2"
   }
 }
