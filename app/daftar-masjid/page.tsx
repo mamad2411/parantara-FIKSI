@@ -38,10 +38,11 @@ import {
   getFormDataFromSession,
   clearRegistrationSession,
 } from "@/lib/registration-session"
-import {
-  generateDeviceFingerprint,
-  saveDeviceFingerprint,
-} from "@/lib/device-fingerprint"
+// TODO: Re-enable after fixing bundling issues
+// import {
+//   generateDeviceFingerprint,
+//   saveDeviceFingerprint,
+// } from "@/lib/device-fingerprint"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -62,14 +63,13 @@ export default function DaftarMasjidPage() {
   // Initialize session and device fingerprint
   useEffect(() => {
     const initSession = async () => {
-      try {
-        // Generate device fingerprint
-        const fingerprint = await generateDeviceFingerprint()
-        saveDeviceFingerprint(fingerprint)
-      } catch (error) {
-        console.error('Failed to generate device fingerprint:', error)
-        // Continue without fingerprint
-      }
+      // TODO: Re-enable device fingerprinting after fixing bundling issues
+      // try {
+      //   const fingerprint = await generateDeviceFingerprint()
+      //   saveDeviceFingerprint(fingerprint)
+      // } catch (error) {
+      //   console.error('Failed to generate device fingerprint:', error)
+      // }
 
       // Check existing session
       const existingSession = getRegistrationSession()
