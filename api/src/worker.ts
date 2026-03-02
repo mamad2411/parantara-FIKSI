@@ -202,13 +202,13 @@ app.post('/api/auth/register/step1',
   validateInput({
     email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
     name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
-    phone: { required: true, type: 'string', minLength: 10, maxLength: 15 }
+    nickname: { required: true, type: 'string', minLength: 3, maxLength: 30 }
   }),
   async (c) => {
   try {
-    const { email, name, phone } = await c.req.json()
+    const { email, name, nickname } = await c.req.json()
 
-    if (!email || !name || !phone) {
+    if (!email || !name || !nickname) {
       return c.json(
         { success: false, message: 'Semua field harus diisi' },
         400
@@ -223,7 +223,7 @@ app.post('/api/auth/register/step1',
     otpStorage.set(email, {
       otp,
       expires,
-      data: { name, phone }
+      data: { name, nickname }
     })
 
     // Send OTP email
@@ -312,9 +312,9 @@ app.post('/api/auth/register/verify-otp', async (c) => {
 // Register Step 4 - Complete Registration
 app.post('/api/auth/register/complete', async (c) => {
   try {
-    const { name, email, phone, password, mosqueName, mosqueAddress, mosqueCity } = await c.req.json()
+    const { name, email, nickname, password, mosqueName, mosqueAddress, mosqueCity } = await c.req.json()
 
-    if (!name || !email || !phone || !password) {
+    if (!name || !email || !nickname || !password) {
       return c.json(
         { success: false, message: 'Semua field harus diisi' },
         400
@@ -355,7 +355,7 @@ app.post('/api/auth/register/complete', async (c) => {
       user: {
         email,
         name,
-        phone,
+        nickname,
       },
     })
   } catch (error) {
