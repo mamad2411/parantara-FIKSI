@@ -9,7 +9,13 @@ interface RecaptchaProviderProps {
 
 export function RecaptchaProvider({ children }: RecaptchaProviderProps) {
   // reCAPTCHA v3 Site Key (public key - aman untuk di frontend)
-  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; // Test key
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  
+  // If no valid key, render children without reCAPTCHA
+  if (!recaptchaSiteKey || recaptchaSiteKey === 'your_recaptcha_site_key') {
+    console.warn('reCAPTCHA is disabled: No valid NEXT_PUBLIC_RECAPTCHA_SITE_KEY found');
+    return <>{children}</>;
+  }
 
   return (
     <GoogleReCaptchaProvider

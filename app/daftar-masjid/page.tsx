@@ -18,6 +18,7 @@ import {
   Step4ReviewData,
   Step5AkunAdmin
 } from "@/components/masjid-registration"
+import { SessionTimer } from "@/components/masjid-registration/SessionTimer"
 import {
   sanitizeInput,
   validateEmail,
@@ -30,6 +31,17 @@ import {
   RateLimiter,
   sanitizeObject
 } from "@/lib/security-utils"
+import {
+  createRegistrationSession,
+  getRegistrationSession,
+  saveFormDataToSession,
+  getFormDataFromSession,
+  clearRegistrationSession,
+} from "@/lib/registration-session"
+import {
+  generateDeviceFingerprint,
+  saveDeviceFingerprint,
+} from "@/lib/device-fingerprint"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -45,6 +57,36 @@ export default function DaftarMasjidPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [csrfToken, setCSRFToken] = useState("")
   const [honeypot, setHoneypot] = useState("") // Bot detection
+  const [sessionInitialized, setSessionInitialized] = useState(false)
+
+  // Initialize session and device fingerprint
+  useEffect(() => {
+    const initSession = async () => {
+      // Generate device fingerprint
+      const fingerprint = await generateDeviceFingerprint()
+      saveDeviceFingerprint(fingerprint)
+
+      // Check existing session
+      const existingSession = getRegistrationSession()
+      if (existingSession) {
+        // Restore session
+        setCurrentStep(existingSession.currentStep)
+        setSessionInitialized(true)
+      } else {
+        // Create new session (will be properly initialized after user starts)
+        setSessionInitialized(true)
+      }
+    }
+
+    initSession()
+  }, [])
+
+  // Auto-save form data to session
+  useEffect(() => {
+    if (sessionInitialized && currentStep > 0) {
+      saveFormDataToSession(currentStep, formData)
+    }
+  }, [formData, currentStep, sessionInitialized])
 
   // Generate CSRF token on mount
   useEffect(() => {
@@ -326,6 +368,9 @@ export default function DaftarMasjidPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 py-3 sm:py-4 md:py-8 px-3 sm:px-4 lg:px-8">
       {/* Toast Container */}
       <Toaster />
+      
+      {/* Session Timer */}
+      {sessionInitialized && <SessionTimer />}
       
       <div className="w-full mx-auto flex gap-4 sm:gap-6 lg:gap-8">
         {/* Sidebar Navigation - Desktop Only (XL and above) */}
