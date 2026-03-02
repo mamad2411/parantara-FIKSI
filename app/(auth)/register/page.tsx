@@ -412,21 +412,27 @@ export default function RegisterPage() {
           return
         }
         
-        if (!nicknameAvailable) {
-          setError('Mohon tunggu pengecekan nickname selesai')
+        if (nicknameAvailable !== true) {
+          setError('Nickname belum divalidasi. Mohon tunggu sebentar.')
           setLoading(false)
           return
         }
         
         // Validate email availability
+        if (emailChecking) {
+          setError('Mohon tunggu pengecekan email selesai...')
+          setLoading(false)
+          return
+        }
+        
         if (emailAvailable === false) {
           setError('Email sudah terdaftar. Silakan gunakan email lain atau login.')
           setLoading(false)
           return
         }
         
-        if (!emailAvailable) {
-          setError('Mohon tunggu pengecekan email selesai')
+        if (emailAvailable !== true) {
+          setError('Email belum divalidasi. Mohon tunggu sebentar.')
           setLoading(false)
           return
         }
