@@ -18,7 +18,8 @@ import {
   Step4ReviewData,
   Step5AkunAdmin
 } from "@/components/masjid-registration"
-import { SessionTimer } from "@/components/masjid-registration/SessionTimer"
+// TODO: Re-enable after fixing bundling issues
+// import { SessionTimer } from "@/components/masjid-registration/SessionTimer"
 import {
   sanitizeInput,
   validateEmail,
@@ -31,13 +32,14 @@ import {
   RateLimiter,
   sanitizeObject
 } from "@/lib/security-utils"
-import {
-  createRegistrationSession,
-  getRegistrationSession,
-  saveFormDataToSession,
-  getFormDataFromSession,
-  clearRegistrationSession,
-} from "@/lib/registration-session"
+// TODO: Re-enable after fixing bundling issues
+// import {
+//   createRegistrationSession,
+//   getRegistrationSession,
+//   saveFormDataToSession,
+//   getFormDataFromSession,
+//   clearRegistrationSession,
+// } from "@/lib/registration-session"
 // TODO: Re-enable after fixing bundling issues
 // import {
 //   generateDeviceFingerprint,
@@ -71,27 +73,27 @@ export default function DaftarMasjidPage() {
       //   console.error('Failed to generate device fingerprint:', error)
       // }
 
-      // Check existing session
-      const existingSession = getRegistrationSession()
-      if (existingSession) {
-        // Restore session
-        setCurrentStep(existingSession.currentStep)
-        setSessionInitialized(true)
-      } else {
-        // Create new session (will be properly initialized after user starts)
-        setSessionInitialized(true)
-      }
+      // TODO: Re-enable session management after fixing bundling issues
+      // const existingSession = getRegistrationSession()
+      // if (existingSession) {
+      //   setCurrentStep(existingSession.currentStep)
+      //   setSessionInitialized(true)
+      // } else {
+      //   setSessionInitialized(true)
+      // }
+      
+      setSessionInitialized(true)
     }
 
     initSession()
   }, [])
 
-  // Auto-save form data to session
-  useEffect(() => {
-    if (sessionInitialized && currentStep > 0) {
-      saveFormDataToSession(currentStep, formData)
-    }
-  }, [formData, currentStep, sessionInitialized])
+  // Auto-save form data to session - Temporarily disabled
+  // useEffect(() => {
+  //   if (sessionInitialized && currentStep > 0) {
+  //     saveFormDataToSession(currentStep, formData)
+  //   }
+  // }, [formData, currentStep, sessionInitialized])
 
   // Generate CSRF token on mount
   useEffect(() => {
@@ -374,8 +376,8 @@ export default function DaftarMasjidPage() {
       {/* Toast Container */}
       <Toaster />
       
-      {/* Session Timer */}
-      {sessionInitialized && <SessionTimer />}
+      {/* Session Timer - Temporarily disabled */}
+      {/* {sessionInitialized && <SessionTimer />} */}
       
       <div className="w-full mx-auto flex gap-4 sm:gap-6 lg:gap-8">
         {/* Sidebar Navigation - Desktop Only (XL and above) */}
