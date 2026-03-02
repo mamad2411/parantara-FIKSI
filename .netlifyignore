@@ -1,0 +1,49 @@
+# Netlify Ignore File
+# Files and directories to exclude from deployment
+
+# Dependencies
+node_modules/
+api/node_modules/
+
+# Development
+.git/
+.vscode/
+.husky/
+
+# Environment files (use Netlify UI for env vars)
+.env*
+!.env.example
+!.env.local.example
+!.env.docker.example
+
+# Build artifacts
+.next/cache/
+
+# Docker
+docker/
+Dockerfile
+docker-compose.yml
+.dockerignore
+.env.docker
+.env.docker.example
+
+# API (deployed separately to Cloudflare Workers)
+api/
+
+# Documentation
+README.md
+
+# Vercel (no longer used)
+.vercel/
+vercel.json
+.vercelignore
+
+# Scripts
+scripts/
+add-vercel-env.ps1
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
