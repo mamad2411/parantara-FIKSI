@@ -16,49 +16,16 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    # Prevent clickjacking attacks
     X-Frame-Options = "DENY"
-    
-    # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
-    
-    # Enable XSS protection
     X-XSS-Protection = "1; mode=block"
-    
-    # Control referrer information
     Referrer-Policy = "strict-origin-when-cross-origin"
-    
-    # Restrict browser features
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
-    
-    # Force HTTPS
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    
-    # Content Security Policy - Comprehensive protection
-    Content-Security-Policy = """
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://apis.google.com https://vercel.live;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      font-src 'self' https://fonts.gstatic.com data:;
-      img-src 'self' data: https: blob:;
-      media-src 'self' blob:;
-      connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.workers.dev https://vercel.live wss://*.pusher.com;
-      frame-src 'self' https://www.google.com https://vercel.live;
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self';
-      frame-ancestors 'none';
-      upgrade-insecure-requests;
-    """
-    
-    # Additional security headers
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' blob:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.workers.dev; frame-src 'self' https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;"
     X-Permitted-Cross-Domain-Policies = "none"
     X-Download-Options = "noopen"
-    Cross-Origin-Embedder-Policy = "require-corp"
-    Cross-Origin-Opener-Policy = "same-origin"
-    Cross-Origin-Resource-Policy = "same-origin"
 
-# Cache static assets aggressively
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
@@ -69,19 +36,16 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Cache images
 [[headers]]
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
-# Cache videos
 [[headers]]
   for = "/vidio/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, must-revalidate"
 
-# Don't cache HTML
 [[headers]]
   for = "/*.html"
   [headers.values]
@@ -91,38 +55,17 @@
 # REDIRECTS & PROXIES
 # ============================================
 
-# API Proxy to Cloudflare Workers
 [[redirects]]
   from = "/api/*"
   to = "https://danamasjid-api.danamsjid-api.workers.dev/:splat"
   status = 200
   force = true
-  [redirects.headers]
-    X-From = "Netlify"
 
-# Force HTTPS
 [[redirects]]
   from = "http://danamasjid.netlify.app/*"
   to = "https://danamasjid.netlify.app/:splat"
   status = 301
   force = true
-
-# ============================================
-# RATE LIMITING & DDOS PROTECTION
-# ============================================
-
-# Rate limit authentication endpoints
-[[edge_functions]]
-  path = "/api/auth/*"
-  function = "rate-limit-auth"
-
-[[edge_functions]]
-  path = "/register"
-  function = "rate-limit-register"
-
-[[edge_functions]]
-  path = "/login"
-  function = "rate-limit-login"
 
 # ============================================
 # CONTEXT-SPECIFIC SETTINGS
@@ -145,13 +88,4 @@
   node_bundler = "esbuild"
   
 [functions."*"]
-  # Timeout for serverless functions (max 26s on free tier)
   timeout = 26
-
-# ============================================
-# PLUGINS
-# ============================================
-
-# Essential Next.js plugin (will be auto-installed by Netlify)
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
