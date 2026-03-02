@@ -3,12 +3,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["sin1"],
-  "functions": {
-    "app/**/*.{js,ts,tsx}": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
