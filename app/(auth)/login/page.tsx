@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
   const [redirectMessage, setRedirectMessage] = useState("")
   
   // Get redirect message from URL
@@ -40,16 +41,11 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError("")
-      const user = await signInWithGoogle()
+      await signInWithGoogle()
       
-      // Check if user has completed mosque registration
-      const hasCompletedRegistration = await checkMosqueRegistration(user.uid)
-      
-      if (hasCompletedRegistration) {
-        router.push("/dashboard")
-      } else {
-        router.push("/daftar-masjid")
-      }
+      // Wait for auth state to fully update before redirect
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      window.location.href = '/daftar-masjid'
     } catch (err: any) {
       setError(err.message || "Gagal login dengan Google")
     } finally {
@@ -62,38 +58,15 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError("")
-      const user = await signInWithEmail(email, password)
+      setSuccess(false)
+      await signInWithEmail(email, password)
       
-      // Check if user has completed mosque registration
-      const hasCompletedRegistration = await checkMosqueRegistration(user.uid)
-      
-      if (hasCompletedRegistration) {
-        router.push("/dashboard")
-      } else {
-        router.push("/daftar-masjid")
-      }
+      // Show success message, don't auto-redirect
+      setSuccess(true)
+      setLoading(false)
     } catch (err: any) {
       setError("Email atau password salah")
-    } finally {
       setLoading(false)
-    }
-  }
-
-  // Check if user has completed mosque registration
-  const checkMosqueRegistration = async (userId: string) => {
-    try {
-      // Check localStorage first for faster response
-      const registrationStatus = localStorage.getItem(`mosque_registration_${userId}`)
-      if (registrationStatus === 'completed') {
-        return true
-      }
-      
-      // TODO: Check with API/Firebase if mosque registration is completed
-      // For now, return false to always redirect to registration
-      return false
-    } catch (error) {
-      console.error('Error checking mosque registration:', error)
-      return false
     }
   }
 

@@ -242,11 +242,10 @@ app.post('/api/auth/register/step1',
     }
 
     console.log(`OTP sent to: ${email}`)
-    console.log(`OTP CODE: ${otp}`) // Log OTP for development
-
+    
     return c.json({
       success: true,
-      message: 'OTP berhasil dikirim ke email Anda',
+      message: 'OTP berhasil dikirim ke email Anda'
     })
   } catch (error) {
     console.error('Send OTP error:', error)

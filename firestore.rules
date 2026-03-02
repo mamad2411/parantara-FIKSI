@@ -24,23 +24,21 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      // Allow read if signed in and is owner
-      allow read: if isOwner(userId);
+      // Allow read if signed in (needed for email validation)
+      allow read: if isSignedIn();
       
       // Allow create only if signed in and creating own document
       allow create: if isSignedIn() && 
                       isOwner(userId) &&
-                      request.resource.data.keys().hasAll(['uid', 'email', 'name', 'createdAt']) &&
+                      request.resource.data.keys().hasAll(['uid', 'email', 'name']) &&
                       isValidEmail(request.resource.data.email) &&
                       isValidString(request.resource.data.name, 2, 100) &&
-                      request.resource.data.uid == userId &&
-                      request.resource.data.createdAt is timestamp;
+                      request.resource.data.uid == userId;
       
       // Allow update only if owner and not changing critical fields
       allow update: if isOwner(userId) &&
                       request.resource.data.uid == resource.data.uid &&
-                      request.resource.data.email == resource.data.email &&
-                      request.resource.data.createdAt == resource.data.createdAt;
+                      request.resource.data.email == resource.data.email;
       
       // Prevent deletion
       allow delete: if false;

@@ -86,9 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set auth cookie for middleware
       document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
 
-      // Save user data to Firestore in background (non-blocking)
-      console.log('Saving user data to Firestore in background...')
-      setDoc(doc(db, 'users', user.uid), {
+      // Save user data to Firestore (must wait to ensure data is saved)
+      console.log('Saving user data to Firestore...')
+      await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email?.toLowerCase().trim() || email.toLowerCase().trim(), // Ensure lowercase
         name: userData.name,
@@ -100,13 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         accountStatus: 'pending_mosque_registration', // pending_mosque_registration, active, suspended
         lastLoginAt: new Date().toISOString(),
         deviceFingerprint: navigator.userAgent // Simple device tracking
-      }).then(() => {
-        console.log('User data saved to Firestore successfully')
-      }).catch(err => {
-        console.error('Failed to save user data to Firestore:', err)
       })
+      console.log('User data saved to Firestore successfully')
       
-      // Return user immediately without waiting for Firestore
       return user
     } catch (error: any) {
       console.error('Sign up error:', error)
@@ -121,6 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         errorMessage = 'Format email tidak valid.'
       } else if (error.code === 'auth/network-request-failed') {
         errorMessage = 'Koneksi internet bermasalah. Silakan coba lagi.'
+      } else if (error.message) {
+        errorMessage = error.message
       }
       
       throw new Error(errorMessage)

@@ -42,10 +42,10 @@ export default function RegisterPage() {
   const [resendCountdown, setResendCountdown] = useState(0)
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong' | null>(null)
   const [passwordMatch, setPasswordMatch] = useState<boolean | null>(null)
-  const [emailChecking, setEmailChecking] = useState(false)
-  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
   const [nicknameChecking, setNicknameChecking] = useState(false)
   const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null)
+  const [emailChecking, setEmailChecking] = useState(false)
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
 
   // Countdown timer for resend OTP
   useEffect(() => {
@@ -91,68 +91,8 @@ export default function RegisterPage() {
     }
   }, [formData.password, formData.confirmPassword])
 
-  // Check email availability with both Firestore and Firebase Auth
-  useEffect(() => {
-    if (!formData.email || !formData.email.includes('@')) {
-      setEmailAvailable(null)
-      return
-    }
-
-    const checkEmail = async () => {
-      setEmailChecking(true)
-      console.log('Checking email availability:', formData.email)
-      try {
-        const emailLower = formData.email.toLowerCase().trim()
-        
-        // Method 1: Check in Firestore users collection
-        const { collection, query, where, getDocs, limit } = await import('firebase/firestore')
-        const { db } = await import('@/lib/firebase')
-        
-        const usersRef = collection(db, 'users')
-        const q = query(
-          usersRef, 
-          where('email', '==', emailLower),
-          limit(1)
-        )
-        const querySnapshot = await getDocs(q)
-        
-        console.log('Firestore check - Documents found:', querySnapshot.size)
-        
-        // If found in Firestore, email is taken
-        if (!querySnapshot.empty) {
-          console.log('Email check result:', 'Already registered in Firestore ✗')
-          setEmailAvailable(false)
-          setEmailChecking(false)
-          return
-        }
-        
-        // Method 2: Check in Firebase Auth as backup
-        const { fetchSignInMethodsForEmail } = await import('firebase/auth')
-        const { auth } = await import('@/lib/firebase')
-        
-        const signInMethods = await fetchSignInMethodsForEmail(auth, emailLower)
-        console.log('Firebase Auth check - Sign-in methods found:', signInMethods.length)
-        
-        // If found in Firebase Auth, email is taken
-        if (signInMethods.length > 0) {
-          console.log('Email check result:', 'Already registered in Firebase Auth ✗')
-          setEmailAvailable(false)
-        } else {
-          console.log('Email check result:', 'Available ✓')
-          setEmailAvailable(true)
-        }
-      } catch (error: any) {
-        console.error('Error checking email:', error)
-        setEmailAvailable(null)
-      } finally {
-        setEmailChecking(false)
-      }
-    }
-
-    // Reduced debounce to 150ms for faster response
-    const timer = setTimeout(checkEmail, 150)
-    return () => clearTimeout(timer)
-  }, [formData.email])
+  // Email validation removed - will be checked at registration time (step 3)
+  // This is more reliable as Firebase Auth will return auth/email-already-in-use error
 
   // Generate nickname suggestions from full name
   const generateNicknameSuggestions = (fullName: string): string[] => {
@@ -214,29 +154,49 @@ export default function RegisterPage() {
 
     const checkNickname = async () => {
       setNicknameChecking(true)
-      console.log('Checking nickname:', formData.nickname)
+      const nicknameLower = formData.nickname.toLowerCase()
+      console.log('=== NICKNAME VALIDATION CHECK ===')
+      console.log('Input nickname:', formData.nickname)
+      console.log('Normalized nickname:', nicknameLower)
+      
       try {
-        const { collection, query, where, getDocs, limit } = await import('firebase/firestore')
+        const { collection, getDocs } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
         
-        // Query Firestore for existing nickname with limit 1 for faster response
+        // Get all users and manually search (more reliable than query)
         const usersRef = collection(db, 'users')
-        const q = query(
-          usersRef, 
-          where('nickname', '==', formData.nickname.toLowerCase()),
-          limit(1) // Only need to know if exists, not count
-        )
-        const querySnapshot = await getDocs(q)
+        const querySnapshot = await getDocs(usersRef)
         
-        // If no documents found, nickname is available
-        const available = querySnapshot.empty
-        console.log('Nickname check result:', available ? 'Available' : 'Taken')
-        setNicknameAvailable(available)
+        console.log('Firestore - Total users:', querySnapshot.size)
+        
+        // Manual search through all users (case-insensitive)
+        let nicknameFound = false
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data()
+          const userNickname = userData.nickname?.toLowerCase().trim()
+          console.log('Comparing:', userNickname, '===', nicknameLower, '?', userNickname === nicknameLower)
+          if (userNickname === nicknameLower) {
+            console.log('❌ Nickname FOUND in Firestore:', {
+              docId: doc.id,
+              storedNickname: userData.nickname
+            })
+            nicknameFound = true
+          }
+        })
+        
+        if (nicknameFound) {
+          console.log('❌ Nickname SUDAH DIGUNAKAN')
+          setNicknameAvailable(false)
+        } else {
+          console.log('✅ Nickname TERSEDIA')
+          setNicknameAvailable(true)
+        }
       } catch (error) {
-        console.error('Error checking nickname:', error)
+        console.error('❌ Error checking nickname:', error)
         setNicknameAvailable(null)
       } finally {
         setNicknameChecking(false)
+        console.log('=== NICKNAME VALIDATION END ===')
       }
     }
 
@@ -244,6 +204,69 @@ export default function RegisterPage() {
     const timer = setTimeout(checkNickname, 150)
     return () => clearTimeout(timer)
   }, [formData.nickname])
+
+  // Check email availability in Firestore
+  useEffect(() => {
+    if (!formData.email || !formData.email.includes('@')) {
+      setEmailAvailable(null)
+      setEmailChecking(false)
+      return
+    }
+
+    // Skip if already checking
+    if (emailChecking) return
+
+    const checkEmail = async () => {
+      setEmailChecking(true)
+      const emailLower = formData.email.toLowerCase().trim()
+      console.log('=== EMAIL VALIDATION CHECK ===')
+      console.log('Input email:', formData.email)
+      console.log('Normalized email:', emailLower)
+      
+      try {
+        const { collection, getDocs } = await import('firebase/firestore')
+        const { db } = await import('@/lib/firebase')
+        
+        // Get all users and manually search for email
+        const usersRef = collection(db, 'users')
+        const querySnapshot = await getDocs(usersRef)
+        
+        console.log('Firestore - Total users:', querySnapshot.size)
+        
+        // Manual search through all users (case-insensitive)
+        let emailFound = false
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data()
+          const userEmail = userData.email?.toLowerCase().trim()
+          if (userEmail === emailLower) {
+            console.log('❌ Email FOUND in Firestore:', {
+              docId: doc.id,
+              storedEmail: userData.email
+            })
+            emailFound = true
+          }
+        })
+        
+        if (emailFound) {
+          console.log('❌ Email SUDAH TERDAFTAR')
+          setEmailAvailable(false)
+        } else {
+          console.log('✅ Email TERSEDIA')
+          setEmailAvailable(true)
+        }
+      } catch (error) {
+        console.error('❌ Error checking email:', error)
+        setEmailAvailable(null)
+      } finally {
+        setEmailChecking(false)
+        console.log('=== EMAIL VALIDATION END ===')
+      }
+    }
+
+    // Reduced debounce to 150ms for faster response
+    const timer = setTimeout(checkEmail, 150)
+    return () => clearTimeout(timer)
+  }, [formData.email])
 
   // Animation variants untuk efek muncul
   const containerVariants = {
@@ -419,7 +442,6 @@ export default function RegisterPage() {
     console.log('Form Data:', formData)
     console.log('Nickname:', formData.nickname)
     console.log('Nickname Available:', nicknameAvailable)
-    console.log('Email Available:', emailAvailable)
     console.log('Password Strength:', passwordStrength)
     console.log('Password Match:', passwordMatch)
     
@@ -447,8 +469,8 @@ export default function RegisterPage() {
         }
         
         // Validate email availability
-        if (emailChecking) {
-          setError('Mohon tunggu pengecekan email selesai...')
+        if (!formData.email || !formData.email.includes('@')) {
+          setError('Email tidak valid')
           setLoading(false)
           return
         }
@@ -547,11 +569,11 @@ export default function RegisterPage() {
         })
 
         console.log('Step 3: Firebase registration successful! User ID:', user.uid)
-        setSuccess('Pendaftaran berhasil!')
+        setSuccess('Pendaftaran berhasil! Silakan lengkapi data masjid Anda.')
+        setLoading(false)
         
-        // Redirect immediately without delay
-        console.log('Step 3: Redirecting to /daftar-masjid')
-        router.push('/daftar-masjid')
+        // Don't auto-redirect, let user click button manually
+        // User will see success message with link to daftar-masjid
       }
     } catch (err: any) {
       console.error('=== REGISTRATION ERROR ===')
@@ -794,9 +816,17 @@ export default function RegisterPage() {
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-600"
+                    className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-600"
                   >
-                    {success}
+                    <p className="font-semibold mb-2">{success}</p>
+                    {currentStep === 3 && (
+                      <Link 
+                        href="/daftar-masjid"
+                        className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                      >
+                        Lengkapi Data Masjid →
+                      </Link>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -948,6 +978,8 @@ export default function RegisterPage() {
                             </svg>
                           )}
                         </div>
+                        
+                        {/* Validation messages */}
                         {emailAvailable === false && (
                           <p className="text-xs text-red-500 mt-1.5 ml-1">Email sudah terdaftar</p>
                         )}
@@ -1328,7 +1360,9 @@ export default function RegisterPage() {
                       setLoading(true)
                       setError("")
                       await signInWithGoogle()
-                      router.push("/daftar-masjid")
+                      // Wait for auth state to fully update before redirect
+                      await new Promise(resolve => setTimeout(resolve, 1000))
+                      window.location.href = '/daftar-masjid'
                     } catch (err: any) {
                       setError(err.message || "Gagal login dengan Google")
                       setLoading(false)
