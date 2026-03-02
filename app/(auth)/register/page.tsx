@@ -121,7 +121,8 @@ export default function RegisterPage() {
       }
     }
 
-    const timer = setTimeout(checkEmail, 300) // Reduced from 500ms to 300ms
+    // Reduced debounce to 150ms for faster response
+    const timer = setTimeout(checkEmail, 150)
     return () => clearTimeout(timer)
   }, [formData.email])
 
@@ -172,23 +173,31 @@ export default function RegisterPage() {
     }
   }, [formData.name])
 
-  // Check nickname availability in Firestore
+  // Check nickname availability in Firestore with optimizations
   useEffect(() => {
     if (!formData.nickname || formData.nickname.length < 3) {
       setNicknameAvailable(null)
+      setNicknameChecking(false)
       return
     }
+
+    // Skip if already checking
+    if (nicknameChecking) return
 
     const checkNickname = async () => {
       setNicknameChecking(true)
       console.log('Checking nickname:', formData.nickname)
       try {
-        const { collection, query, where, getDocs } = await import('firebase/firestore')
+        const { collection, query, where, getDocs, limit } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
         
-        // Query Firestore for existing nickname
+        // Query Firestore for existing nickname with limit 1 for faster response
         const usersRef = collection(db, 'users')
-        const q = query(usersRef, where('nickname', '==', formData.nickname.toLowerCase()))
+        const q = query(
+          usersRef, 
+          where('nickname', '==', formData.nickname.toLowerCase()),
+          limit(1) // Only need to know if exists, not count
+        )
         const querySnapshot = await getDocs(q)
         
         // If no documents found, nickname is available
@@ -203,7 +212,8 @@ export default function RegisterPage() {
       }
     }
 
-    const timer = setTimeout(checkNickname, 300) // Reduced from 500ms to 300ms
+    // Reduced debounce to 150ms for faster response
+    const timer = setTimeout(checkNickname, 150)
     return () => clearTimeout(timer)
   }, [formData.nickname])
 
