@@ -91,7 +91,7 @@ export default function RegisterPage() {
     }
   }, [formData.password, formData.confirmPassword])
 
-  // Check email availability with Firebase Auth
+  // Check email availability with Firestore (more reliable than Firebase Auth)
   useEffect(() => {
     if (!formData.email || !formData.email.includes('@')) {
       setEmailAvailable(null)
@@ -101,21 +101,25 @@ export default function RegisterPage() {
     const checkEmail = async () => {
       setEmailChecking(true)
       try {
-        // Use Firebase Auth fetchSignInMethodsForEmail
-        const { fetchSignInMethodsForEmail } = await import('firebase/auth')
-        const { auth } = await import('@/lib/firebase')
+        // Check in Firestore users collection
+        const { collection, query, where, getDocs, limit } = await import('firebase/firestore')
+        const { db } = await import('@/lib/firebase')
         
-        const signInMethods = await fetchSignInMethodsForEmail(auth, formData.email)
-        // If signInMethods array is empty, email is available
-        setEmailAvailable(signInMethods.length === 0)
+        const usersRef = collection(db, 'users')
+        const q = query(
+          usersRef, 
+          where('email', '==', formData.email.toLowerCase()),
+          limit(1)
+        )
+        const querySnapshot = await getDocs(q)
+        
+        // If no documents found, email is available
+        const available = querySnapshot.empty
+        console.log('Email check result:', available ? 'Available' : 'Already registered')
+        setEmailAvailable(available)
       } catch (error: any) {
-        // If error code is auth/invalid-email, still show as available but invalid format
-        if (error?.code === 'auth/invalid-email') {
-          setEmailAvailable(null)
-        } else {
-          console.error('Error checking email:', error)
-          setEmailAvailable(null)
-        }
+        console.error('Error checking email:', error)
+        setEmailAvailable(null)
       } finally {
         setEmailChecking(false)
       }
