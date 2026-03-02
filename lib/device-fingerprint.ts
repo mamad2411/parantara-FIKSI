@@ -1,7 +1,7 @@
 /**
- * Device Fingerprinting untuk Web - Enhanced Version
- * Menggunakan FingerprintJS untuk akurasi maksimal
- * Library: @fingerprintjs/fingerprintjs
+ * Device Fingerprinting untuk Web - Custom Implementation
+ * Implementasi manual tanpa library external untuk stabilitas maksimal
+ * Menggunakan berbagai browser APIs untuk akurasi tinggi
  */
 
 export interface DeviceFingerprint {
@@ -22,118 +22,134 @@ export interface DeviceFingerprint {
     vendor: string;
     cookieEnabled: boolean;
     doNotTrack: string | null;
+    canvasFingerprint: string;
+    webglFingerprint: string;
+    audioFingerprint: string;
   };
   timestamp: number;
 }
 
-let fpPromise: Promise<any> | null = null;
-
 /**
- * Initialize FingerprintJS (singleton pattern with dynamic import)
+ * Generate Canvas Fingerprint
  */
-async function initFingerprint() {
-  if (typeof window === 'undefined') {
-    throw new Error('FingerprintJS can only run in browser');
+function getCanvasFingerprint(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'no-canvas';
+
+    canvas.width = 200;
+    canvas.height = 50;
+
+    // Draw text with different styles
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
+    ctx.fillText('DanaMasjid 🕌', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillText('DanaMasjid 🕌', 4, 17);
+
+    return canvas.toDataURL();
+  } catch (e) {
+    return 'canvas-error';
   }
-  
-  if (!fpPromise) {
-    // Dynamic import to avoid SSR issues
-    const FingerprintJS = await import('@fingerprintjs/fingerprintjs');
-    fpPromise = FingerprintJS.default.load({
-      monitoring: false, // Disable monitoring untuk privacy
-    });
-  }
-  return fpPromise;
 }
 
 /**
- * Generate device fingerprint menggunakan FingerprintJS
- * Jauh lebih akurat dari implementasi manual
+ * Generate WebGL Fingerprint
  */
-export async function generateDeviceFingerprint(): Promise<DeviceFingerprint> {
-  // Check if running in browser
-  if (typeof window === 'undefined') {
-    throw new Error('Device fingerprinting only works in browser');
-  }
-  
+function getWebGLFingerprint(): string {
   try {
-    // Load FingerprintJS
-    const fp = await initFingerprint();
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return 'no-webgl';
+
+    const debugInfo = (gl as any).getExtension('WEBGL_debug_renderer_info');
+    if (debugInfo) {
+      const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      return `${vendor}~${renderer}`;
+    }
+
+    return 'webgl-no-debug';
+  } catch (e) {
+    return 'webgl-error';
+  }
+}
+
+/**
+ * Generate Audio Fingerprint
+ */
+function getAudioFingerprint(): string {
+  try {
+    const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return 'no-audio';
+
+    const context = new AudioContext();
+    const oscillator = context.createOscillator();
+    const analyser = context.createAnalyser();
+    const gainNode = context.createGain();
+    const scriptProcessor = context.createScriptProcessor(4096, 1, 1);
+
+    gainNode.gain.value = 0; // Mute
+    oscillator.connect(analyser);
+    analyser.connect(scriptProcessor);
+    scriptProcessor.connect(gainNode);
+    gainNode.connect(context.destination);
+
+    oscillator.start(0);
     
-    // Get fingerprint result
-    const result = await fp.get();
+    const fingerprint = `${context.sampleRate}-${analyser.fftSize}`;
     
-    // Extract components
-    const components = result.components;
-    
-    // Build detailed fingerprint
-    const fingerprint: DeviceFingerprint = {
-      id: result.visitorId, // Unique ID dari FingerprintJS
-      visitorId: result.visitorId,
-      confidence: result.confidence?.score || 1,
-      components: {
-        userAgent: navigator.userAgent,
-        screenResolution: `${screen.width}x${screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        language: navigator.language,
-        platform: navigator.platform,
-        colorDepth: screen.colorDepth,
-        pixelRatio: window.devicePixelRatio,
-        hardwareConcurrency: navigator.hardwareConcurrency || 0,
-        deviceMemory: (navigator as any).deviceMemory,
-        touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-        vendor: navigator.vendor,
-        cookieEnabled: navigator.cookieEnabled,
-        doNotTrack: navigator.doNotTrack || null,
-      },
-      timestamp: Date.now(),
-    };
+    oscillator.stop();
+    context.close();
 
     return fingerprint;
-  } catch (error) {
-    console.error('Error generating fingerprint:', error);
-    // Fallback to basic fingerprint
-    return generateBasicFingerprint();
+  } catch (e) {
+    return 'audio-error';
   }
 }
 
 /**
- * Fallback: Basic fingerprint jika FingerprintJS gagal
+ * Get installed fonts (simplified)
  */
-async function generateBasicFingerprint(): Promise<DeviceFingerprint> {
-  const components = [
-    navigator.userAgent,
-    navigator.language,
-    screen.colorDepth,
-    screen.width + 'x' + screen.height,
-    new Date().getTimezoneOffset(),
-    navigator.platform,
-    window.devicePixelRatio,
-  ].join('|');
+function getFonts(): string {
+  const baseFonts = ['monospace', 'sans-serif', 'serif'];
+  const testFonts = [
+    'Arial', 'Verdana', 'Times New Roman', 'Courier New',
+    'Georgia', 'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS',
+    'Trebuchet MS', 'Impact'
+  ];
 
-  const fingerprintId = await hashString(components);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return 'no-fonts';
 
-  return {
-    id: fingerprintId,
-    visitorId: fingerprintId,
-    confidence: 0.5, // Lower confidence for basic fingerprint
-    components: {
-      userAgent: navigator.userAgent,
-      screenResolution: `${screen.width}x${screen.height}`,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      language: navigator.language,
-      platform: navigator.platform,
-      colorDepth: screen.colorDepth,
-      pixelRatio: window.devicePixelRatio,
-      hardwareConcurrency: navigator.hardwareConcurrency || 0,
-      deviceMemory: (navigator as any).deviceMemory,
-      touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-      vendor: navigator.vendor,
-      cookieEnabled: navigator.cookieEnabled,
-      doNotTrack: navigator.doNotTrack || null,
-    },
-    timestamp: Date.now(),
-  };
+  const testString = 'mmmmmmmmmmlli';
+  const textSize = '72px';
+  
+  const baseFontWidths: { [key: string]: number } = {};
+  baseFonts.forEach(baseFont => {
+    ctx.font = `${textSize} ${baseFont}`;
+    baseFontWidths[baseFont] = ctx.measureText(testString).width;
+  });
+
+  const detectedFonts: string[] = [];
+  testFonts.forEach(font => {
+    baseFonts.forEach(baseFont => {
+      ctx.font = `${textSize} ${font}, ${baseFont}`;
+      const width = ctx.measureText(testString).width;
+      if (width !== baseFontWidths[baseFont]) {
+        if (!detectedFonts.includes(font)) {
+          detectedFonts.push(font);
+        }
+      }
+    });
+  });
+
+  return detectedFonts.join(',');
 }
 
 /**
@@ -148,9 +164,95 @@ async function hashString(str: string): Promise<string> {
 }
 
 /**
+ * Generate device fingerprint - Custom implementation
+ */
+export async function generateDeviceFingerprint(): Promise<DeviceFingerprint> {
+  // Check if running in browser
+  if (typeof window === 'undefined') {
+    throw new Error('Device fingerprinting only works in browser');
+  }
+
+  try {
+    // Collect all components
+    const canvasFingerprint = getCanvasFingerprint();
+    const webglFingerprint = getWebGLFingerprint();
+    const audioFingerprint = getAudioFingerprint();
+    const fonts = getFonts();
+
+    const components = {
+      userAgent: navigator.userAgent,
+      screenResolution: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset().toString(),
+      language: navigator.language,
+      languages: navigator.languages.join(','),
+      platform: navigator.platform,
+      colorDepth: screen.colorDepth,
+      pixelRatio: window.devicePixelRatio,
+      hardwareConcurrency: navigator.hardwareConcurrency || 0,
+      deviceMemory: (navigator as any).deviceMemory,
+      touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      maxTouchPoints: navigator.maxTouchPoints,
+      vendor: navigator.vendor,
+      cookieEnabled: navigator.cookieEnabled,
+      doNotTrack: navigator.doNotTrack || null,
+      canvasFingerprint,
+      webglFingerprint,
+      audioFingerprint,
+      fonts,
+      plugins: Array.from(navigator.plugins || []).map(p => p.name).join(','),
+    };
+
+    // Combine all components into a single string
+    const fingerprintString = Object.values(components).join('|');
+    
+    // Generate hash
+    const fingerprintId = await hashString(fingerprintString);
+
+    // Calculate confidence based on available features
+    let confidence = 0.5;
+    if (canvasFingerprint !== 'no-canvas' && canvasFingerprint !== 'canvas-error') confidence += 0.15;
+    if (webglFingerprint !== 'no-webgl' && webglFingerprint !== 'webgl-error') confidence += 0.15;
+    if (audioFingerprint !== 'no-audio' && audioFingerprint !== 'audio-error') confidence += 0.1;
+    if (fonts !== 'no-fonts' && fonts.length > 0) confidence += 0.1;
+
+    const fingerprint: DeviceFingerprint = {
+      id: fingerprintId,
+      visitorId: fingerprintId,
+      confidence: Math.min(confidence, 1),
+      components: {
+        userAgent: components.userAgent,
+        screenResolution: components.screenResolution,
+        timezone: components.timezone,
+        language: components.language,
+        platform: components.platform,
+        colorDepth: components.colorDepth,
+        pixelRatio: components.pixelRatio,
+        hardwareConcurrency: components.hardwareConcurrency,
+        deviceMemory: components.deviceMemory,
+        touchSupport: components.touchSupport,
+        vendor: components.vendor,
+        cookieEnabled: components.cookieEnabled,
+        doNotTrack: components.doNotTrack,
+        canvasFingerprint: canvasFingerprint.substring(0, 50) + '...', // Truncate for storage
+        webglFingerprint: components.webglFingerprint,
+        audioFingerprint: components.audioFingerprint,
+      },
+      timestamp: Date.now(),
+    };
+
+    return fingerprint;
+  } catch (error) {
+    console.error('Error generating fingerprint:', error);
+    throw error;
+  }
+}
+
+/**
  * Simpan device fingerprint ke localStorage
  */
 export function saveDeviceFingerprint(fingerprint: DeviceFingerprint): void {
+  if (typeof window === 'undefined') return;
   localStorage.setItem('device_fingerprint', JSON.stringify(fingerprint));
   localStorage.setItem('device_fingerprint_id', fingerprint.id);
 }
@@ -159,6 +261,7 @@ export function saveDeviceFingerprint(fingerprint: DeviceFingerprint): void {
  * Get device fingerprint dari localStorage
  */
 export function getStoredDeviceFingerprint(): DeviceFingerprint | null {
+  if (typeof window === 'undefined') return null;
   const stored = localStorage.getItem('device_fingerprint');
   return stored ? JSON.parse(stored) : null;
 }
@@ -167,12 +270,12 @@ export function getStoredDeviceFingerprint(): DeviceFingerprint | null {
  * Get only fingerprint ID (faster)
  */
 export function getStoredFingerprintId(): string | null {
+  if (typeof window === 'undefined') return null;
   return localStorage.getItem('device_fingerprint_id');
 }
 
 /**
  * Compare two device fingerprints
- * Returns true if they match
  */
 export function compareFingerprints(fp1: DeviceFingerprint, fp2: DeviceFingerprint): boolean {
   return fp1.id === fp2.id;
@@ -182,6 +285,7 @@ export function compareFingerprints(fp1: DeviceFingerprint, fp2: DeviceFingerpri
  * Check if device is trusted for specific user
  */
 export function isDeviceTrusted(userId: string): boolean {
+  if (typeof window === 'undefined') return false;
   const trustedDevices = localStorage.getItem(`trusted_devices_${userId}`);
   if (!trustedDevices) return false;
   
@@ -195,6 +299,7 @@ export function isDeviceTrusted(userId: string): boolean {
  * Add device to trusted list
  */
 export function trustDevice(userId: string, fingerprintId: string): void {
+  if (typeof window === 'undefined') return;
   const key = `trusted_devices_${userId}`;
   const stored = localStorage.getItem(key);
   const devices: string[] = stored ? JSON.parse(stored) : [];
@@ -209,6 +314,7 @@ export function trustDevice(userId: string, fingerprintId: string): void {
  * Remove device from trusted list
  */
 export function untrustDevice(userId: string, fingerprintId: string): void {
+  if (typeof window === 'undefined') return;
   const key = `trusted_devices_${userId}`;
   const stored = localStorage.getItem(key);
   if (!stored) return;
@@ -222,6 +328,7 @@ export function untrustDevice(userId: string, fingerprintId: string): void {
  * Get all trusted devices for user
  */
 export function getTrustedDevices(userId: string): string[] {
+  if (typeof window === 'undefined') return [];
   const stored = localStorage.getItem(`trusted_devices_${userId}`);
   return stored ? JSON.parse(stored) : [];
 }
@@ -230,6 +337,7 @@ export function getTrustedDevices(userId: string): string[] {
  * Clear all trusted devices for user
  */
 export function clearTrustedDevices(userId: string): void {
+  if (typeof window === 'undefined') return;
   localStorage.removeItem(`trusted_devices_${userId}`);
 }
 
@@ -261,6 +369,5 @@ export function getDeviceInfo(fingerprint: DeviceFingerprint): string {
  * Check if fingerprint is high confidence
  */
 export function isHighConfidence(fingerprint: DeviceFingerprint): boolean {
-  return fingerprint.confidence >= 0.9;
+  return fingerprint.confidence >= 0.8;
 }
-
