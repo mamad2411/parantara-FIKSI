@@ -100,22 +100,28 @@ export default function RegisterPage() {
 
     const checkEmail = async () => {
       setEmailChecking(true)
+      console.log('Checking email availability:', formData.email)
       try {
         // Check in Firestore users collection
         const { collection, query, where, getDocs, limit } = await import('firebase/firestore')
         const { db } = await import('@/lib/firebase')
         
         const usersRef = collection(db, 'users')
+        
+        // Try both lowercase and original email to be safe
+        const emailLower = formData.email.toLowerCase()
         const q = query(
           usersRef, 
-          where('email', '==', formData.email.toLowerCase()),
+          where('email', '==', emailLower),
           limit(1)
         )
         const querySnapshot = await getDocs(q)
         
         // If no documents found, email is available
         const available = querySnapshot.empty
-        console.log('Email check result:', available ? 'Available' : 'Already registered')
+        console.log('Email check result for', emailLower, ':', available ? 'Available ✓' : 'Already registered ✗')
+        console.log('Documents found:', querySnapshot.size)
+        
         setEmailAvailable(available)
       } catch (error: any) {
         console.error('Error checking email:', error)

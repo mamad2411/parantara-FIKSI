@@ -128,8 +128,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithEmailAndPassword(auth, email, password)
       const user = result.user
       
-      // Get user data from Firestore
-      const userRef = doc(db, 'users', user.uid)
+      // Save userId to localStorage immediately for faster UX
+      localStorage.setItem('userId', user.uid)
+      
+      // Set auth cookie for middleware
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+      
+      // Do Firestore operations in background (non-blocking)
+      updateUserLoginData(user.uid).catch(err => {
+        console.error('Background update error:', err)
+      })
+      
+      return user
+    } catch (error: any) {
+      // Suppress offline errors in console
+      if (error?.code === 'unavailable' || error?.message?.includes('client is offline')) {
+        console.warn('Firebase offline - attempting to continue with cached data')
+        return null
+      }
+      
+      console.error('Sign in error:', error)
+      throw error
+    }
+  }
+
+  // Background function to update user data (non-blocking)
+  const updateUserLoginData = async (userId: string) => {
+    try {
+      const userRef = doc(db, 'users', userId)
       const userSnap = await getDoc(userRef)
       
       if (userSnap.exists()) {
@@ -137,65 +163,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const currentDevice = navigator.userAgent
         const now = new Date()
         
-        // Check if registration deadline has passed
+        // Check if registration deadline has passed (just log, don't block login)
         if (userData.registrationDeadline && !userData.registrationCompleted) {
           const deadline = new Date(userData.registrationDeadline)
           if (now > deadline) {
-            // Account suspended - need reactivation
+            console.warn('Registration deadline passed - user should complete registration')
+            // Update status but don't block
             await setDoc(userRef, {
-              ...userData,
-              accountStatus: 'suspended',
-              suspendedAt: now.toISOString(),
-              suspensionReason: 'registration_incomplete'
+              accountStatus: 'pending_mosque_registration',
+              lastReminderAt: now.toISOString()
             }, { merge: true })
-            
-            // Sign out immediately
-            await firebaseSignOut(auth)
-            
-            throw new Error('ACCOUNT_SUSPENDED')
           }
         }
         
-        // Check device fingerprint
-        if (userData.deviceFingerprint && userData.deviceFingerprint !== currentDevice) {
-          // Different device - require verification
-          throw new Error('DEVICE_NOT_RECOGNIZED')
-        }
-        
-        // Update last login
-        await setDoc(userRef, {
+        // Update last login (fire and forget)
+        setDoc(userRef, {
           lastLoginAt: now.toISOString(),
           deviceFingerprint: currentDevice
-        }, { merge: true })
+        }, { merge: true }).catch(err => console.error('Failed to update login time:', err))
       }
-      
-      // Save userId to localStorage
-      localStorage.setItem('userId', user.uid)
-      
-      // Set auth cookie for middleware
-      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
-      
-      return user
-    } catch (error: any) {
-      // Suppress offline errors in console
-      if (error?.code === 'unavailable' || error?.message?.includes('client is offline')) {
-        console.warn('Firebase offline - attempting to continue with cached data')
-        // Don't throw, let the app continue with cached auth state
-        return null
-      }
-      
-      console.error('Sign in error:', error)
-      
-      // Handle custom errors
-      if (error.message === 'ACCOUNT_SUSPENDED') {
-        throw new Error('Akun Anda telah dinonaktifkan karena belum menyelesaikan pendaftaran masjid dalam 48 jam. Silakan verifikasi email Anda untuk mengaktifkan kembali.')
-      }
-      
-      if (error.message === 'DEVICE_NOT_RECOGNIZED') {
-        throw new Error('DEVICE_NOT_RECOGNIZED')
-      }
-      
-      throw error
+    } catch (error) {
+      console.error('Error updating user login data:', error)
     }
   }
 
