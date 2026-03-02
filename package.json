@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "optimize:images": "node scripts/optimize-images.js",
     "compress:videos": "node scripts/compress-videos.js",
     "compress:videos:balanced": "node scripts/compress-videos.js balanced",
