@@ -10,6 +10,10 @@
 # Next.js plugin for Netlify
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  
+[plugins.inputs]
+  # Disable Next.js image optimization (we already set unoptimized: true)
+  disableNextImageOptimization = true
 
 # Security headers
 [[headers]]
@@ -25,13 +29,7 @@
     X-Download-Options = "noopen"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseapp.com https://*.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://www.google.com https://danamasjid-api.danamsjid-api.workers.dev https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com wss://*.pusher.com https://www.emsifa.com; frame-src 'self' https://www.google.com https://accounts.google.com https://*.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests; block-all-mixed-content;"
 
-# Cache static assets
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Content-Type = "text/css; charset=utf-8"
-
+# Cache static assets - CSS files first (more specific)
 [[headers]]
   for = "/_next/static/chunks/*.css"
   [headers.values]
@@ -42,6 +40,17 @@
   for = "/_next/static/css/*.css"
   [headers.values]
     Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/static/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
