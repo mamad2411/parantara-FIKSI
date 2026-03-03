@@ -11,10 +11,13 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Edge function to fix CSS MIME type
-[[edge_functions]]
-  function = "fix-css-mime"
-  path = "/_next/static/*"
+# Headers for static assets
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
 
 # API proxy to Cloudflare Workers
 [[redirects]]
