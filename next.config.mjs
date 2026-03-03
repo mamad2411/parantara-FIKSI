@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
-    // Disable Next.js image optimization, use Netlify's instead
     unoptimized: true,
     remotePatterns: [
       {
@@ -17,82 +17,9 @@ const nextConfig = {
       },
     ],
   },
-  // Optimize production build
   compress: true,
   poweredByHeader: false,
   
-  // Security Headers
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          // HSTS - Force HTTPS
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          // Prevent clickjacking
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          // XSS Filter
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          // Referrer Policy
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          // Permissions Policy
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
-          },
-          // Cross-Origin-Opener-Policy
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups'
-          },
-          // Cross-Origin-Embedder-Policy
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'credentialless'
-          },
-          // Cross-Origin-Resource-Policy
-          {
-            key: 'Cross-Origin-Resource-Policy',
-            value: 'same-site'
-          },
-          // Content Security Policy
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseapp.com https://*.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://www.google.com wss://ws-us3.pusher.com https://danamasjid-api.danamsjid-api.workers.dev https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com wss://*.pusher.com https://www.emsifa.com",
-              "frame-src 'self' https://www.google.com https://accounts.google.com https://*.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
-              "media-src 'self'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'self'",
-              "upgrade-insecure-requests",
-              "block-all-mixed-content"
-            ].join('; ')
-          }
-        ],
-      },
-    ]
-  },
-  
-  // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
   },
