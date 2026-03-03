@@ -150,13 +150,14 @@ export default function RegisterPage() {
     setNicknameChecking(false)
     setNicknameAvailable(null)
     
+    // Require at least 3 characters before checking
     if (!formData.nickname || formData.nickname.length < 3) {
       return
     }
 
     const checkNickname = async () => {
       setNicknameChecking(true)
-      const nicknameLower = formData.nickname.toLowerCase()
+      const nicknameLower = formData.nickname.toLowerCase().trim()
       console.log('=== NICKNAME VALIDATION CHECK ===')
       console.log('Input nickname:', formData.nickname)
       console.log('Normalized nickname:', nicknameLower)
@@ -195,6 +196,7 @@ export default function RegisterPage() {
         }
       } catch (error) {
         console.error('❌ Error checking nickname:', error)
+        // Don't show error to user, just set to null (neutral state)
         setNicknameAvailable(null)
       } finally {
         setNicknameChecking(false)
@@ -202,8 +204,8 @@ export default function RegisterPage() {
       }
     }
 
-    // Debounce to 500ms for better UX
-    const timer = setTimeout(checkNickname, 500)
+    // Increase debounce to 1000ms - wait 1 second after user stops typing
+    const timer = setTimeout(checkNickname, 1000)
     
     // Cleanup: cancel timer if nickname changes before timeout
     return () => {
@@ -218,7 +220,8 @@ export default function RegisterPage() {
     setEmailChecking(false)
     setEmailAvailable(null)
     
-    if (!formData.email || !formData.email.includes('@')) {
+    // Require valid email format before checking
+    if (!formData.email || !formData.email.includes('@') || formData.email.length < 5) {
       return
     }
 
@@ -262,6 +265,7 @@ export default function RegisterPage() {
         }
       } catch (error) {
         console.error('❌ Error checking email:', error)
+        // Don't show error to user, just set to null (neutral state)
         setEmailAvailable(null)
       } finally {
         setEmailChecking(false)
@@ -269,8 +273,8 @@ export default function RegisterPage() {
       }
     }
 
-    // Debounce to 500ms for better UX
-    const timer = setTimeout(checkEmail, 500)
+    // Increase debounce to 1000ms - wait 1 second after user stops typing
+    const timer = setTimeout(checkEmail, 1000)
     
     // Cleanup: cancel timer if email changes before timeout
     return () => {
