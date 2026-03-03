@@ -21,9 +21,6 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Output configuration for Netlify
-  output: 'standalone',
-  
   // Security Headers
   async headers() {
     return [
