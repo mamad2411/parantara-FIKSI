@@ -37,11 +37,6 @@ const nextConfig = {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN'
           },
-          // XSS Protection
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
           // XSS Filter
           {
             key: 'X-XSS-Protection',

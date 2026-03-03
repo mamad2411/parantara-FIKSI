@@ -11,14 +11,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Headers for static assets
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-
 # API proxy to Cloudflare Workers
 [[redirects]]
   from = "/api/*"
