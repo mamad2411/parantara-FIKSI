@@ -146,14 +146,13 @@ export default function RegisterPage() {
 
   // Check nickname availability in Firestore with optimizations
   useEffect(() => {
+    // Reset state when nickname changes
+    setNicknameChecking(false)
+    setNicknameAvailable(null)
+    
     if (!formData.nickname || formData.nickname.length < 3) {
-      setNicknameAvailable(null)
-      setNicknameChecking(false)
       return
     }
-
-    // Skip if already checking
-    if (nicknameChecking) return
 
     const checkNickname = async () => {
       setNicknameChecking(true)
@@ -203,21 +202,25 @@ export default function RegisterPage() {
       }
     }
 
-    // Reduced debounce to 150ms for faster response
-    const timer = setTimeout(checkNickname, 150)
-    return () => clearTimeout(timer)
+    // Debounce to 500ms for better UX
+    const timer = setTimeout(checkNickname, 500)
+    
+    // Cleanup: cancel timer if nickname changes before timeout
+    return () => {
+      clearTimeout(timer)
+      setNicknameChecking(false)
+    }
   }, [formData.nickname])
 
   // Check email availability in Firestore
   useEffect(() => {
+    // Reset state when email changes
+    setEmailChecking(false)
+    setEmailAvailable(null)
+    
     if (!formData.email || !formData.email.includes('@')) {
-      setEmailAvailable(null)
-      setEmailChecking(false)
       return
     }
-
-    // Skip if already checking
-    if (emailChecking) return
 
     const checkEmail = async () => {
       setEmailChecking(true)
@@ -266,9 +269,14 @@ export default function RegisterPage() {
       }
     }
 
-    // Reduced debounce to 150ms for faster response
-    const timer = setTimeout(checkEmail, 150)
-    return () => clearTimeout(timer)
+    // Debounce to 500ms for better UX
+    const timer = setTimeout(checkEmail, 500)
+    
+    // Cleanup: cancel timer if email changes before timeout
+    return () => {
+      clearTimeout(timer)
+      setEmailChecking(false)
+    }
   }, [formData.email])
 
   // Animation variants untuk efek muncul
