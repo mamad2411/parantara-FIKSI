@@ -21,6 +21,10 @@ interface FlipCardProps {
 }
 
 // --- FlipCard Component ---
+const IMG_WIDTH_MOBILE = 45;
+const IMG_HEIGHT_MOBILE = 65;
+const IMG_WIDTH_TABLET = 50;
+const IMG_HEIGHT_TABLET = 72;
 const IMG_WIDTH = 60;
 const IMG_HEIGHT = 85;
 
@@ -31,6 +35,24 @@ function FlipCard({
     content,
 }: FlipCardProps) {
     const [isFlipped, setIsFlipped] = useState(false);
+    const [cardSize, setCardSize] = useState({ width: IMG_WIDTH, height: IMG_HEIGHT });
+
+    useEffect(() => {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            if (width < 640) {
+                setCardSize({ width: IMG_WIDTH_MOBILE, height: IMG_HEIGHT_MOBILE });
+            } else if (width < 1024) {
+                setCardSize({ width: IMG_WIDTH_TABLET, height: IMG_HEIGHT_TABLET });
+            } else {
+                setCardSize({ width: IMG_WIDTH, height: IMG_HEIGHT });
+            }
+        };
+        
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <motion.div
@@ -51,8 +73,8 @@ function FlipCard({
             // Initial style
             style={{
                 position: "absolute",
-                width: IMG_WIDTH,
-                height: IMG_HEIGHT,
+                width: cardSize.width,
+                height: cardSize.height,
                 transformStyle: "preserve-3d",
                 perspective: "1000px",
             }}
@@ -69,7 +91,7 @@ function FlipCard({
             >
                 {/* Front Face */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-black/5 bg-transparent"
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl ring-1 ring-black/5 bg-transparent"
                     style={{ backfaceVisibility: "hidden" }}
                 >
                     <img
@@ -78,8 +100,8 @@ function FlipCard({
                         className="h-full w-full object-cover"
                     />
                     {/* Click hint */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-2">
-                        <span className="text-white text-[8px] font-semibold uppercase tracking-wider">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-1 sm:pb-2">
+                        <span className="text-white text-[6px] sm:text-[8px] font-semibold uppercase tracking-wider">
                             Klik
                         </span>
                     </div>
@@ -87,20 +109,20 @@ function FlipCard({
 
                 {/* Back Face */}
                 <div
-                    className="absolute inset-0 h-full w-full overflow-hidden rounded-xl shadow-lg bg-gradient-to-br from-emerald-600 to-emerald-800 flex flex-col items-center justify-center p-3 border border-emerald-500"
+                    className="absolute inset-0 h-full w-full overflow-hidden rounded-lg sm:rounded-xl shadow-md sm:shadow-lg bg-gradient-to-br from-emerald-600 to-emerald-800 flex flex-col items-center justify-center p-2 sm:p-3 border border-emerald-500"
                     style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                 >
-                    <div className="text-center space-y-1">
+                    <div className="text-center space-y-0.5 sm:space-y-1">
                         {/* Arabic Text */}
-                        <p className="text-sm font-bold text-yellow-300 mb-1" style={{ fontFamily: 'serif' }}>
+                        <p className="text-[10px] sm:text-sm font-bold text-yellow-300 mb-0.5 sm:mb-1" style={{ fontFamily: 'serif' }}>
                             {content.arabic}
                         </p>
                         {/* Indonesian Text */}
-                        <p className="text-[10px] font-semibold text-white uppercase tracking-wide">
+                        <p className="text-[8px] sm:text-[10px] font-semibold text-white uppercase tracking-wide">
                             {content.indo}
                         </p>
                         {/* Description */}
-                        <p className="text-[7px] text-emerald-100 leading-tight mt-1">
+                        <p className="text-[6px] sm:text-[7px] text-emerald-100 leading-tight mt-0.5 sm:mt-1">
                             {content.desc}
                         </p>
                     </div>
@@ -282,7 +304,7 @@ export default function IntroAnimation() {
     return (
         <div
             ref={containerRef}
-            className="hidden lg:block relative h-[500vh] w-full bg-[#FAFAFA]"
+            className="relative h-[500vh] w-full bg-[#FAFAFA]"
             style={{ overscrollBehavior: "contain" }}
         >
             {/* Pinned viewport */}

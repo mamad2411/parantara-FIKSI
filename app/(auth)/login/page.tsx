@@ -206,7 +206,7 @@ export default function LoginPage() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50"
+      className="min-h-screen w-full flex items-center justify-center p-4 pb-16 sm:pb-20 md:pb-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50"
     >
       {/* Video Background */}
       <VideoBackground 
@@ -547,9 +547,15 @@ export default function LoginPage() {
       {/* Footer */}
       <motion.div
         variants={footerVariants}
-        className="absolute bottom-6 left-0 right-0 text-center text-xs text-white/90 z-20"
+        className="absolute bottom-2 sm:bottom-4 md:bottom-6 left-0 right-0 text-center text-[9px] sm:text-[10px] md:text-xs text-white/90 z-20 px-4"
       >
-        Hak Cipta @danamasjid 2025 | Kebijakan Privasi
+        <p className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 md:gap-2">
+          <span>Hak Cipta @danamasjid 2026</span>
+          <span className="hidden sm:inline">|</span>
+          <Link href="/privacy-policy" className="hover:text-white transition-colors underline">
+            Kebijakan Privasi
+          </Link>
+        </p>
       </motion.div>
     </motion.div>
   )

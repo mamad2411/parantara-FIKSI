@@ -30,7 +30,7 @@ export function Footer() {
                 </div>
               </Link>
               <p className="text-sm text-muted-foreground text-center md:text-left">
-                Donasi masjid yang transparan dan amanah.
+                laporan masjid yang transparan dan amanah.
               </p>
             </div>
 

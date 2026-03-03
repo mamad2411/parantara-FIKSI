@@ -51,9 +51,39 @@ export function HomePage() {
   const expandRadius = progress * getMaxRadius()
 
   return (
-    <div ref={containerRef} className="h-[36vh] bg-background -mt-16 sm:-mt-24 md:-mt-32 lg:mt-0">
-      <div className="h-screen flex items-start justify-center pt-2 sm:pt-4 md:pt-6 lg:pt-10 sticky top-0">
-        <div className="relative w-full max-w-[320px] sm:max-w-[420px] md:max-w-[500px] lg:max-w-[600px]">
+    <div ref={containerRef} className="h-[200vh] bg-background">
+      <div className="h-screen flex flex-col items-center justify-center gap-8 sm:gap-12 md:gap-16 lg:gap-20 sticky top-0 px-4">
+        {/* Horizonta with Strip Animation - Top */}
+        <div 
+          className="overflow-visible relative w-full max-w-[85vw] sm:max-w-[75vw] md:max-w-[65vw] lg:max-w-[60vw] flex justify-center"
+          style={{
+            opacity: progress > 0.2 ? 1 : 0,
+            transform: `scale(${progress > 0.2 ? 1 : 0.8})`,
+            transition: 'all 0.8s ease-out',
+          }}
+        >
+          <div className="relative inline-block w-full">
+            {/* Frame Border */}
+            <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-700 rounded-3xl pointer-events-none z-20"></div>
+            
+            {/* Animated Strip Background - Kuning solid */}
+            <div 
+              className="absolute inset-0 bg-yellow-400 rounded-3xl"
+              style={{
+                transform: `scaleX(${Math.min(progress * 2.5, 1)})`,
+                transformOrigin: 'left',
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            ></div>
+            
+            {/* Text */}
+            <span className="relative z-10 font-bold text-center text-[12vw] sm:text-[10vw] md:text-[8vw] lg:text-[7vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 block">
+              TRANSPARAN
+            </span>
+          </div>
+        </div>
+
+        <div className="relative w-full max-w-[280px] sm:max-w-[380px] md:max-w-[480px] lg:max-w-[600px]">
           <div
             className={`w-full aspect-square rounded-full flex items-center justify-center transition-all duration-300 ${
               progress > 0.6 ? "border-2 border-[#e9e9e9] dark:border-gray-700" : ""
@@ -183,16 +213,71 @@ export function HomePage() {
                       progress > 0.5 ? "opacity-100" : "opacity-0"
                     }`}
                   >
-                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white text-center mb-1 sm:mb-2">Transparan</h1>
-                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white text-center mb-2 sm:mb-3 md:mb-4">Untuk Semua Jamaah</h1>
+                    <h1 
+                      className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white text-center mb-1"
+                      style={{
+                        transform: `translateY(${progress > 0.6 ? 0 : 20}px)`,
+                        opacity: progress > 0.6 ? 1 : 0,
+                        transition: 'all 0.6s ease-out',
+                      }}
+                    >
+                      Transparan
+                    </h1>
+                    <h1 
+                      className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white text-center mb-2 sm:mb-3"
+                      style={{
+                        transform: `translateY(${progress > 0.65 ? 0 : 20}px)`,
+                        opacity: progress > 0.65 ? 1 : 0,
+                        transition: 'all 0.6s ease-out 0.1s',
+                      }}
+                    >
+                      Untuk Semua Jamaah
+                    </h1>
 
-                    <p className="text-xs sm:text-sm md:text-base text-gray-500 dark:text-gray-400 text-center max-w-[200px] sm:max-w-xs md:max-w-sm">
+                    <p 
+                      className="text-[10px] sm:text-xs md:text-sm text-gray-500 dark:text-gray-400 text-center max-w-[180px] sm:max-w-[240px] md:max-w-xs"
+                      style={{
+                        transform: `translateY(${progress > 0.7 ? 0 : 20}px)`,
+                        opacity: progress > 0.7 ? 1 : 0,
+                        transition: 'all 0.6s ease-out 0.2s',
+                      }}
+                    >
                       Laporan keuangan real-time, transparansi penuh, dan pengalaman yang menyenangkan di semua perangkat.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Bottom with Strip Animation */}
+        <div 
+          className="overflow-visible relative w-full max-w-[85vw] sm:max-w-[75vw] md:max-w-[65vw] lg:max-w-[60vw] flex justify-center"
+          style={{
+            opacity: progress > 0.3 ? 1 : 0,
+            transform: `scale(${progress > 0.3 ? 1 : 0.8})`,
+            transition: 'all 0.8s ease-out 0.2s',
+          }}
+        >
+          <div className="relative inline-block w-full">
+            {/* Frame Border */}
+            <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-700 rounded-3xl pointer-events-none z-20"></div>
+            
+            {/* Animated Strip Background - Biru solid (sama dengan features section) */}
+            <div 
+              className="absolute inset-0 bg-blue-500 rounded-3xl"
+              style={{
+                transform: `scaleX(${Math.min((progress - 0.2) * 2.5, 1)})`,
+                transformOrigin: 'right',
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            ></div>
+            
+            {/* Text */}
+            <span className="relative z-10 font-bold text-center text-[12vw] sm:text-[10vw] md:text-[8vw] lg:text-[7vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 block">
+              JUJUR
+            </span>
           </div>
         </div>
       </div>
