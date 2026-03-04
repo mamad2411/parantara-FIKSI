@@ -24,8 +24,8 @@ service cloud.firestore {
     
     // Users collection
     match /users/{userId} {
-      // Allow read if signed in (needed for email validation)
-      allow read: if isSignedIn();
+      // Allow read for email/nickname validation (even when not signed in)
+      allow read: if true;
       
       // Allow create only if signed in and creating own document
       allow create: if isSignedIn() && 

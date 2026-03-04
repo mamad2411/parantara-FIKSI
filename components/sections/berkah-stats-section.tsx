@@ -36,7 +36,7 @@ export function BerkahStatsSection() {
                 {/* BER Text */}
                 <div className="relative inline-block">
                   <motion.h2 
-                    className="text-[120px] md:text-[160px] lg:text-[200px] font-black leading-none text-blue-600"
+                    className="text-[80px] sm:text-[120px] md:text-[160px] lg:text-[200px] font-black leading-none text-blue-600"
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -46,7 +46,7 @@ export function BerkahStatsSection() {
                   
                   {/* Animated Strip for BER */}
                   <motion.div
-                    className="absolute bottom-4 left-0 h-8 bg-blue-600"
+                    className="absolute bottom-2 sm:bottom-4 left-0 h-4 sm:h-6 md:h-8 bg-blue-600 rounded-sm"
                     initial={{ width: 0 }}
                     animate={isInView ? { width: "100%" } : {}}
                     transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
@@ -56,7 +56,7 @@ export function BerkahStatsSection() {
                 {/* KAH Text */}
                 <div className="relative inline-block">
                   <motion.h2 
-                    className="text-[120px] md:text-[160px] lg:text-[200px] font-black leading-none text-yellow-500"
+                    className="text-[80px] sm:text-[120px] md:text-[160px] lg:text-[200px] font-black leading-none text-yellow-500"
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.5, delay: 0.5 }}
@@ -66,7 +66,7 @@ export function BerkahStatsSection() {
                   
                   {/* Animated Strip for KAH */}
                   <motion.div
-                    className="absolute bottom-4 left-0 h-8 bg-yellow-500"
+                    className="absolute bottom-2 sm:bottom-4 left-0 h-4 sm:h-6 md:h-8 bg-yellow-500 rounded-sm"
                     initial={{ width: 0 }}
                     animate={isInView ? { width: "100%" } : {}}
                     transition={{ duration: 0.8, delay: 0.7, ease: "easeInOut" }}

@@ -190,11 +190,24 @@ const lerp = (start: number, end: number, t: number) => start * (1 - t) + end * 
 export default function IntroAnimation() {
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+    const [isDesktop, setIsDesktop] = useState(true);
     const containerRef = useRef<HTMLDivElement>(null);
     const pinnedRef = useRef<HTMLDivElement>(null);
 
+    // Check if desktop on mount
+    useEffect(() => {
+        const checkDesktop = () => {
+            setIsDesktop(window.innerWidth >= 1024);
+        };
+        checkDesktop();
+        window.addEventListener('resize', checkDesktop);
+        return () => window.removeEventListener('resize', checkDesktop);
+    }, []);
+
     // --- Container Size ---
     useEffect(() => {
+        if (!isDesktop) return; // Skip if not desktop
+        
         const targetEl = pinnedRef.current || containerRef.current;
         if (!targetEl) {
             if (typeof window !== "undefined") {
@@ -222,7 +235,7 @@ export default function IntroAnimation() {
         });
 
         return () => observer.disconnect();
-    }, []);
+    }, [isDesktop]);
 
     // --- Virtual Scroll Logic (sync with page scroll) ---
     const { scrollYProgress } = useScroll({
@@ -300,6 +313,11 @@ export default function IntroAnimation() {
     // Fade in content when arc is formed (morphValue > 0.8)
     const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
+
+    // Don't render on tablet and mobile
+    if (!isDesktop) {
+        return null;
+    }
 
     return (
         <div

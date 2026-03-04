@@ -151,8 +151,14 @@ export function HeroSection() {
           <div
             className={`transition-all duration-1000 delay-[800ms] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
           >
-            <h1 className="font-serif text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] lg:text-[6.5rem] xl:text-[7.5rem] 2xl:text-[8.5rem] font-normal leading-[1.2] sm:leading-tight mb-6 w-full px-6 max-w-6xl mx-auto text-center">
-              <AnimatedText text="Transparansi Keuangan Masjid" delay={0.3} />
+            <h1 className="font-serif text-[2rem] xs:text-[2.5rem] sm:text-[3rem] md:text-[4rem] lg:text-[5rem] xl:text-[6rem] 2xl:text-[7rem] font-normal leading-tight mb-6 w-full px-4 max-w-6xl mx-auto text-center">
+              <span className="inline-block whitespace-nowrap">
+                <AnimatedText text="Transparansi" delay={0.3} />
+              </span>
+              {" "}
+              <span className="inline-block">
+                <AnimatedText text="Keuangan Masjid" delay={0.4} />
+              </span>
             </h1>
           </div>
         </div>
@@ -160,8 +166,8 @@ export function HeroSection() {
         <div className="flex flex-col items-center justify-center gap-8">
           <div className="relative">
             <div
-              className={`relative w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] transition-all duration-[1500ms] ease-out delay-500 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[400px]"
+              className={`relative w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] transition-opacity duration-1000 ease-out delay-500 ${
+                isVisible ? "opacity-100" : "opacity-0"
               }`}
             >
               <img src="/images/iphone.webp" alt="DanaMasjid Mobile App" className="w-full h-auto relative z-10" />
