@@ -21,7 +21,7 @@ export function BerkahStatsSection() {
   return (
     <section ref={ref} className="py-24 px-6 bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
           
           {/* Left Side - BERKAH Text */}
           <div className="relative">
@@ -46,9 +46,10 @@ export function BerkahStatsSection() {
                   
                   {/* Animated Strip for BER */}
                   <motion.div
-                    className="absolute bottom-2 sm:bottom-4 left-0 h-4 sm:h-6 md:h-8 bg-blue-600 rounded-sm z-10"
-                    initial={{ width: 0 }}
-                    animate={isInView ? { width: "100%" } : { width: 0 }}
+                    className="absolute bottom-2 sm:bottom-4 left-0 right-0 h-4 sm:h-6 md:h-8 bg-blue-600 rounded-sm"
+                    style={{ zIndex: -1 }}
+                    initial={{ scaleX: 0 }}
+                    animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
                     transition={{ duration: 0.8, delay: 0.4, ease: "easeInOut" }}
                   />
                 </div>
@@ -66,9 +67,10 @@ export function BerkahStatsSection() {
                   
                   {/* Animated Strip for KAH */}
                   <motion.div
-                    className="absolute bottom-2 sm:bottom-4 left-0 h-4 sm:h-6 md:h-8 bg-yellow-500 rounded-sm z-10"
-                    initial={{ width: 0 }}
-                    animate={isInView ? { width: "100%" } : { width: 0 }}
+                    className="absolute bottom-2 sm:bottom-4 left-0 right-0 h-4 sm:h-6 md:h-8 bg-yellow-500 rounded-sm"
+                    style={{ zIndex: -1 }}
+                    initial={{ scaleX: 0 }}
+                    animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
                     transition={{ duration: 0.8, delay: 0.7, ease: "easeInOut" }}
                     onAnimationComplete={() => setTextAnimationComplete(true)}
                   />
@@ -88,7 +90,7 @@ export function BerkahStatsSection() {
           </div>
 
           {/* Right Side - Chart (Only show on desktop after text animation completes) */}
-          <div className="hidden lg:block">
+          <div className="hidden md:block">
             {textAnimationComplete ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -201,7 +203,7 @@ export function BerkahStatsSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="lg:hidden"
+            className="md:hidden"
           >
             <div className="bg-white rounded-3xl p-6 shadow-xl">
               {/* Total Donasi Header */}
