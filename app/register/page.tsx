@@ -11,6 +11,7 @@ import { VideoBackground } from "@/components/auth/video-background"
 import { useRegisterStep1, useVerifyOTP } from "@/lib/hooks/use-auth"
 import { RateLimitAlert } from "@/components/ui/rate-limit-alert"
 import { ApiError } from "@/lib/api-client"
+import { PolicyModal } from "@/components/policy-modal"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [direction, setDirection] = useState(0)
+  const [isPolicyOpen, setIsPolicyOpen] = useState(false)
   
   const [formData, setFormData] = useState({
     // Step 1
@@ -1509,14 +1511,16 @@ export default function RegisterPage() {
         <div className="flex flex-row items-center justify-center gap-2 text-[10px] sm:text-xs text-white/90">
           <span>Hak Cipta @danamasjid 2026</span>
           <span>|</span>
-          <Link 
-            href="/privacy-policy" 
+          <button 
+            onClick={() => setIsPolicyOpen(true)}
             className="hover:text-white transition-colors underline"
           >
             Kebijakan Privasi
-          </Link>
+          </button>
         </div>
       </motion.div>
+
+      <PolicyModal open={isPolicyOpen} onOpenChange={setIsPolicyOpen} />
     </motion.div>
   )
 }

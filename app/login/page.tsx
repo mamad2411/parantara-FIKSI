@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
 import { VideoBackground } from "@/components/auth/video-background"
+import { PolicyModal } from "@/components/policy-modal"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [redirectMessage, setRedirectMessage] = useState("")
+  const [isPolicyOpen, setIsPolicyOpen] = useState(false)
   
   // Get redirect message from URL
   useEffect(() => {
@@ -552,11 +554,16 @@ export default function LoginPage() {
         <p className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 md:gap-2">
           <span>Hak Cipta @danamasjid 2026</span>
           <span className="hidden sm:inline">|</span>
-          <Link href="/privacy-policy" className="hover:text-white transition-colors underline">
+          <button 
+            onClick={() => setIsPolicyOpen(true)}
+            className="hover:text-white transition-colors underline"
+          >
             Kebijakan Privasi
-          </Link>
+          </button>
         </p>
       </motion.div>
+
+      <PolicyModal open={isPolicyOpen} onOpenChange={setIsPolicyOpen} />
     </motion.div>
   )
 }

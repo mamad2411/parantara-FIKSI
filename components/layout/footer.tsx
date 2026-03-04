@@ -1,8 +1,13 @@
+"use client"
+
 import Link from "next/link"
 import { Twitter, Linkedin, Instagram, Facebook } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
+import { PolicyModal } from "@/components/policy-modal"
 
 export function Footer() {
+  const [isPolicyOpen, setIsPolicyOpen] = useState(false)
   return (
     <div className="relative lg:mt-32">{/* Added lg:mt-32 for desktop spacing */}
       <div className="absolute -top-[30vw] sm:-top-[25vw] md:-top-[20vw] left-0 right-0 w-full h-[40vw] z-0 overflow-hidden">
@@ -68,10 +73,27 @@ export function Footer() {
 
           <div className="pt-8 mt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">© 2026 DanaMasjid. Hak cipta dilindungi.</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsPolicyOpen(true)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+              >
+                Kebijakan Privasi
+              </button>
+              <span className="text-xs text-muted-foreground">•</span>
+              <button
+                onClick={() => setIsPolicyOpen(true)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+              >
+                Syarat & Ketentuan
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground">DanaMasjid - Platform Donasi Masjid Terpercaya</p>
           </div>
         </div>
       </footer>
+
+      <PolicyModal open={isPolicyOpen} onOpenChange={setIsPolicyOpen} />
     </div>
   )
 }
