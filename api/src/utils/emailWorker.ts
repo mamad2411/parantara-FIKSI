@@ -169,15 +169,16 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kode OTP DanaMasjid</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f1f5f9;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 20px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">🕌 DanaMasjid</h1>
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
+              <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
           </tr>
           
@@ -190,8 +191,8 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
               </p>
               
               <!-- OTP Box -->
-              <div style="background-color: #f3f4f6; border: 2px dashed #10b981; border-radius: 8px; padding: 30px; text-align: center; margin: 30px 0;">
-                <div style="font-size: 36px; font-weight: bold; color: #10b981; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+              <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 3px solid #2563eb; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0;">
+                <div style="font-size: 48px; font-weight: bold; color: #1e40af; letter-spacing: 10px; font-family: 'Courier New', monospace;">
                   ${otp}
                 </div>
               </div>
@@ -204,11 +205,11 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
           
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
-                © 2024 DanaMasjid. Platform Donasi Masjid Terpercaya.
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 30px; text-align: center;">
+              <p style="margin: 0 0 10px 0; color: #dbeafe; font-size: 14px;">
+                © 2026 DanaMasjid. Platform Donasi Masjid Terpercaya.
               </p>
-              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+              <p style="margin: 0; color: #93c5fd; font-size: 12px;">
                 Email ini dikirim otomatis, mohon tidak membalas email ini.
               </p>
             </td>
@@ -231,15 +232,16 @@ export function getWelcomeEmailHTML(name: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selamat Datang di DanaMasjid</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f1f5f9;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 20px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">🕌 DanaMasjid</h1>
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
+              <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
           </tr>
           
@@ -251,11 +253,11 @@ export function getWelcomeEmailHTML(name: string): string {
                 Terima kasih telah bergabung dengan DanaMasjid. Kami senang Anda menjadi bagian dari platform donasi masjid terpercaya.
               </p>
               
-              <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 4px;">
-                <p style="margin: 0; color: #065f46; font-size: 16px; font-weight: bold;">
-                  🎉 GRATIS 3 Bulan Pertama!
+              <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+                <p style="margin: 0; color: #92400e; font-size: 16px; font-weight: bold;">
+                  GRATIS 3 Bulan Pertama!
                 </p>
-                <p style="margin: 10px 0 0 0; color: #047857; font-size: 14px;">
+                <p style="margin: 10px 0 0 0; color: #78350f; font-size: 14px;">
                   Nikmati semua fitur premium tanpa biaya selama 3 bulan pertama.
                 </p>
               </div>
@@ -265,7 +267,7 @@ export function getWelcomeEmailHTML(name: string): string {
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="https://danamasjid.vercel.app/masjid" style="display: inline-block; background-color: #10b981; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                <a href="https://danamasjid.vercel.app/daftar-masjid" style="display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
                   Mulai Sekarang
                 </a>
               </div>
@@ -274,12 +276,12 @@ export function getWelcomeEmailHTML(name: string): string {
           
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
-                © 2024 DanaMasjid. Platform Donasi Masjid Terpercaya.
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 30px; text-align: center;">
+              <p style="margin: 0 0 10px 0; color: #dbeafe; font-size: 14px;">
+                © 2026 DanaMasjid. Platform Donasi Masjid Terpercaya.
               </p>
-              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                Butuh bantuan? Hubungi kami di support@danamasjid.com
+              <p style="margin: 0; color: #93c5fd; font-size: 12px;">
+                Butuh bantuan? Hubungi kami di danamasjid48@gmail.com
               </p>
             </td>
           </tr>
@@ -301,15 +303,16 @@ export function getSubscribeWelcomeEmailHTML(email: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terima Kasih Telah Berlangganan</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f1f5f9;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 20px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">🕌 DanaMasjid</h1>
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
+              <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
           </tr>
           
@@ -328,17 +331,17 @@ export function getSubscribeWelcomeEmailHTML(email: string): string {
                 <li>Promo dan penawaran khusus</li>
               </ul>
               
-              <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 4px;">
-                <p style="margin: 0; color: #065f46; font-size: 16px; font-weight: bold;">
-                  🎉 Penawaran Khusus untuk Anda!
+              <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+                <p style="margin: 0; color: #92400e; font-size: 16px; font-weight: bold;">
+                  Penawaran Khusus untuk Anda!
                 </p>
-                <p style="margin: 10px 0 0 0; color: #047857; font-size: 14px;">
+                <p style="margin: 10px 0 0 0; color: #78350f; font-size: 14px;">
                   Daftarkan masjid Anda sekarang dan dapatkan GRATIS 3 bulan pertama!
                 </p>
               </div>
               
               <div style="text-align: center; margin: 30px 0;">
-                <a href="https://danamasjid.vercel.app/masjid" style="display: inline-block; background-color: #10b981; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                <a href="https://danamasjid.vercel.app/daftar-masjid" style="display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold;">
                   Daftarkan Masjid Sekarang
                 </a>
               </div>
@@ -351,12 +354,12 @@ export function getSubscribeWelcomeEmailHTML(email: string): string {
           
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
-                © 2024 DanaMasjid. Platform Donasi Masjid Terpercaya.
+            <td style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 30px; text-align: center;">
+              <p style="margin: 0 0 10px 0; color: #dbeafe; font-size: 14px;">
+                © 2026 DanaMasjid. Platform Donasi Masjid Terpercaya.
               </p>
-              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                Email: ${email} | <a href="https://danamasjid.vercel.app" style="color: #10b981; text-decoration: none;">danamasjid.vercel.app</a>
+              <p style="margin: 0; color: #93c5fd; font-size: 12px;">
+                Email ini dikirim otomatis, mohon tidak membalas email ini.
               </p>
             </td>
           </tr>
