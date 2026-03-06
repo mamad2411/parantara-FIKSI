@@ -142,8 +142,13 @@ export const DANAMASJID_LOGO_SVG = `<svg width="100" height="100" viewBox="0 0 1
   <rect x="45" y="35" width="10" height="3" fill="#1e40af"/>
 </svg>`
 
-// Convert SVG to base64 data URL
-export const DANAMASJID_LOGO_BASE64 = `data:image/svg+xml;base64,${Buffer.from(DANAMASJID_LOGO_SVG).toString('base64')}`
+// Convert SVG to base64 data URL using btoa (browser-compatible)
+function svgToBase64(svg: string): string {
+  // Use btoa for base64 encoding (available in Workers)
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
+
+export const DANAMASJID_LOGO_BASE64 = svgToBase64(DANAMASJID_LOGO_SVG)
 
 // Helper function to get logo attachment
 export function getLogoAttachment(): EmailAttachment {
