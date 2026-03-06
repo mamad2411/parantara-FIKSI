@@ -10,19 +10,6 @@ export function HomePage() {
     offset: ["start center", "end center"],
   })
   
-  // Check if device is mobile or tablet - hide component if true
-  const [isMobile, setIsMobile] = useState(true) // Default true for SSR
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-  
   // Responsive breakpoints
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
   
@@ -137,7 +124,7 @@ export function HomePage() {
   const bottomStyle = getBottomStripStyle()
 
   return (
-    <div ref={containerRef} className={`relative h-[180vh] bg-background ${isMobile ? 'hidden' : ''}`}>
+    <div ref={containerRef} className={`relative h-[180vh] bg-background `}>
       <div className="h-screen relative sticky top-0 px-4 py-12">
         {/* TRANSPARAN - Pojok Kanan Atas */}
         <div 

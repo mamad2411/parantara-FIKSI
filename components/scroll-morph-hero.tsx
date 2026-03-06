@@ -21,10 +21,10 @@ interface FlipCardProps {
 }
 
 // --- FlipCard Component ---
-const IMG_WIDTH_MOBILE = 45;
-const IMG_HEIGHT_MOBILE = 65;
-const IMG_WIDTH_TABLET = 50;
-const IMG_HEIGHT_TABLET = 72;
+const IMG_WIDTH_MOBILE = 55;
+const IMG_HEIGHT_MOBILE = 75;
+const IMG_WIDTH_TABLET = 60;
+const IMG_HEIGHT_TABLET = 85;
 const IMG_WIDTH = 60;
 const IMG_HEIGHT = 85;
 
@@ -194,10 +194,10 @@ export default function IntroAnimation() {
     const containerRef = useRef<HTMLDivElement>(null);
     const pinnedRef = useRef<HTMLDivElement>(null);
 
-    // Check if desktop on mount (exclude tablet and mobile)
+    // Responsive sizing for all devices
     useEffect(() => {
         const checkDesktop = () => {
-            setIsDesktop(window.innerWidth >= 1024); // Changed back to 1024 to exclude tablets
+            setIsDesktop(window.innerWidth >= 768); // Include tablets and mobile
         };
         checkDesktop();
         window.addEventListener('resize', checkDesktop);
@@ -206,8 +206,6 @@ export default function IntroAnimation() {
 
     // --- Container Size ---
     useEffect(() => {
-        if (!isDesktop) return; // Skip if not desktop
-
         const targetEl = pinnedRef.current || containerRef.current;
         if (!targetEl) {
             if (typeof window !== "undefined") {
@@ -235,7 +233,7 @@ export default function IntroAnimation() {
         });
 
         return () => observer.disconnect();
-    }, [isDesktop]);
+    }, []);
 
     // --- Virtual Scroll Logic (sync with page scroll) ---
     const { scrollYProgress } = useScroll({
@@ -313,11 +311,6 @@ export default function IntroAnimation() {
     // Fade in content when arc is formed (morphValue > 0.8)
     const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
     const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
-
-    // Don't render on tablet and mobile (desktop only)
-    if (!isDesktop) {
-        return null;
-    }
 
     return (
         <div
