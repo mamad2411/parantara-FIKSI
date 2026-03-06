@@ -102,8 +102,6 @@ const nextConfig = {
               "frame-ancestors 'self'",
               "manifest-src 'self'",
               "media-src 'self' blob: data:",
-              "require-trusted-types-for 'script'",
-              "trusted-types 'none'",
               "upgrade-insecure-requests"
             ].join('; ')
           },
