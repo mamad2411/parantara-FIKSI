@@ -180,7 +180,6 @@ export function generateOTP(): string {
 
 // Email templates
 export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): string {
-  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -197,7 +196,6 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
-              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
@@ -245,7 +243,6 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
 }
 
 export function getWelcomeEmailHTML(name: string): string {
-  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -262,7 +259,6 @@ export function getWelcomeEmailHTML(name: string): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
-              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
@@ -318,7 +314,6 @@ export function getWelcomeEmailHTML(name: string): string {
 }
 
 export function getSubscribeWelcomeEmailHTML(email: string): string {
-  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -335,7 +330,6 @@ export function getSubscribeWelcomeEmailHTML(email: string): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
-              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
