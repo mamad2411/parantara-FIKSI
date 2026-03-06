@@ -92,7 +92,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://tagmanager.google.com",
               "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://ssl.gstatic.com https://i.pravatar.cc",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com",
+              "connect-src 'self' https://*.workers.dev https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com",
               "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.net https://*.firebaseapp.com https://accounts.google.com",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
