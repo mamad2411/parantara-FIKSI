@@ -851,25 +851,6 @@ export default function RegisterPage() {
                     {error}
                   </motion.div>
                 )}
-                {success && (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-600"
-                  >
-                    <p className="font-semibold mb-2">{success}</p>
-                    {currentStep === 3 && (
-                      <Link 
-                        href="/daftar-masjid"
-                        className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                      >
-                        Lengkapi Data Masjid →
-                      </Link>
-                    )}
-                  </motion.div>
-                )}
               </AnimatePresence>
               
               <AnimatePresence mode="wait" custom={direction}>
