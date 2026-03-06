@@ -7,10 +7,18 @@ interface EmailOptions {
   html: string
   from?: string
   resendApiKey?: string
+  attachments?: EmailAttachment[]
+}
+
+interface EmailAttachment {
+  filename: string
+  content: string // base64 encoded
+  cid?: string // Content-ID for inline images
+  contentType?: string
 }
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
-  const { to, subject, html, from = 'DanaMasjid <noreply@danamasjid.com>', resendApiKey } = options
+  const { to, subject, html, from = 'DanaMasjid <noreply@danamasjid.com>', resendApiKey, attachments } = options
 
   try {
     // Log email for development
@@ -27,18 +35,31 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     // Try Resend API first (requires RESEND_API_KEY)
     if (resendApiKey) {
       try {
+        const resendPayload: any = {
+          from: 'DanaMasjid <onboarding@resend.dev>', // Use verified domain
+          to: [to],
+          subject,
+          html,
+        }
+
+        // Add attachments if provided
+        if (attachments && attachments.length > 0) {
+          resendPayload.attachments = attachments.map(att => ({
+            filename: att.filename,
+            content: att.content,
+            content_type: att.contentType || 'image/png',
+            disposition: att.cid ? 'inline' : 'attachment',
+            content_id: att.cid,
+          }))
+        }
+
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${resendApiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            from: 'DanaMasjid <onboarding@resend.dev>', // Use verified domain
-            to: [to],
-            subject,
-            html,
-          }),
+          body: JSON.stringify(resendPayload),
         })
 
         if (response.ok) {
@@ -54,29 +75,42 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     
     // Fallback: Try MailChannels (free for Cloudflare Workers)
     try {
+      const mailChannelsPayload: any = {
+        personalizations: [
+          {
+            to: [{ email: to }],
+          },
+        ],
+        from: {
+          email: 'noreply@danamasjid.com',
+          name: 'DanaMasjid',
+        },
+        subject,
+        content: [
+          {
+            type: 'text/html',
+            value: html,
+          },
+        ],
+      }
+
+      // Add attachments for MailChannels
+      if (attachments && attachments.length > 0) {
+        mailChannelsPayload.attachments = attachments.map(att => ({
+          filename: att.filename,
+          content: att.content,
+          type: att.contentType || 'image/png',
+          disposition: att.cid ? 'inline' : 'attachment',
+          content_id: att.cid,
+        }))
+      }
+
       const response = await fetch('https://api.mailchannels.net/tx/v1/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          personalizations: [
-            {
-              to: [{ email: to }],
-            },
-          ],
-          from: {
-            email: 'noreply@danamasjid.com',
-            name: 'DanaMasjid',
-          },
-          subject,
-          content: [
-            {
-              type: 'text/html',
-              value: html,
-            },
-          ],
-        }),
+        body: JSON.stringify(mailChannelsPayload),
       })
 
       if (response.ok) {
@@ -96,6 +130,22 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     console.error('Send email error:', error)
     // Return true to not block registration flow
     return true
+  }
+}
+
+// Logo DanaMasjid dalam base64 (SVG sederhana)
+export const DANAMASJID_LOGO_BASE64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiByeD0iMTYiIGZpbGw9IiMxZTQwYWYiLz4KPHBhdGggZD0iTTUwIDIwTDI1IDM1VjUwQzI1IDYyLjUgMzUgNzIgNTAgNzVDNjUgNzIgNzUgNjIuNSA3NSA1MFYzNUw1MCAyMFoiIGZpbGw9IiNmZmZmZmYiLz4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1NSIgcj0iOCIgZmlsbD0iIzFlNDBhZiIvPgo8L3N2Zz4='
+
+// Helper function to get logo attachment
+export function getLogoAttachment(): EmailAttachment {
+  // Extract base64 content from data URL
+  const base64Content = DANAMASJID_LOGO_BASE64.split(',')[1]
+  
+  return {
+    filename: 'logo.svg',
+    content: base64Content,
+    cid: 'logo', // This matches cid:logo in HTML templates
+    contentType: 'image/svg+xml',
   }
 }
 

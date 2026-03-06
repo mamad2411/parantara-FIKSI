@@ -1,7 +1,8 @@
+import { sendEmail, getLogoAttachment } from '../utils/emailWorker';
 import { EmailService } from '../utils/emailService';
 
-// Contoh penggunaan untuk mengirim email OTP
-async function sendOTPEmail() {
+// Contoh penggunaan untuk mengirim email OTP dengan logo
+async function sendOTPEmailWithLogo() {
   const otpCode = '442591'; // Generate OTP code (6 digit)
   const userEmail = 'user@example.com';
 
@@ -12,10 +13,16 @@ async function sendOTPEmail() {
     logoUrl: 'https://danamasjid.com/logo.png', // URL logo dari server
   });
 
-  // Kirim email
-  await EmailService.sendEmail(userEmail, emailTemplate);
+  // Kirim email dengan logo attachment
+  await sendEmail({
+    to: userEmail,
+    subject: emailTemplate.subject,
+    html: emailTemplate.html,
+    attachments: [getLogoAttachment()], // Attach logo sebagai inline image
+    resendApiKey: process.env.RESEND_API_KEY,
+  });
   
-  console.log(`OTP email sent to ${userEmail}`);
+  console.log(`OTP email sent to ${userEmail} with logo`);
 }
 
 // Contoh fungsi untuk generate OTP
@@ -43,14 +50,20 @@ export async function handleUserRegistration(email: string) {
   //   expiresAt: expiryTime,
   // });
   
-  // Kirim email OTP
+  // Kirim email OTP dengan logo
   const emailTemplate = EmailService.getOTPVerificationEmail({
     email,
     otpCode,
     logoUrl: 'https://danamasjid.com/logo.png',
   });
   
-  await EmailService.sendEmail(email, emailTemplate);
+  await sendEmail({
+    to: email,
+    subject: emailTemplate.subject,
+    html: emailTemplate.html,
+    attachments: [getLogoAttachment()], // Logo akan muncul di email
+    resendApiKey: process.env.RESEND_API_KEY,
+  });
   
   return {
     success: true,
@@ -84,4 +97,5 @@ export async function verifyOTP(email: string, inputOTP: string) {
   };
 }
 
-export { generateOTP };
+export { generateOTP, sendOTPEmailWithLogo };
+
