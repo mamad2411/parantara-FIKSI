@@ -126,10 +126,11 @@ export function HomePage() {
   return (
     <div ref={containerRef} className={`relative h-[800vh] bg-background `}>
       <div className="h-screen relative sticky top-0 px-4 py-12">
-        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Tengah (Mobile & Tablet) */}
+        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Atas dengan jarak (Tablet) / Tengah (Mobile) */}
         <div 
           className="absolute top-8 right-8 lg:top-12 lg:right-16 
-                     sm:top-1/4 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     sm:top-[15%] sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     md:top-[12%]
                      lg:left-auto lg:translate-x-0
                      overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
           style={{
@@ -237,10 +238,11 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Tengah (Mobile & Tablet) */}
+        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Bawah dengan jarak (Tablet) / Tengah (Mobile) */}
         <div 
           className="absolute bottom-8 left-8 lg:bottom-12 lg:left-16
-                     sm:bottom-1/4 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     sm:bottom-[15%] sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     md:bottom-[12%]
                      lg:left-16 lg:translate-x-0
                      overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
           style={{

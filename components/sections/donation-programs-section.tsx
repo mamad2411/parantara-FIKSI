@@ -245,6 +245,8 @@ export function DonationProgramsSection() {
                   <img 
                     src="/images/program/dash.webp" 
                     alt="Dashboard Preview" 
+                    width={800}
+                    height={600}
                     className="w-full h-auto object-cover"
                   />
                 </div>
@@ -330,6 +332,8 @@ export function DonationProgramsSection() {
                   <img 
                     src="/images/program/komunitas.webp" 
                     alt="Komunitas Donatur" 
+                    width={800}
+                    height={600}
                     className="w-full h-auto object-cover"
                   />
                 </div>

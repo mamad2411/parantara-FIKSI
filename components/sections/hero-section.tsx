@@ -171,7 +171,13 @@ export function HeroSection() {
                 isVisible ? "opacity-100" : "opacity-0"
               }`}
             >
-              <img src="/images/iphone.webp" alt="DanaMasjid Mobile App" className="w-full h-auto relative z-10" />
+              <img 
+                src="/images/iphone.webp" 
+                alt="DanaMasjid Mobile App" 
+                width={475}
+                height={934}
+                className="w-full h-auto relative z-10" 
+              />
             </div>
           </div>
         </div>
