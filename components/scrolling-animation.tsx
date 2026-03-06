@@ -176,14 +176,14 @@ export function HomePage() {
                 <div className="w-full h-full rounded-full bg-[#ffffff] dark:bg-black flex items-center justify-center relative">
                   {/* Images in circle */}
                   {[
-                    { angle: 0, threshold: 0.1, src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 1" },
-                    { angle: Math.PI / 4, threshold: 0.15, src: "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 2" },
-                    { angle: Math.PI / 2, threshold: 0.2, src: "https://images.unsplash.com/photo-1619365734050-cb5e64a42d43?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 3" },
-                    { angle: 3 * Math.PI / 4, threshold: 0.25, src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 4" },
-                    { angle: Math.PI, threshold: 0.3, src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 5" },
-                    { angle: 5 * Math.PI / 4, threshold: 0.35, src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 6" },
-                    { angle: 3 * Math.PI / 2, threshold: 0.4, src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 7" },
-                    { angle: 7 * Math.PI / 4, threshold: 0.45, src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0", alt: "Profile 8" }
+                    { angle: 0, threshold: 0.1, src: "/images/profil/profil1.webp", alt: "Profile 1" },
+                    { angle: Math.PI / 4, threshold: 0.15, src: "/images/profil/profil2.webp", alt: "Profile 2" },
+                    { angle: Math.PI / 2, threshold: 0.2, src: "/images/profil/profil3.webp", alt: "Profile 3" },
+                    { angle: 3 * Math.PI / 4, threshold: 0.25, src: "/images/profil/profil4.webp", alt: "Profile 4" },
+                    { angle: Math.PI, threshold: 0.3, src: "/images/profil/profil5.webp", alt: "Profile 5" },
+                    { angle: 5 * Math.PI / 4, threshold: 0.35, src: "/images/profil/profil6.webp", alt: "Profile 6" },
+                    { angle: 3 * Math.PI / 2, threshold: 0.4, src: "/images/profil/profil7.webp", alt: "Profile 7" },
+                    { angle: 7 * Math.PI / 4, threshold: 0.45, src: "/images/profil/profil8.webp", alt: "Profile 8" }
                   ].map((item, index) => (
                     <div
                       key={index}
