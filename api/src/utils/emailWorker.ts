@@ -134,7 +134,16 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 }
 
 // Logo DanaMasjid dalam base64 (SVG sederhana)
-export const DANAMASJID_LOGO_BASE64 = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiByeD0iMTYiIGZpbGw9IiMxZTQwYWYiLz4KPHBhdGggZD0iTTUwIDIwTDI1IDM1VjUwQzI1IDYyLjUgMzUgNzIgNTAgNzVDNjUgNzIgNzUgNjIuNSA3NSA1MFYzNUw1MCAyMFoiIGZpbGw9IiNmZmZmZmYiLz4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1NSIgcj0iOCIgZmlsbD0iIzFlNDBhZiIvPgo8L3N2Zz4='
+// SVG logo masjid dengan warna biru
+export const DANAMASJID_LOGO_SVG = `<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="100" rx="16" fill="#1e40af"/>
+  <path d="M50 25L30 37.5V52.5C30 62.5 38 70 50 72.5C62 70 70 62.5 70 52.5V37.5L50 25Z" fill="#ffffff"/>
+  <circle cx="50" cy="57.5" r="7.5" fill="#1e40af"/>
+  <rect x="45" y="35" width="10" height="3" fill="#1e40af"/>
+</svg>`
+
+// Convert SVG to base64 data URL
+export const DANAMASJID_LOGO_BASE64 = `data:image/svg+xml;base64,${Buffer.from(DANAMASJID_LOGO_SVG).toString('base64')}`
 
 // Helper function to get logo attachment
 export function getLogoAttachment(): EmailAttachment {
@@ -149,6 +158,11 @@ export function getLogoAttachment(): EmailAttachment {
   }
 }
 
+// Get inline logo for email templates (no external URL needed)
+export function getInlineLogo(): string {
+  return DANAMASJID_LOGO_BASE64
+}
+
 // Generate OTP using cryptographically secure random
 export function generateOTP(): string {
   // Use crypto.getRandomValues for secure random generation
@@ -161,6 +175,7 @@ export function generateOTP(): string {
 
 // Email templates
 export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): string {
+  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -177,6 +192,7 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
@@ -224,6 +240,7 @@ export function getOTPEmailHTML(otp: string, purpose: string = 'verifikasi'): st
 }
 
 export function getWelcomeEmailHTML(name: string): string {
+  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -240,6 +257,7 @@ export function getWelcomeEmailHTML(name: string): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
@@ -295,6 +313,7 @@ export function getWelcomeEmailHTML(name: string): string {
 }
 
 export function getSubscribeWelcomeEmailHTML(email: string): string {
+  const logoBase64 = getInlineLogo()
   return `
 <!DOCTYPE html>
 <html>
@@ -311,6 +330,7 @@ export function getSubscribeWelcomeEmailHTML(email: string): string {
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding: 40px 20px; text-align: center;">
+              <img src="${logoBase64}" alt="DanaMasjid Logo" style="width: 80px; height: 80px; margin-bottom: 16px; border-radius: 12px;" />
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">DanaMasjid</h1>
               <p style="margin: 8px 0 0; color: #dbeafe; font-size: 14px;">Platform Donasi Masjid Terpercaya</p>
             </td>
