@@ -35,8 +35,8 @@ export default function Home() {
       <CTASection />
       <ScrollAdventure />
       <IntroAnimation />
-      <ScrollingAnimation />
       <DonationProgramsSection />
+      <ScrollingAnimation />
       <TestimonialsSection />
       <FAQSection />
       <Footer />

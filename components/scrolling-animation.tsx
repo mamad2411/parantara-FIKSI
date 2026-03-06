@@ -124,11 +124,14 @@ export function HomePage() {
   const bottomStyle = getBottomStripStyle()
 
   return (
-    <div ref={containerRef} className={`relative h-[180vh] bg-background `}>
+    <div ref={containerRef} className={`relative h-[800vh] bg-background `}>
       <div className="h-screen relative sticky top-0 px-4 py-12">
-        {/* TRANSPARAN - Pojok Kanan Atas */}
+        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Tengah (Mobile & Tablet) */}
         <div 
-          className="absolute top-8 right-8 lg:top-12 lg:right-16 overflow-visible w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw]"
+          className="absolute top-8 right-8 lg:top-12 lg:right-16 
+                     sm:top-1/4 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     lg:left-auto lg:translate-x-0
+                     overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
           style={{
             opacity: topStyle.opacity,
             transform: `scale(${topStyle.scale}) translateX(${progress < 0.2 ? 50 : 0}px) translateY(${progress < 0.2 ? -30 : 0}px)`,
@@ -150,7 +153,7 @@ export function HomePage() {
             ></div>
             
             {/* Text */}
-            <span className="relative z-10 font-bold text-center text-[6vw] sm:text-[5vw] md:text-[4vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-3 block drop-shadow-lg">
+            <span className="relative z-10 font-bold text-center text-[8vw] sm:text-[7vw] md:text-[6vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-4 block drop-shadow-lg">
               TRANSPARAN
             </span>
           </div>
@@ -234,9 +237,12 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* JUJUR - Pojok Kiri Bawah */}
+        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Tengah (Mobile & Tablet) */}
         <div 
-          className="absolute bottom-8 left-8 lg:bottom-12 lg:left-16 overflow-visible w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw]"
+          className="absolute bottom-8 left-8 lg:bottom-12 lg:left-16
+                     sm:bottom-1/4 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
+                     lg:left-16 lg:translate-x-0
+                     overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
           style={{
             opacity: bottomStyle.opacity,
             transform: `scale(${bottomStyle.scale}) translateX(${progress < 0.4 ? -50 : 0}px) translateY(${progress < 0.4 ? 30 : 0}px)`,
@@ -258,7 +264,7 @@ export function HomePage() {
             ></div>
             
             {/* Text */}
-            <span className="relative z-10 font-bold text-center text-[6vw] sm:text-[5vw] md:text-[4vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-3 block drop-shadow-lg">
+            <span className="relative z-10 font-bold text-center text-[8vw] sm:text-[7vw] md:text-[6vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-4 block drop-shadow-lg">
               JUJUR
             </span>
           </div>
