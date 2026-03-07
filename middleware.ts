@@ -117,7 +117,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard']
+  const protectedRoutes = ['/dashboard'] // '/jamaah' temporarily removed for preview
   const authRoutes = ['/login', '/register']
   
   // Check if route is protected

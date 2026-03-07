@@ -1,0 +1,157 @@
+{
+    "id": "3",
+    "domain": "nurul-iman",
+    "cityId": "1638",
+    "cityName": "KOTA SURABAYA, JAWA TIMUR",
+    "profile": {
+        "name": "Masjid Nurul Iman",
+        "address": "Jl. Raya Darmo No. 78, Wonokromo",
+        "city": "Surabaya",
+        "province": "Jawa Timur",
+        "description": "Mushalla Nurul Iman merupakan tempat ibadah yang berdiri di lingkungan perumahan warga. Meskipun berukuran kecil, mushalla ini aktif menyelenggarakan berbagai program kegiatan keagamaan.",
+        "imageUrl": "/images/login/loginnn.webp",
+        "logoUrl": "/images/masjid/logo/nurul-iman-example.webp",
+        "gallery": [],
+        "phone": "031-5678901",
+        "email": "nurul.iman.sby@gmail.com",
+        "established": "2005",
+        "verified": false,
+        "socialMedia": {
+            "instagram": "@nuruliman_sby"
+        }
+    },
+    "financial": {
+        "currentWeek": {
+            "saldoAwal": 3500000,
+            "pemasukan": 850000,
+            "pengeluaran": 400000,
+            "saldoAkhir": 3950000
+        },
+        "monthly": [
+            {
+                "month": "2026-03",
+                "saldoAwal": 3500000,
+                "pemasukan": 850000,
+                "pengeluaran": 400000,
+                "saldoAkhir": 3950000,
+                "details": [
+                    {
+                        "date": "2026-03-01",
+                        "description": "Infaq Jumat",
+                        "type": "pemasukan",
+                        "amount": 500000,
+                        "category": "Infaq"
+                    },
+                    {
+                        "date": "2026-03-03",
+                        "description": "Donasi Warga",
+                        "type": "pemasukan",
+                        "amount": 350000,
+                        "category": "Donasi"
+                    },
+                    {
+                        "date": "2026-03-04",
+                        "description": "Bayar Listrik",
+                        "type": "pengeluaran",
+                        "amount": 250000,
+                        "category": "Operasional"
+                    },
+                    {
+                        "date": "2026-03-05",
+                        "description": "Beli Perlengkapan",
+                        "type": "pengeluaran",
+                        "amount": 150000,
+                        "category": "Inventaris"
+                    }
+                ]
+            },
+            {
+                "month": "2026-02",
+                "saldoAwal": 2800000,
+                "pemasukan": 1200000,
+                "pengeluaran": 500000,
+                "saldoAkhir": 3500000,
+                "details": [
+                    {
+                        "date": "2026-02-07",
+                        "description": "Infaq Jumat Pekan 1",
+                        "type": "pemasukan",
+                        "amount": 450000,
+                        "category": "Infaq"
+                    },
+                    {
+                        "date": "2026-02-14",
+                        "description": "Infaq Jumat Pekan 2",
+                        "type": "pemasukan",
+                        "amount": 400000,
+                        "category": "Infaq"
+                    },
+                    {
+                        "date": "2026-02-20",
+                        "description": "Donasi Online",
+                        "type": "pemasukan",
+                        "amount": 350000,
+                        "category": "Donasi"
+                    },
+                    {
+                        "date": "2026-02-05",
+                        "description": "Bayar Listrik",
+                        "type": "pengeluaran",
+                        "amount": 250000,
+                        "category": "Operasional"
+                    },
+                    {
+                        "date": "2026-02-10",
+                        "description": "Beli Sajadah",
+                        "type": "pengeluaran",
+                        "amount": 250000,
+                        "category": "Inventaris"
+                    }
+                ]
+            }
+        ]
+    },
+    "programs": [
+        {
+            "id": "p1",
+            "title": "Tadarus Ramadhan",
+            "description": "Program tadarus Al-Quran bersama setiap malam selama bulan Ramadhan.",
+            "target": 2000000,
+            "collected": 1500000,
+            "startDate": "2026-02-28",
+            "endDate": "2026-03-29",
+            "status": "active",
+            "imageUrl": ""
+        }
+    ],
+    "schedules": [
+        {
+            "id": "s1",
+            "title": "Kajian Malam Jumat",
+            "speaker": "Ustadz Bambang Irawan",
+            "day": "Kamis",
+            "time": "19:30",
+            "topic": "Akhlak Muslim Sehari-hari",
+            "recurring": true
+        },
+        {
+            "id": "s2",
+            "title": "Belajar Iqra untuk Anak",
+            "speaker": "Ibu Siti Aminah",
+            "day": "Sabtu",
+            "time": "15:00",
+            "topic": "Belajar Membaca Al-Quran",
+            "recurring": true
+        }
+    ],
+    "donation": {
+        "bankAccounts": [
+            {
+                "bank": "BSI",
+                "accountNumber": "456-789-0123",
+                "accountName": "Mushalla Nurul Iman"
+            }
+        ],
+        "qrCodeUrl": "/images/qr/nurul-iman-qr.png"
+    }
+}

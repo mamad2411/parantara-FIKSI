@@ -22,7 +22,7 @@ const nextConfig = {
   // Optimize production build
   compress: true,
   poweredByHeader: false,
-  
+
   // Security Headers
   async headers() {
     return [
@@ -83,7 +83,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://www.google.com https://va.vercel-scripts.com https://vercel.live wss://ws-us3.pusher.com https://danamasjid-api.danamsjid-api.workers.dev https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com wss://*.pusher.com https://www.emsifa.com",
+              "connect-src 'self' https://www.google.com https://va.vercel-scripts.com https://vercel.live wss://ws-us3.pusher.com https://danamasjid-api.danamsjid-api.workers.dev https://accounts.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com wss://*.pusher.com https://www.emsifa.com https://api.myquran.com",
               "frame-src 'self' https://www.google.com https://vercel.live https://accounts.google.com https://*.firebaseapp.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
               "media-src 'self'",
               "object-src 'none'",
@@ -98,7 +98,7 @@ const nextConfig = {
       },
     ]
   },
-  
+
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
@@ -106,3 +106,5 @@ const nextConfig = {
 }
 
 export default nextConfig
+
+import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());
