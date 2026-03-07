@@ -4,20 +4,9 @@ import type { NextRequest } from 'next/server'
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
-// Generate CSP nonce for inline scripts
-function generateNonce(): string {
-  const array = new Uint8Array(16)
-  crypto.getRandomValues(array)
-  return Buffer.from(array).toString('base64')
-}
-
 // Security middleware with advanced protection
 export function middleware(request: NextRequest) {
-  const nonce = generateNonce()
   const response = NextResponse.next()
-  
-  // Set nonce in request headers for use in pages
-  response.headers.set('x-nonce', nonce)
   
   // Get client IP (fallback to x-forwarded-for header)
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
@@ -84,10 +73,10 @@ export function middleware(request: NextRequest) {
   response.headers.set('Cross-Origin-Embedder-Policy', 'unsafe-none')
   response.headers.set('Cross-Origin-Resource-Policy', 'cross-origin')
   
-  // Stricter CSP with nonce and Trusted Types
+  // Balanced CSP - Compatible with Next.js and Google services
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://maps.googleapis.com https://apis.google.com https://accounts.google.com https://ssl.gstatic.com`,
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://maps.googleapis.com https://apis.google.com https://accounts.google.com https://ssl.gstatic.com https://www.google-analytics.com https://tagmanager.google.com https://*.firebaseapp.com https://*.googleapis.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://tagmanager.google.com",
     "img-src 'self' data: blob: https: *",
     "font-src 'self' data: https://fonts.gstatic.com",
@@ -101,8 +90,6 @@ export function middleware(request: NextRequest) {
     "frame-ancestors 'none'",
     "manifest-src 'self'",
     "media-src 'self' blob: data:",
-    "require-trusted-types-for 'script'",
-    "trusted-types 'none'",
     "upgrade-insecure-requests"
   ].join('; ')
   
