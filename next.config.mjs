@@ -18,6 +18,9 @@ const nextConfig = {
   // Enable source maps for production debugging
   productionBrowserSourceMaps: true,
   
+  // Optimize build output
+  swcMinify: true,
+  
   // Generate unique build IDs to prevent cache issues
   generateBuildId: async () => {
     return `build-${Date.now()}`
@@ -83,17 +86,17 @@ const nextConfig = {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin'
           },
-          // Comprehensive CSP with Trusted Types
+          // Comprehensive CSP - Relaxed for compatibility with Google services
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://maps.googleapis.com https://apis.google.com https://accounts.google.com https://ssl.gstatic.com https://www.google-analytics.com https://tagmanager.google.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://tagmanager.google.com",
-              "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://ssl.gstatic.com https://i.pravatar.cc",
+              "img-src 'self' data: blob: https: *",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.workers.dev https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com",
-              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.net https://*.firebaseapp.com https://accounts.google.com",
+              "connect-src 'self' https://*.workers.dev https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://www.googletagmanager.com https://www.emsifa.com wss://ws-us3.pusher.com wss://*.pusher.com",
+              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.net https://*.firebaseapp.com https://accounts.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
               "object-src 'none'",
