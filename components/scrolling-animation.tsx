@@ -124,8 +124,52 @@ export function HomePage() {
   const bottomStyle = getBottomStripStyle()
 
   return (
-    <div ref={containerRef} className={`relative h-[800vh] bg-background `}>
-      <div className="h-screen relative sticky top-0 px-4 py-12">
+    <div ref={containerRef} className={`relative h-[300vh] bg-background `}>
+      <div className="h-screen relative sticky top-0 px-4 py-12 overflow-hidden">
+        {/* Wavy Background */}
+        <div className="absolute inset-0 -z-10">
+          {/* Top Wave */}
+          <svg 
+            className="absolute top-0 left-0 w-full h-full" 
+            viewBox="0 0 1440 800" 
+            preserveAspectRatio="xMidYMid slice"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FB923C" />
+                <stop offset="50%" stopColor="#F97316" />
+                <stop offset="100%" stopColor="#EA580C" />
+              </linearGradient>
+            </defs>
+            <path 
+              d="M0,0 C240,150 480,200 720,180 C960,160 1200,100 1440,150 L1440,0 L0,0 Z" 
+              fill="url(#waveGradient)"
+              opacity="0.9"
+            />
+          </svg>
+          
+          {/* Bottom Wave */}
+          <svg 
+            className="absolute bottom-0 left-0 w-full h-full" 
+            viewBox="0 0 1440 800" 
+            preserveAspectRatio="xMidYMid slice"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="waveGradient2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#EA580C" />
+                <stop offset="50%" stopColor="#F97316" />
+                <stop offset="100%" stopColor="#FB923C" />
+              </linearGradient>
+            </defs>
+            <path 
+              d="M0,800 C240,650 480,600 720,620 C960,640 1200,700 1440,650 L1440,800 L0,800 Z" 
+              fill="url(#waveGradient2)"
+              opacity="0.9"
+            />
+          </svg>
+        </div>
         {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Atas dengan jarak (Tablet) / Tengah (Mobile) */}
         <div 
           className="absolute top-8 right-8 lg:top-12 lg:right-16 

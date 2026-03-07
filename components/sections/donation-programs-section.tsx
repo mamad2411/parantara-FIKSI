@@ -1,6 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Lottie from "lottie-react"
+import animationData from "@/lotie/Man goes to the mosque on Ramadan.json"
 
 export function DonationProgramsSection() {
   return (
@@ -241,13 +243,11 @@ export function DonationProgramsSection() {
                 </div>
 
                 {/* Dashboard Preview Image */}
-                <div className="relative rounded-xl overflow-hidden shadow-lg border border-slate-200">
-                  <img 
-                    src="/images/program/dash.webp" 
-                    alt="Dashboard Preview" 
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-cover"
+                <div className="relative rounded-xl overflow-hidden shadow-lg border border-slate-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+                  <Lottie 
+                    animationData={animationData}
+                    loop={true}
+                    className="w-full h-auto"
                   />
                 </div>
 

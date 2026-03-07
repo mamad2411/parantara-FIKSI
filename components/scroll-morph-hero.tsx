@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, useTransform, useSpring, useMotionValue, useScroll } from "framer-motion";
+import { motion, useTransform, useSpring, useMotionValue, useScroll, AnimatePresence } from "framer-motion";
 
 // --- Utility ---
 // function cn(...inputs: ClassValue[]) {
@@ -66,8 +66,10 @@ function FlipCard({
             }}
             transition={{
                 type: "spring",
-                stiffness: 40,
+                stiffness: 100,
                 damping: 15,
+                mass: 0.2,
+                restDelta: 0.001
             }}
 
             // Initial style
@@ -87,7 +89,12 @@ function FlipCard({
                 className="relative h-full w-full"
                 style={{ transformStyle: "preserve-3d" }}
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.4, type: "spring", stiffness: 200, damping: 20 }}
+                transition={{ 
+                    duration: 0.5, 
+                    type: "spring", 
+                    stiffness: 150, 
+                    damping: 20 
+                }}
             >
                 {/* Front Face */}
                 <div
@@ -134,7 +141,7 @@ function FlipCard({
 
 // --- Main Hero Component ---
 const TOTAL_IMAGES = 20;
-const MAX_SCROLL = 3000; // Virtual scroll range
+const MAX_SCROLL = 3500; // Virtual scroll range - increased for smoother transitions
 
 // Card Content Data
 const CARD_CONTENT = [
@@ -191,8 +198,34 @@ export default function IntroAnimation() {
     const [introPhase, setIntroPhase] = useState<AnimationPhase>("scatter");
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const [isDesktop, setIsDesktop] = useState(true);
+    const [sponsorOrder, setSponsorOrder] = useState([0, 1, 2, 3]);
     const containerRef = useRef<HTMLDivElement>(null);
     const pinnedRef = useRef<HTMLDivElement>(null);
+
+    // Sponsor logos data
+    const sponsors = [
+        { src: "/images/sponsor/alikhlas.webp", alt: "Al Ikhlas" },
+        { src: "/images/sponsor/pondokIT.webp", alt: "Pondok IT" },
+        { src: "/images/sponsor/tb.webp", alt: "TB" },
+        { src: "/images/sponsor/ysb.webp", alt: "YSB" },
+    ];
+
+    // Shuffle sponsor positions every 30 seconds
+    useEffect(() => {
+        const shuffleInterval = setInterval(() => {
+            setSponsorOrder(prev => {
+                const newOrder = [...prev];
+                // Fisher-Yates shuffle
+                for (let i = newOrder.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newOrder[i], newOrder[j]] = [newOrder[j], newOrder[i]];
+                }
+                return newOrder;
+            });
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(shuffleInterval);
+    }, []);
 
     // Responsive sizing for all devices
     useEffect(() => {
@@ -243,18 +276,33 @@ export default function IntroAnimation() {
     const virtualScroll = useTransform(scrollYProgress, [0, 1], [0, MAX_SCROLL]);
 
     // 1. Morph Progress: 0 (Circle) -> 1 (Bottom Arc)
-    // Happens between scroll 0 and 600
-    const morphProgress = useTransform(virtualScroll, [0, 600], [0, 1]);
-    const smoothMorph = useSpring(morphProgress, { stiffness: 40, damping: 20 });
+    // Happens between scroll 0 and 800 (increased for smoother transition)
+    const morphProgress = useTransform(virtualScroll, [0, 800], [0, 1]);
+    const smoothMorph = useSpring(morphProgress, { 
+        stiffness: 100, 
+        damping: 15,
+        mass: 0.2,
+        restDelta: 0.001
+    });
 
-    // 2. Scroll Rotation (Shuffling): Starts after morph (e.g., > 600)
+    // 2. Scroll Rotation (Shuffling): Starts after morph (e.g., > 800)
     // Rotates the bottom arc as user continues scrolling
-    const scrollRotate = useTransform(virtualScroll, [600, 3000], [0, 360]);
-    const smoothScrollRotate = useSpring(scrollRotate, { stiffness: 40, damping: 20 });
+    const scrollRotate = useTransform(virtualScroll, [800, 3500], [0, 360]);
+    const smoothScrollRotate = useSpring(scrollRotate, { 
+        stiffness: 80, 
+        damping: 15,
+        mass: 0.3,
+        restDelta: 0.001
+    });
 
     // --- Mouse Parallax ---
     const mouseX = useMotionValue(0);
-    const smoothMouseX = useSpring(mouseX, { stiffness: 30, damping: 20 });
+    const smoothMouseX = useSpring(mouseX, { 
+        stiffness: 80, 
+        damping: 20,
+        mass: 0.2,
+        restDelta: 0.001
+    });
 
     useEffect(() => {
         const container = pinnedRef.current;
@@ -275,8 +323,8 @@ export default function IntroAnimation() {
 
     // --- Intro Sequence ---
     useEffect(() => {
-        const timer1 = setTimeout(() => setIntroPhase("line"), 500);
-        const timer2 = setTimeout(() => setIntroPhase("circle"), 2500);
+        const timer1 = setTimeout(() => setIntroPhase("line"), 800);
+        const timer2 = setTimeout(() => setIntroPhase("circle"), 2000);
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
     }, []);
 
@@ -308,9 +356,9 @@ export default function IntroAnimation() {
     }, [smoothMorph, smoothScrollRotate, smoothMouseX]);
 
     // --- Content Opacity ---
-    // Fade in content when arc is formed (morphValue > 0.8)
-    const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
-    const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
+    // Fade in content when arc is formed (morphValue > 0.85)
+    const contentOpacity = useTransform(smoothMorph, [0.85, 1], [0, 1]);
+    const contentY = useTransform(smoothMorph, [0.85, 1], [30, 0]);
 
     return (
         <div
@@ -320,15 +368,129 @@ export default function IntroAnimation() {
         >
             {/* Pinned viewport */}
             <div ref={pinnedRef} className="sticky top-0 h-screen overflow-hidden flex flex-col items-center justify-center perspective-1000">
+                
+                {/* Stats Bar - Top */}
+                <div className="absolute top-0 left-0 right-0 z-10">
+                    {/* Sponsor Logos Bar */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.3 }}
+                        className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 py-4 md:py-6"
+                    >
+                        <div className="max-w-7xl mx-auto px-4">
+                            {/* Sponsor Label */}
+                            <div className="text-center mb-3">
+                                <p className="text-xs md:text-sm font-bold text-gray-800 uppercase tracking-widest">
+                                    Didukung Oleh
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-0 divide-x-0 md:divide-x divide-yellow-600">
+                                <AnimatePresence mode="popLayout">
+                                    {sponsorOrder.map((sponsorIndex, position) => (
+                                        <motion.div 
+                                            key={`sponsor-${sponsorIndex}`}
+                                            layout
+                                            initial={{ 
+                                                opacity: 0, 
+                                                scale: 0.5,
+                                                y: -20
+                                            }}
+                                            animate={{ 
+                                                opacity: 1, 
+                                                scale: 1,
+                                                y: 0
+                                            }}
+                                            exit={{ 
+                                                opacity: 0, 
+                                                scale: 0.5,
+                                                y: 20
+                                            }}
+                                            transition={{ 
+                                                duration: 0.5, 
+                                                delay: position * 0.08,
+                                                ease: [0.4, 0, 0.2, 1],
+                                                layout: {
+                                                    duration: 0.4,
+                                                    ease: [0.4, 0, 0.2, 1]
+                                                }
+                                            }}
+                                            className="flex items-center justify-center"
+                                        >
+                                            <div className="flex flex-col items-center gap-2">
+                                                <motion.div 
+                                                    whileHover={{ scale: 1.05, y: -2 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="bg-white rounded-lg p-3 md:p-4 shadow-md hover:shadow-xl transition-shadow duration-300"
+                                                >
+                                                    <img 
+                                                        src={sponsors[sponsorIndex].src} 
+                                                        alt={sponsors[sponsorIndex].alt} 
+                                                        className="h-10 md:h-12 w-auto object-contain"
+                                                    />
+                                                </motion.div>
+                                                <p className="text-[10px] md:text-xs font-semibold text-gray-800 text-center">
+                                                    {sponsors[sponsorIndex].alt}
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </motion.div>
+                    
+                    {/* Marquee Animation */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: -30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 1.5, type: "spring", stiffness: 80, damping: 15 }}
+                        className="bg-blue-600 py-1 overflow-hidden"
+                    >
+                        <div className="flex animate-marquee-infinite whitespace-nowrap">
+                            <span className="text-xs text-white mx-6">Platform Donasi Masjid Terpercaya</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Transparansi Real-Time</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Amanah & Berkah</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Laporan Lengkap</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Mudah & Aman</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Platform Donasi Masjid Terpercaya</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Transparansi Real-Time</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Amanah & Berkah</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Laporan Lengkap</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Mudah & Aman</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Platform Donasi Masjid Terpercaya</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Transparansi Real-Time</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Amanah & Berkah</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Laporan Lengkap</span>
+                            <span className="text-xs text-white">|</span>
+                            <span className="text-xs text-white mx-6">Mudah & Aman</span>
+                            <span className="text-xs text-white">|</span>
+                        </div>
+                    </motion.div>
+                </div>
 
 
                 {/* Intro Text (Fades out) */}
-                <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-1/2 -translate-y-1/2">
+                <div className="absolute z-0 flex flex-col items-center justify-center text-center pointer-events-none top-[60%] md:top-[55%] -translate-y-1/2 px-4 max-w-xs md:max-w-none">
                     <motion.h1
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" } : { opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 1 }}
-                        className="text-2xl font-medium tracking-tight text-gray-800 md:text-4xl"
+                        className="text-base md:text-2xl lg:text-4xl font-medium tracking-tight text-gray-800 leading-tight md:leading-normal"
                     >
                         Wujudkan Transparansi Donasi Masjid
                     </motion.h1>
@@ -336,7 +498,7 @@ export default function IntroAnimation() {
                         initial={{ opacity: 0 }}
                         animate={introPhase === "circle" && morphValue < 0.5 ? { opacity: 0.5 - morphValue } : { opacity: 0 }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className="mt-4 text-xs font-bold tracking-[0.2em] text-gray-800"
+                        className="mt-2 md:mt-4 text-[9px] md:text-xs font-bold tracking-[0.15em] md:tracking-[0.2em] text-gray-800"
                     >
                         SCROLL UNTUK MENJELAJAH
                     </motion.p>
@@ -345,12 +507,12 @@ export default function IntroAnimation() {
                 {/* Arc Active Content (Fades in) */}
                 <motion.div
                     style={{ opacity: contentOpacity, y: contentY }}
-                    className="absolute top-[25%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
+                    className="absolute top-[50%] md:top-[30%] z-10 flex flex-col items-center justify-center text-center pointer-events-none px-4"
                 >
-                    <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 tracking-tight mb-4">
+                    <h2 className="text-2xl md:text-3xl lg:text-5xl font-semibold text-gray-900 tracking-tight mb-3 md:mb-4">
                         Jelajahi Misi DanaMasjid
                     </h2>
-                    <p className="text-sm md:text-base text-gray-800 max-w-lg leading-relaxed">
+                    <p className="text-xs md:text-sm lg:text-base text-gray-800 max-w-lg leading-relaxed">
                         Transparansi donasi, laporan real-time, dan program yang berdampak. <br className="hidden md:block" />
                         Gulir untuk melihat program unggulan dan fitur yang memudahkan berdonasi.
                     </p>
@@ -378,12 +540,13 @@ export default function IntroAnimation() {
 
                             // A. Calculate Circle Position
                             const circleRadius = Math.min(minDimension * 0.35, 350);
+                            const circleOffsetY = 120; // Offset ke bawah untuk menghindari stats bar
 
                             const circleAngle = (i / TOTAL_IMAGES) * 360;
                             const circleRad = (circleAngle * Math.PI) / 180;
                             const circlePos = {
                                 x: Math.cos(circleRad) * circleRadius,
-                                y: Math.sin(circleRad) * circleRadius,
+                                y: Math.sin(circleRad) * circleRadius + circleOffsetY,
                                 rotation: circleAngle + 90,
                             };
 
@@ -446,7 +609,6 @@ export default function IntroAnimation() {
                                 opacity: 1,
                             };
                         }
-
                         return (
                             <FlipCard
                                 key={i}
