@@ -79,17 +79,23 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Images - 7 days cache
+# Images - 30 days cache
 [[headers]]
   for = "/images/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800, must-revalidate"
+    Cache-Control = "public, max-age=2592000, immutable"
 
-# Videos - 7 days cache
+# Videos - 30 days cache  
 [[headers]]
   for = "/vidio/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800, must-revalidate"
+    Cache-Control = "public, max-age=2592000, immutable"
+    
+# Fonts - 1 year cache
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 # API proxy to Cloudflare Workers
 [[redirects]]

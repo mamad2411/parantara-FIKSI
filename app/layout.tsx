@@ -67,6 +67,10 @@ export default function RootLayout({
         {/* Preconnect to external domains for better performance */}
         <link rel="preconnect" href="https://www.google.com" />
         <link rel="preconnect" href="https://www.gstatic.com" />
+        <link rel="preconnect" href="https://apis.google.com" />
+        <link rel="preconnect" href="https://i.pravatar.cc" />
+        <link rel="dns-prefetch" href="https://danamasjid.firebaseapp.com" />
+        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
       </head>
       <body className={`font-sans antialiased`}>
         <ScrollProgress />

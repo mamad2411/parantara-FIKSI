@@ -4,7 +4,11 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: false,
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,11 +19,14 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Enable source maps for production debugging
-  productionBrowserSourceMaps: true,
+  // Disable source maps in production for better performance
+  productionBrowserSourceMaps: false,
   
   // Optimize build output
   swcMinify: true,
+  
+  // Optimize CSS
+  optimizeFonts: true,
   
   // Generate unique build IDs to prevent cache issues
   generateBuildId: async () => {
@@ -28,7 +35,11 @@ const nextConfig = {
   
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
+    optimizeCss: true,
   },
+  
+  // Add empty turbopack config to silence warning
+  turbopack: {},
   
   // Complex Security Headers Configuration
   async headers() {
