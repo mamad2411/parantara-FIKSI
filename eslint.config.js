@@ -3,7 +3,6 @@ import tsparser from '@typescript-eslint/parser';
 
 export default [
   {
-    files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
     ignores: [
       ".next/**",
       "node_modules/**",
@@ -12,12 +11,19 @@ export default [
       "dist/**",
       "build/**",
       "out/**",
+      "*.config.js",
+      "*.config.mjs",
+      "*.config.ts",
     ],
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: tsparser,
       ecmaVersion: "latest",
       sourceType: "module",
       parserOptions: {
+        project: "./tsconfig.json",
         ecmaFeatures: {
           jsx: true,
         },
@@ -27,9 +33,21 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
-      // Disable rules that conflict with TypeScript
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+    },
+  },
+  {
+    files: ["**/*.js", "**/*.jsx"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
     },
   },
 ];
