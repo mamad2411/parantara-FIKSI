@@ -96,7 +96,7 @@ export function ServicesSection() {
         </span>
       </div>
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{__html: `
         @keyframes drawPath {
           from {
             stroke-dasharray: 1000;
@@ -114,7 +114,7 @@ export function ServicesSection() {
         :global(.animate-draw-icon) :global(rect) {
           animation: drawPath 2s ease-out forwards;
         }
-      `}</style>
+      `}} />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div ref={sectionRef} className="relative px-6 lg:px-8 py-20 lg:py-24 mb-3 lg:mt-25 overflow-hidden rounded-3xl min-h-[450px] lg:min-h-[550px]">

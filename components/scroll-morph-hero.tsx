@@ -83,14 +83,13 @@ function FlipCard({
                 e.stopPropagation();
                 setIsFlipped(!isFlipped);
             }}
-            whileHover={{ scale: 1.05 }}
         >
             <motion.div
                 className="relative h-full w-full"
                 style={{ transformStyle: "preserve-3d" }}
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 transition={{ 
-                    duration: 0.1, 
+                    duration: 0.05, 
                     ease: "linear"
                 }}
             >

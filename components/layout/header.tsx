@@ -83,7 +83,7 @@ export function Header() {
             </div>
           </a>
 
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden xl:flex items-center gap-8">
             <a
               href="#how-it-works"
               onClick={(e) => handleSmoothScroll(e, "how-it-works")}
@@ -174,7 +174,7 @@ export function Header() {
             </a>
           </nav>
 
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden xl:flex items-center gap-3">
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -274,7 +274,7 @@ export function Header() {
           </div>
 
           <button
-            className={`lg:hidden transition-colors duration-300 ${isScrolled ? "text-black" : "text-foreground"}`}
+            className={`xl:hidden transition-colors duration-300 ${isScrolled ? "text-black" : "text-foreground"}`}
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -283,7 +283,7 @@ export function Header() {
 
         {isOpen && (
           <nav
-            className={`lg:hidden mt-6 pb-6 flex flex-col gap-4 border-t pt-6 ${
+            className={`xl:hidden mt-6 pb-6 flex flex-col gap-4 border-t pt-6 ${
               isScrolled ? "border-zinc-200" : "border-border"
             }`}
           >

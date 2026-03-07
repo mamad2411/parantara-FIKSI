@@ -67,6 +67,15 @@ export function HomePage() {
   const [progress, setProgress] = useState(0)
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
   
+  // Calculate dynamic height based on expanded cards
+  const getContainerHeight = () => {
+    const baseHeight = screenSize === 'desktop' ? 300 : 500 // Mobile/tablet jauh lebih tinggi
+    if (expandedCard !== null) {
+      return `${baseHeight + 150}vh` // Tambah 150vh saat ada card yang dibuka
+    }
+    return `${baseHeight}vh`
+  }
+  
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     // Smooth progression untuk mobile
     setProgress(latest)
@@ -125,8 +134,9 @@ export function HomePage() {
   const bottomStyle = getBottomStripStyle()
 
   return (
-    <div ref={containerRef} className={`relative h-[300vh] bg-background `}>
-      <div className="h-screen relative sticky top-0 px-4 py-12 overflow-hidden">
+    <div ref={containerRef} className={`relative bg-background`} style={{ height: getContainerHeight() }}>
+      <div className="relative sticky top-0 px-4 py-12 overflow-hidden
+                      h-[130vh] sm:h-[120vh] lg:h-screen">
         {/* Wavy Background */}
         <div className="absolute inset-0 -z-10">
           {/* Top Wave */}
@@ -171,13 +181,12 @@ export function HomePage() {
             />
           </svg>
         </div>
-        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Atas dengan jarak (Tablet) / Tengah (Mobile) */}
+        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Atas (Mobile/Tablet) */}
         <div 
-          className="absolute top-8 right-8 lg:top-12 lg:right-16 
-                     sm:top-[15%] sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
-                     md:top-[12%]
-                     lg:left-auto lg:translate-x-0
-                     overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
+          className="absolute 
+                     top-4 left-1/2 -translate-x-1/2
+                     lg:top-12 lg:right-16 lg:left-auto lg:translate-x-0
+                     overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw] z-30"
           style={{
             opacity: topStyle.opacity,
             transform: `scale(${topStyle.scale}) translateX(${progress < 0.2 ? 50 : 0}px) translateY(${progress < 0.2 ? -30 : 0}px)`,
@@ -204,9 +213,9 @@ export function HomePage() {
             </span>
           </div>
           
-          {/* Collapsible Stats Cards - Below TRANSPARAN - Desktop Only */}
+          {/* Collapsible Stats Cards - Below TRANSPARAN */}
           {topStyle.opacity > 0.8 && (
-            <div className="mt-4 space-y-2 hidden lg:block">
+            <div className="mt-4 space-y-2">
               {[
                 { 
                   value: "351K", 
@@ -263,7 +272,7 @@ export function HomePage() {
                   
                   {/* Expanded Content */}
                   <div 
-                    className={`overflow-hidden transition-all duration-300 ${expandedCard === index ? 'max-h-20' : 'max-h-0'}`}
+                    className={`overflow-hidden transition-all duration-300 ${expandedCard === index ? 'max-h-32 sm:max-h-24 lg:max-h-20' : 'max-h-0'}`}
                   >
                     <div className={`px-3 sm:px-4 pb-3 sm:pb-4 pt-0`}>
                       <p className={`text-[9px] sm:text-[10px] ${stat.textColor} opacity-70 leading-relaxed`}>
@@ -278,7 +287,8 @@ export function HomePage() {
         </div>
 
         {/* Center Circle with Images */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 
+                        -translate-y-[20%] sm:-translate-y-[10%] lg:-translate-y-1/2">
           <div className={`relative ${dimensions.containerWidth}`}>
           <div
             className={`w-full aspect-square rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -355,13 +365,13 @@ export function HomePage() {
           </div>
         </div>
 
-        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Bawah dengan jarak (Tablet) / Tengah (Mobile) */}
+        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Bawah (Mobile/Tablet) */}
         <div 
-          className="absolute bottom-8 left-8 lg:bottom-12 lg:left-16
-                     sm:bottom-[15%] sm:left-1/2 sm:-translate-x-1/2 sm:right-auto
-                     md:bottom-[12%]
-                     lg:left-16 lg:translate-x-0
-                     overflow-visible w-[50vw] sm:w-[60vw] md:w-[55vw] lg:w-[25vw]"
+          className="absolute 
+                     bottom-8 left-1/2 -translate-x-1/2
+                     sm:bottom-12
+                     lg:bottom-12 lg:left-16 lg:translate-x-0
+                     overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw]"
           style={{
             opacity: bottomStyle.opacity,
             transform: `scale(${bottomStyle.scale}) translateX(${progress < 0.4 ? -50 : 0}px) translateY(${progress < 0.4 ? 30 : 0}px)`,
