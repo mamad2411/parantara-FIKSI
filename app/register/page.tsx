@@ -610,11 +610,21 @@ export default function RegisterPage() {
         })
 
         console.log('Step 3: Firebase registration successful! User ID:', user.uid)
-        setSuccess('Pendaftaran berhasil! Silakan lengkapi data masjid Anda.')
+        setSuccess('Pendaftaran berhasil! Silakan login untuk melanjutkan.')
         setLoading(false)
         
-        // Don't auto-redirect, let user click button manually
-        // User will see success message with link to daftar-masjid
+        // Sign out user after successful registration
+        // User must login first before accessing daftar-masjid
+        try {
+          await signOut()
+        } catch (signOutError) {
+          console.error('Error signing out:', signOutError)
+        }
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          router.push('/login?message=Pendaftaran berhasil! Silakan login untuk melanjutkan ke pendaftaran masjid.')
+        }, 2000)
       }
     } catch (err: any) {
       console.error('=== REGISTRATION ERROR ===')
