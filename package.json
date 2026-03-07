@@ -30,7 +30,11 @@
     "db:generate": "cd api && npm run db:generate",
     "db:push": "cd api && npm run db:push",
     "db:studio": "cd api && npm run db:studio",
-    "db:seed": "cd api && npm run db:seed"
+    "db:seed": "cd api && npm run db:seed",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

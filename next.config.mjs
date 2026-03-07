@@ -129,3 +129,6 @@ const nextConfig = {
 }
 
 export default nextConfig
+
+// Cloudflare integration - uncomment after installing @opennextjs/cloudflare
+// import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev())

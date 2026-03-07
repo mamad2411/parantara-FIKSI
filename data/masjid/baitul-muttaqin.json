@@ -1,0 +1,128 @@
+ {
+    "id": "5",
+    "domain": "baitul-muttaqin",
+    "cityId": "1505",
+    "cityName": "KOTA YOGYAKARTA, DI YOGYAKARTA",
+    "profile": {
+      "name": "Masjid Baitul Muttaqin",
+      "address": "Jl. Malioboro No. 56, Yogyakarta",
+      "city": "Yogyakarta",
+      "province": "DI Yogyakarta",
+      "description": "Masjid bersejarah di pusat kota Yogyakarta dengan arsitektur tradisional Jawa.",
+      "imageUrl": "/images/login/loginnn.webp",
+      "gallery": [],
+      "phone": "0274-512345",
+      "email": "info@baitulmuttaqin.id",
+      "established": "1952",
+      "verified": true,
+      "socialMedia": {
+        "instagram": "@baitulmuttaqin_jogja",
+        "website": "https://baitulmuttaqin.id"
+      }
+    },
+    "financial": {
+      "currentWeek": {
+        "saldoAwal": 28000000,
+        "pemasukan": 5500000,
+        "pengeluaran": 2200000,
+        "saldoAkhir": 31300000
+      },
+      "monthly": [
+        {
+          "month": "2026-03",
+          "saldoAwal": 28000000,
+          "pemasukan": 5500000,
+          "pengeluaran": 2200000,
+          "saldoAkhir": 31300000,
+          "details": [
+            { "date": "2026-03-01", "description": "Infaq Jumat Pekan 1", "type": "pemasukan", "amount": 3500000, "category": "Infaq" },
+            { "date": "2026-03-02", "description": "Donasi Wisatawan", "type": "pemasukan", "amount": 2000000, "category": "Donasi" },
+            { "date": "2026-03-03", "description": "Bayar Listrik", "type": "pengeluaran", "amount": 900000, "category": "Operasional" },
+            { "date": "2026-03-04", "description": "Gaji Marbot", "type": "pengeluaran", "amount": 1300000, "category": "SDM" }
+          ]
+        },
+        {
+          "month": "2026-02",
+          "saldoAwal": 21500000,
+          "pemasukan": 10500000,
+          "pengeluaran": 4000000,
+          "saldoAkhir": 28000000,
+          "details": [
+            { "date": "2026-02-07", "description": "Infaq Jumat Pekan 1", "type": "pemasukan", "amount": 3200000, "category": "Infaq" },
+            { "date": "2026-02-14", "description": "Infaq Jumat Pekan 2", "type": "pemasukan", "amount": 3500000, "category": "Infaq" },
+            { "date": "2026-02-20", "description": "Donasi Wisatawan", "type": "pemasukan", "amount": 3800000, "category": "Donasi" },
+            { "date": "2026-02-05", "description": "Bayar Listrik", "type": "pengeluaran", "amount": 900000, "category": "Operasional" },
+            { "date": "2026-02-05", "description": "Bayar Air PDAM", "type": "pengeluaran", "amount": 400000, "category": "Operasional" },
+            { "date": "2026-02-10", "description": "Gaji Marbot (2 orang)", "type": "pengeluaran", "amount": 2600000, "category": "SDM" },
+            { "date": "2026-02-20", "description": "Perawatan Bangunan Kuno", "type": "pengeluaran", "amount": 100000, "category": "Pemeliharaan" }
+          ]
+        },
+        {
+          "month": "2026-01",
+          "saldoAwal": 16000000,
+          "pemasukan": 8500000,
+          "pengeluaran": 3000000,
+          "saldoAkhir": 21500000,
+          "details": [
+            { "date": "2026-01-03", "description": "Infaq Jumat Pekan 1", "type": "pemasukan", "amount": 3000000, "category": "Infaq" },
+            { "date": "2026-01-10", "description": "Infaq Jumat Pekan 2", "type": "pemasukan", "amount": 3200000, "category": "Infaq" },
+            { "date": "2026-01-17", "description": "Donasi Wisatawan", "type": "pemasukan", "amount": 2300000, "category": "Donasi" },
+            { "date": "2026-01-05", "description": "Bayar Listrik", "type": "pengeluaran", "amount": 900000, "category": "Operasional" },
+            { "date": "2026-01-10", "description": "Gaji Marbot (2 orang)", "type": "pengeluaran", "amount": 2100000, "category": "SDM" }
+          ]
+        }
+      ]
+    },
+    "programs": [
+      {
+        "id": "p1",
+        "title": "Pelestarian Masjid Bersejarah",
+        "description": "Program perawatan dan pelestarian bangunan masjid berarsitektur tradisional Jawa.",
+        "target": 40000000,
+        "collected": 28000000,
+        "startDate": "2025-10-01",
+        "endDate": "2026-09-30",
+        "status": "active",
+        "imageUrl": ""
+      },
+      {
+        "id": "p2",
+        "title": "Festival Seni Islami Jogja",
+        "description": "Penyelenggaraan festival seni dan budaya Islam tahunan di halaman masjid.",
+        "target": 25000000,
+        "collected": 18000000,
+        "startDate": "2026-03-01",
+        "endDate": "2026-06-30",
+        "status": "active",
+        "imageUrl": ""
+      },
+      {
+        "id": "p3",
+        "title": "Buka Puasa Gratis Ramadhan 2025",
+        "description": "Penyediaan takjil dan makan malam gratis untuk jamaah dan wisatawan selama Ramadhan.",
+        "target": 30000000,
+        "collected": 30000000,
+        "startDate": "2025-03-01",
+        "endDate": "2025-03-30",
+        "status": "completed",
+        "imageUrl": ""
+      }
+    ],
+    "schedules": [
+      { "id": "s1", "title": "Kajian Budaya Islam", "speaker": "Prof. Dr. Muhaimin Yahya", "day": "Selasa", "time": "16:00", "topic": "Islam dan Budaya Jawa", "recurring": true },
+      { "id": "s2", "title": "Sholawatan Mingguan", "speaker": "Grup Sholawat Al-Muhibbin", "day": "Jumat", "time": "17:00", "topic": "Maulid Diba dan Sholawat Nariyah", "recurring": true },
+      { "id": "s3", "title": "Kajian Ahad Pagi", "speaker": "Ustadz Wahyu Santoso, M.Ag.", "day": "Ahad", "time": "07:00", "topic": "Tafsir Tematik Al-Quran", "recurring": true }
+    ],
+    "donation": {
+      "bankAccounts": [
+        { "bank": "BSI", "accountNumber": "716-789-0123", "accountName": "Masjid Baitul Muttaqin" },
+        { "bank": "BPD DIY", "accountNumber": "032-1234-5678", "accountName": "Yayasan Baitul Muttaqin Yogyakarta" }
+      ],
+      "qrCodeUrl": "/images/qr/baitul-muttaqin-qr.png"
+    },
+    "meta": {
+      "donors": 1890,
+      "totalDonation": 156000000,
+      "category": "Operasional"
+    }
+  }

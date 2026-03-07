@@ -5,92 +5,25 @@ import { motion } from "framer-motion"
 import { Header } from "@/components/layout"
 import { Footer } from "@/components/layout"
 import { MasjidHeroV2 } from "@/components/sections"
-import { Search, MapPin, Filter, ChevronDown } from "lucide-react"
+import { Search, MapPin, Filter, ChevronDown, BadgeCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { getAllMosques } from "@/lib/services/masjid-service"
 
 export default function MasjidPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCity, setSelectedCity] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
-  // Dummy data masjid
-  const mosques = [
-    {
-      id: 1,
-      name: "Masjid Al-Ikhlas",
-      city: "Jakarta",
-      address: "Jl. Sudirman No. 123, Jakarta Pusat",
-      image: "/images/login/loginnn.webp",
-      donors: 1234,
-      totalDonation: 125000000,
-      category: "Operasional",
-      description: "Masjid yang melayani jamaah di pusat kota Jakarta dengan berbagai program sosial dan pendidikan."
-    },
-    {
-      id: 2,
-      name: "Masjid Ar-Rahman",
-      city: "Bandung",
-      address: "Jl. Asia Afrika No. 45, Bandung",
-      image: "/images/login/loginnn.webp",
-      donors: 856,
-      totalDonation: 87500000,
-      category: "Renovasi",
-      description: "Sedang dalam proses renovasi untuk memperluas ruang sholat dan fasilitas wudhu."
-    },
-    {
-      id: 3,
-      name: "Masjid Al-Falah",
-      city: "Surabaya",
-      address: "Jl. Pemuda No. 78, Surabaya",
-      image: "/images/login/loginnn.webp",
-      donors: 2341,
-      totalDonation: 234000000,
-      category: "Pembangunan",
-      description: "Pembangunan masjid baru untuk melayani jamaah di kawasan Surabaya Timur."
-    },
-    {
-      id: 4,
-      name: "Masjid Nurul Huda",
-      city: "Jakarta",
-      address: "Jl. Gatot Subroto No. 234, Jakarta Selatan",
-      image: "/images/login/loginnn.webp",
-      donors: 567,
-      totalDonation: 45000000,
-      category: "Operasional",
-      description: "Masjid dengan program tahfidz dan pendidikan Islam untuk anak-anak."
-    },
-    {
-      id: 5,
-      name: "Masjid Baitul Muttaqin",
-      city: "Yogyakarta",
-      address: "Jl. Malioboro No. 56, Yogyakarta",
-      image: "/images/login/loginnn.webp",
-      donors: 1890,
-      totalDonation: 156000000,
-      category: "Operasional",
-      description: "Masjid bersejarah di pusat kota Yogyakarta dengan arsitektur tradisional Jawa."
-    },
-    {
-      id: 6,
-      name: "Masjid Al-Hidayah",
-      city: "Semarang",
-      address: "Jl. Pandanaran No. 89, Semarang",
-      image: "/images/login/loginnn.webp",
-      donors: 432,
-      totalDonation: 38000000,
-      category: "Renovasi",
-      description: "Membutuhkan renovasi atap dan sistem sound untuk meningkatkan kenyamanan jamaah."
-    },
-  ]
+  const mosques = getAllMosques()
 
-  const cities = ["all", "Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Semarang"]
-  const categories = ["all", "Operasional", "Renovasi", "Pembangunan"]
+  const cities = ["all", ...Array.from(new Set(mosques.map(m => m.location)))]
+  const categories = ["all", ...Array.from(new Set(mosques.map(m => m.category)))]
 
   const filteredMosques = mosques.filter((mosque) => {
     const matchesSearch = mosque.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         mosque.city.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCity = selectedCity === "all" || mosque.city === selectedCity
+      mosque.location.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCity = selectedCity === "all" || mosque.location.includes(selectedCity)
     const matchesCategory = selectedCategory === "all" || mosque.category === selectedCategory
     return matchesSearch && matchesCity && matchesCategory
   })
@@ -98,10 +31,10 @@ export default function MasjidPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
       <Header />
-      
+
       {/* Hero Section */}
       <MasjidHeroV2 />
-      
+
       {/* Search and Filter Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
@@ -178,11 +111,26 @@ export default function MasjidPage() {
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <Image
-                    src={mosque.image}
+                    src={mosque.imageUrl}
                     alt={mosque.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
+                  {/* Category badge */}
+                  <div className="absolute top-3 left-3">
+                    <span className="text-xs font-medium px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-zinc-700 border border-zinc-100 shadow-sm">
+                      {mosque.category}
+                    </span>
+                  </div>
+                  {/* Verified badge */}
+                  {mosque.verified && (
+                    <div className="absolute top-3 right-3 shadow-sm rounded-full">
+                      <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 bg-emerald-500 text-white rounded-full">
+                        <BadgeCheck className="w-3 h-3" />
+                        Terverifikasi
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -190,20 +138,26 @@ export default function MasjidPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                     {mosque.name}
                   </h3>
-                  
+
                   <div className="flex items-start gap-2 text-gray-600 mb-3">
                     <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                    <p className="text-sm">{mosque.address}</p>
+                    <p className="text-sm">{mosque.location}</p>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-6 line-clamp-2">
-                    {mosque.description}
-                  </p>
+                  <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between mb-6">
+                    <div>
+                      <p className="text-xs text-zinc-400">Total Donasi</p>
+                      <p className="text-sm font-bold text-gray-900">{new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(mosque.totalDonation)}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <span>{mosque.jamaahCount} jamaah</span>
+                    </div>
+                  </div>
 
                   {/* CTA Button */}
-                  <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300">
+                  <Link href={`/${mosque.domain}/jamaah`} className="block w-full text-center py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300">
                     Masuk sebagai Jamaah
-                  </button>
+                  </Link>
                 </div>
               </motion.div>
             ))}
@@ -264,7 +218,7 @@ export default function MasjidPage() {
             <p className="text-lg text-blue-100 mb-10 max-w-2xl mx-auto">
               Daftarkan masjid Anda sekarang dan mulai terima donasi secara transparan dan amanah
             </p>
-            <Link 
+            <Link
               href="/daftar-masjid"
               className="inline-block px-10 py-5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
             >

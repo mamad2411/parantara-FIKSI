@@ -1,0 +1,68 @@
+[
+    {
+        "id": "1",
+        "domain": "al-ikhlas",
+        "name": "Masjid Al-Ikhlas",
+        "location": "Jakarta Selatan, DKI Jakarta",
+        "category": "Masjid Jami",
+        "verified": true,
+        "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 45250000,
+        "jamaahCount": 350
+    },
+    {
+        "id": "2",
+        "domain": "al-falah",
+        "name": "Masjid Al-Falah",
+        "location": "Surabaya, Jawa Timur",
+        "category": "Masjid Raya",
+        "verified": true,
+        "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 78500000,
+        "jamaahCount": 520
+    },
+    {
+        "id": "3",
+        "domain": "nurul-iman",
+        "name": "Masjid Nurul Iman",
+        "location": "Surabaya, Jawa Timur",
+        "category": "Mushalla",
+        "verified": false,
+       "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 12800000,
+        "jamaahCount": 150
+    },
+    {
+        "id": "4",
+        "domain": "al-hattam",
+        "name": "MASJID NEGRI IKN",
+        "location": "IKN, Kalimantan Timur",
+        "category": "Masjid Negara",
+        "verified": true,
+        "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 150000000,
+        "jamaahCount": 2000
+    },
+    {
+        "id": "5",
+        "domain": "nurul-huda",
+        "name": "Masjid Nurul Huda",
+        "location": "Jakarta Selatan, DKI Jakarta",
+        "category": "Masjid Jami",
+        "verified": true,
+        "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 45250000,
+        "jamaahCount": 350
+    },
+    {
+        "id": "6",
+        "domain": "baitul-muttaqin",
+        "name": "Masjid Baitul Muttaqin",
+        "location": "Yogyakarta, DI Yogyakarta",
+        "category": "Masjid Raya",
+        "verified": true,
+        "imageUrl": "/images/login/loginnn.webp",
+        "totalDonation": 156000000,
+        "jamaahCount": 1890
+    }
+]
