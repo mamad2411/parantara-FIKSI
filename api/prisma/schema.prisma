@@ -71,5 +71,67 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  masjidRegistrations MasjidRegistration[]
+  
   @@map("users")
+}
+
+model MasjidRegistration {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Step 1: Data Masjid
+  mosqueName            String
+  mosqueAddress         String
+  province              String
+  regency               String
+  district              String
+  village               String
+  postalCode            String
+  
+  // Step 2: Data Legalitas
+  aktaPendirian         String?
+  skKemenkumham         String?
+  npwpMasjid            String?
+  
+  // Step 3: Data Pengurus
+  namaDepan             String
+  namaBelakang          String
+  jenisKelamin          String
+  pekerjaan             String
+  isPemilikBisnis       Boolean  @default(false)
+  emailPerwakilan       String
+  tanggalLahir          String
+  nomorHandphone        String
+  alamatTempat          String
+  jenisID               String   @default("KTP")
+  fotoKTP               String?
+  nomorKTP              String
+  suratKuasa            String?
+  kontakPersonSama      Boolean  @default(true)
+  
+  // Step 4: Upload Dokumen
+  skKepengurusan        String?
+  suratRekomendasiRTRW  String?
+  fotoTampakDepan       String?
+  fotoInterior          String?
+  dokumenStatusTanah    String?
+  ktpKetua              String?
+  npwpDokumen           String?
+  
+  // Step 5: Akun Admin
+  adminEmail            String
+  adminPassword         String
+  
+  // Status
+  status                String   @default("pending") // pending, approved, rejected
+  rejectionReason       String?
+  approvedAt            DateTime?
+  approvedBy            String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@map("masjid_registrations")
 }

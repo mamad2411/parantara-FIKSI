@@ -97,6 +97,11 @@ export default function DaftarMasjidPage() {
 
       // Redirect to login if total session exceeds 24 hours
       if (totalTime > 24 * 60 * 60 * 1000) {
+        const userId = localStorage.getItem('userId')
+        if (userId) {
+          // Mark this user as requiring device verification on next login
+          localStorage.setItem(`force_device_verification_${userId}`, 'true')
+        }
         localStorage.setItem('session_expired', 'timeout')
         router.push('/login?message=Sesi Anda telah berakhir. Silakan login kembali')
         return
@@ -344,50 +349,59 @@ export default function DaftarMasjidPage() {
     setLoading(true)
     
     try {
-      const formDataToSend = new FormData()
+      // Get userId from localStorage
+      const userId = localStorage.getItem('userId')
       
-      // Append all text fields
-      Object.keys(formData).forEach(key => {
-        if (formData[key] && typeof formData[key] !== 'object') {
-          formDataToSend.append(key, formData[key])
-        }
-      })
+      if (!userId) {
+        toast.error("Sesi Anda telah berakhir. Silakan login kembali.", {
+          duration: 4000,
+          position: 'top-center',
+        })
+        router.push('/login?redirect=/daftar-masjid')
+        return
+      }
       
-      // Append files
-      if (formData.skKepengurusan) formDataToSend.append('skKepengurusan', formData.skKepengurusan)
-      if (formData.suratRekomendasiRTRW) formDataToSend.append('suratRekomendasiRTRW', formData.suratRekomendasiRTRW)
-      if (formData.fotoTampakDepan) formDataToSend.append('fotoTampakDepan', formData.fotoTampakDepan)
-      if (formData.fotoInterior) formDataToSend.append('fotoInterior', formData.fotoInterior)
-      if (formData.dokumenStatusTanah) formDataToSend.append('dokumenStatusTanah', formData.dokumenStatusTanah)
-      if (formData.ktpKetua) formDataToSend.append('ktpKetua', formData.ktpKetua)
-      if (formData.npwpDokumen) formDataToSend.append('npwpDokumen', formData.npwpDokumen)
+      // Prepare data for PostgreSQL (via Prisma)
+      const registrationData = {
+        userId,
+        ...formData,
+        // Convert file objects to base64 or URLs if needed
+        // For now, we'll send file names/paths
+      }
       
-      const response = await fetch(`${API_URL}/api/masjid/register`, {
+      const response = await fetch('/api/masjid-registration', {
         method: 'POST',
-        body: formDataToSend,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
       })
       
       const data = await response.json()
       
       if (data.success) {
         // Save registration completion status to localStorage
-        const userId = localStorage.getItem('userId') || 'current_user'
         localStorage.setItem(`mosque_registration_${userId}`, 'completed')
+        localStorage.setItem(`mosque_registration_id_${userId}`, data.registrationId)
+        
+        // Clear the force verification flag since registration is complete
+        localStorage.removeItem(`force_device_verification_${userId}`)
         
         toast.success("Pendaftaran berhasil! Menunggu verifikasi admin...", {
           duration: 3000,
           position: 'top-center',
         })
         setTimeout(() => {
-          router.push("/dashboard")
+          router.push("/masjid?message=Pendaftaran berhasil dikirim")
         }, 2000)
       } else {
-        toast.error(data.message || "Gagal mendaftar", {
+        toast.error(data.error || "Gagal mendaftar", {
           duration: 4000,
           position: 'top-center',
         })
       }
     } catch (err) {
+      console.error('Registration error:', err)
       toast.error("Terjadi kesalahan. Silakan coba lagi.", {
         duration: 4000,
         position: 'top-center',

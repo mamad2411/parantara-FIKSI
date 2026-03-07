@@ -149,12 +149,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const lastLogin = userData.lastLoginAt ? new Date(userData.lastLoginAt) : null
         const now = new Date()
         
-        // Check if device changed and last login was more than 24 hours ago
-        if (lastDevice && lastDevice !== currentDevice && lastLogin) {
-          const hoursSinceLastLogin = (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60)
+        // Check if force device verification flag is set (from 24hr timeout)
+        const forceVerification = localStorage.getItem(`force_device_verification_${user.uid}`)
+        
+        // Check if device changed and last login was more than 24 hours ago OR force verification
+        if ((lastDevice && lastDevice !== currentDevice && lastLogin) || forceVerification) {
+          const hoursSinceLastLogin = lastLogin ? (now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60) : 25
           
-          if (hoursSinceLastLogin > 24) {
-            // Device not recognized and 24+ hours since last login
+          if (hoursSinceLastLogin > 24 || forceVerification) {
+            // Device not recognized and 24+ hours since last login OR forced verification
             // Generate verification token
             const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36)
             
@@ -180,6 +183,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch (emailError) {
               console.error('Failed to send verification email:', emailError)
             }
+            
+            // Clear the force verification flag
+            localStorage.removeItem(`force_device_verification_${user.uid}`)
             
             // Trigger device verification
             localStorage.setItem('device_verification_required', 'true')
