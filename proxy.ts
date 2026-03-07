@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server'
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
-// Security middleware with advanced protection
-export function middleware(request: NextRequest) {
+// Security proxy with advanced protection
+export function proxy(request: NextRequest) {
   const response = NextResponse.next()
   
   // Get client IP (fallback to x-forwarded-for header)
@@ -125,7 +125,7 @@ export function middleware(request: NextRequest) {
   return response
 }
 
-// Configure which routes to run middleware on
+// Configure which routes to run proxy on
 export const config = {
   matcher: [
     /*
