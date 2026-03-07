@@ -13,8 +13,26 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
 
   useEffect(() => {
+    // Only load video on desktop and good connection
+    const isDesktop = window.innerWidth >= 1024
+    const connection = (navigator as any).connection
+    const isGoodConnection = !connection || connection.effectiveType === '4g'
+    
+    if (isDesktop && isGoodConnection) {
+      // Delay video load to prioritize LCP
+      const timer = setTimeout(() => {
+        setShouldLoadVideo(true)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!shouldLoadVideo) return
+    
     const video = videoRef.current
     if (!video) return
 
@@ -30,21 +48,7 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
         setIsLoaded(true)
       } catch (error) {
         console.warn('Video autoplay failed:', error)
-        // Retry on user interaction
-        const handleInteraction = async () => {
-          try {
-            await video.play()
-            setIsLoaded(true)
-            document.removeEventListener('click', handleInteraction)
-            document.removeEventListener('touchstart', handleInteraction)
-          } catch (e) {
-            console.error('Video play failed:', e)
-            setHasError(true)
-          }
-        }
-        
-        document.addEventListener('click', handleInteraction, { once: true })
-        document.addEventListener('touchstart', handleInteraction, { once: true })
+        setHasError(true)
       }
     }
 
@@ -65,28 +69,26 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
     return () => {
       video.removeEventListener('error', handleError)
     }
-  }, [])
+  }, [shouldLoadVideo])
 
   return (
     <>
-      {/* Fallback background if video fails */}
-      {hasError && (
-        <div 
-          className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600"
-          style={{
-            backgroundImage: posterSrc ? `url(${posterSrc})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-      )}
+      {/* Fallback background - always show poster */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600"
+        style={{
+          backgroundImage: posterSrc ? `url(${posterSrc})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
 
-      {/* Video Background */}
-      {!hasError && (
+      {/* Video Background - only on desktop with good connection */}
+      {shouldLoadVideo && !hasError && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: isLoaded ? 1 : 0.5 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          animate={{ opacity: isLoaded ? 1 : 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className={`absolute inset-0 w-full h-full ${className}`}
         >
           <video
@@ -95,12 +97,11 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
             loop
             muted
             playsInline
-            preload="auto"
+            preload="none"
             poster={posterSrc}
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source src={videoSrc} type="video/mp4" />
-            Your browser does not support the video tag.
           </video>
         </motion.div>
       )}
@@ -115,3 +116,4 @@ export function VideoBackground({ videoSrc, posterSrc, className = '' }: VideoBa
     </>
   )
 }
+

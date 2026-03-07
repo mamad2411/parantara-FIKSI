@@ -69,9 +69,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.google.com" />
         <link rel="preconnect" href="https://www.gstatic.com" />
         <link rel="preconnect" href="https://apis.google.com" />
-        <link rel="preconnect" href="https://i.pravatar.cc" />
-        <link rel="dns-prefetch" href="https://danamasjid.firebaseapp.com" />
-        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+        <link rel="preconnect" href="https://danamasjid.firebaseapp.com" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+        <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
+        <link rel="dns-prefetch" href="https://securetoken.googleapis.com" />
       </head>
       <body className={`font-sans antialiased`}>
         <SuppressExtensionErrors />
