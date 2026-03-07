@@ -22,12 +22,6 @@ const nextConfig = {
   // Disable source maps in production for better performance
   productionBrowserSourceMaps: false,
   
-  // Optimize build output
-  swcMinify: true,
-  
-  // Optimize CSS
-  optimizeFonts: true,
-  
   // Generate unique build IDs to prevent cache issues
   generateBuildId: async () => {
     return `build-${Date.now()}`
@@ -35,11 +29,7 @@ const nextConfig = {
   
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
-    optimizeCss: true,
   },
-  
-  // Add empty turbopack config to silence warning
-  turbopack: {},
   
   // Complex Security Headers Configuration
   async headers() {
