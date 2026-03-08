@@ -47,10 +47,6 @@ export default function LoginPage() {
       setPasswordError('Password wajib diisi')
       return false
     }
-    if (value.length < 6) {
-      setPasswordError('Password minimal 6 karakter')
-      return false
-    }
     setPasswordError('')
     return true
   }
