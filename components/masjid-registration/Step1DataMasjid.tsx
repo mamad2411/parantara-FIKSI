@@ -497,17 +497,17 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
 
         {/* Location & Maps Section */}
         <div className="mt-6 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h4 className="font-semibold text-gray-900 flex items-center gap-2">
               <MapIcon className="w-5 h-5 text-blue-600" />
               Lokasi & Koordinat
             </h4>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={loadingLocation}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold w-full sm:w-auto"
               >
                 {loadingLocation ? (
                   <>
@@ -524,7 +524,7 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
               <button
                 type="button"
                 onClick={searchCoordinates}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all text-sm font-semibold"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all text-xs sm:text-sm font-semibold w-full sm:w-auto"
               >
                 <Search className="w-4 h-4" />
                 <span>Cari Koordinat</span>
