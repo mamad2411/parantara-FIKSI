@@ -127,7 +127,36 @@ export function middleware(request: NextRequest) {
   
   // Get auth token from cookies
   const authToken = request.cookies.get('auth_token')?.value
+  const sessionStart = request.cookies.get('daftar_masjid_session')?.value
   const isAuthenticated = !!authToken
+  
+  // Check session timeout for daftar-masjid (1 hour)
+  if (isDaftarMasjid && isAuthenticated) {
+    if (sessionStart) {
+      const sessionStartTime = parseInt(sessionStart)
+      const now = Date.now()
+      const sessionDuration = now - sessionStartTime
+      
+      // If session is older than 1 hour (3600000 ms), redirect to login
+      if (sessionDuration > 60 * 60 * 1000) {
+        const response = NextResponse.redirect(new URL('/login?message=Sesi Anda telah berakhir karena tidak aktif lebih dari 1 jam', request.url))
+        // Clear the session cookie
+        response.cookies.delete('daftar_masjid_session')
+        return response
+      }
+    } else {
+      // Set session start time if not exists
+      const response = NextResponse.next()
+      response.cookies.set('daftar_masjid_session', Date.now().toString(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60, // 1 hour
+        path: '/daftar-masjid'
+      })
+      return response
+    }
+  }
   
   // Redirect to login if accessing protected route without auth
   if (isProtectedRoute && !isAuthenticated) {
@@ -137,13 +166,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
   
-  // Redirect to daftar-masjid if accessing auth routes while authenticated
-  // (User needs to complete mosque registration first)
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/daftar-masjid', request.url))
-  }
+  // Allow authenticated users to access auth routes (login/register)
+  // No auto-redirect to daftar-masjid
   
-  // Allow access to daftar-masjid if authenticated
+  // Require authentication for daftar-masjid
   if (isDaftarMasjid && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
