@@ -233,7 +233,7 @@ export default function DaftarMasjidPage() {
     }
   }
 
-  const handleFileChange = (field: string, file: File | null) => {
+  const handleFileChange = async (field: string, file: File | null) => {
     if (file) {
       // Use security utility for comprehensive file validation
       const validation = validateFileUpload(file)
@@ -244,6 +244,48 @@ export default function DaftarMasjidPage() {
           position: 'top-center',
         })
         return
+      }
+
+      // Additional validation for image files (detect editing/manipulation)
+      if (file.type.startsWith('image/')) {
+        // Import image forensics dynamically
+        const { analyzeImage, getValidationMessage } = await import('@/lib/image-forensics')
+        
+        toast.loading('Memvalidasi foto...', { id: 'image-validation' })
+        
+        try {
+          const forensics = await analyzeImage(file)
+          
+          if (forensics.isSuspicious) {
+            const message = getValidationMessage(forensics)
+            toast.error(
+              `Foto tidak valid!\n\n${message}\n\nMohon upload foto asli dokumen, bukan hasil screenshot atau editan.`,
+              {
+                id: 'image-validation',
+                duration: 6000,
+                position: 'top-center',
+              }
+            )
+            return
+          }
+          
+          // Show warnings if any
+          if (forensics.warnings.length > 0) {
+            toast.warning(
+              `Peringatan:\n${forensics.warnings.join('\n')}\n\nPastikan foto adalah dokumen asli.`,
+              {
+                id: 'image-validation',
+                duration: 5000,
+                position: 'top-center',
+              }
+            )
+          } else {
+            toast.success('Foto valid', { id: 'image-validation', duration: 2000 })
+          }
+        } catch (error) {
+          console.error('Error validating image:', error)
+          toast.dismiss('image-validation')
+        }
       }
     }
     setFormData({ ...formData, [field]: file })
