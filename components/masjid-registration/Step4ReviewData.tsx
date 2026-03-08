@@ -160,16 +160,6 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
             value={formData.skKemenkumham}
             isValid={!!formData.skKemenkumham}
           />
-          <ReviewItem 
-            label="NPWP Masjid (16 Digit)" 
-            value={formData.npwpMasjid}
-            isValid={!!formData.npwpMasjid && formData.npwpMasjid.length === 15}
-          />
-          <ReviewFile 
-            label="Dokumen NPWP" 
-            file={formData.npwpDokumen}
-            isValid={!!formData.npwpDokumen}
-          />
         </ReviewSection>
 
         {/* Perwakilan Resmi */}

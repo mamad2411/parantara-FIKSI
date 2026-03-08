@@ -450,57 +450,6 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           </div>
         </div>
 
-        {/* NPWP Section */}
-        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-amber-100">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2 mb-2">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 flex-shrink-0" />
-              <span>NPWP Masjid (Tax Number)</span>
-            </h3>
-            <p className="text-[10px] sm:text-xs text-gray-600">
-              Nomor Pokok Wajib Pajak untuk identitas perpajakan masjid
-            </p>
-          </div>
-
-          <div className="space-y-3 sm:space-y-4">
-            <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-                16-Digit NPWP Number (Tax Number) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.npwpMasjid}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '')
-                  if (value.length <= 16) {
-                    setFormData({...formData, npwpMasjid: value})
-                  }
-                }}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base bg-white border-2 border-gray-900 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                placeholder="16 digit angka"
-                maxLength={16}
-                required
-              />
-              <p className="text-[10px] sm:text-xs text-gray-500 mt-1.5 sm:mt-2">Format: 16 digit angka tanpa tanda baca</p>
-            </div>
-
-            <FileUploadBox
-              id="npwpDokumen"
-              label="Dokumen NPWP Masjid"
-              file={formData.npwpDokumen}
-              guideline={{
-                title: "Panduan NPWP Masjid",
-                points: [
-                  "<strong>Nama masjid, alamat, dan nomor NPWP</strong> harus jelas dan dapat dibaca",
-                  "Nomor NPWP harus mengandung <strong>16 digit</strong>",
-                  "NPWP harus diterbitkan oleh <strong>Direktorat Jenderal Pajak</strong>",
-                  "Jika belum memiliki NPWP masjid, pelajari cara mendapatkannya <a href='https://simas.kemenag.go.id/page/daftarmasjidmushalla' target='_blank' rel='noopener noreferrer' class='text-blue-600 underline hover:text-blue-700'>di sini (simas.kemenag.go.id)</a>"
-                ]
-              }}
-            />
-          </div>
-        </div>
-
         {/* Additional Documents Section */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-blue-100">
           <div className="mb-4 sm:mb-6">

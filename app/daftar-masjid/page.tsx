@@ -313,15 +313,8 @@ export default function DaftarMasjidPage() {
         break
         
       case 2:
-        if (!formData.aktaPendirian || !formData.skKemenkumham || !formData.npwpMasjid) {
+        if (!formData.aktaPendirian || !formData.skKemenkumham) {
           toast.error("Semua field legalitas harus diisi", {
-            duration: 3000,
-            position: 'top-center',
-          })
-          return false
-        }
-        if (formData.npwpMasjid.length !== 15 || !/^\d+$/.test(formData.npwpMasjid)) {
-          toast.error("NPWP harus 15 digit angka", {
             duration: 3000,
             position: 'top-center',
           })
@@ -598,15 +591,6 @@ export default function DaftarMasjidPage() {
                           <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
                           <span>NPWP</span>
                         </div>
-                      </motion.div>
-                    )}
-                    {currentStep > 2 && formData.npwpMasjid && (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="ml-11 mt-1 text-xs text-gray-500"
-                      >
-                        ✓ NPWP: {formData.npwpMasjid}
                       </motion.div>
                     )}
                   </AnimatePresence>
