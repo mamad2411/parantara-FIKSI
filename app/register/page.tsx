@@ -76,23 +76,6 @@ export default function RegisterPage() {
     }
   }, [currentStep, otpStepStartTime, router])
 
-  // Check if user is already logged in, redirect to daftar-masjid
-  useEffect(() => {
-    const checkAuthAndRedirect = () => {
-      const userId = localStorage.getItem('userId')
-      const authCookie = document.cookie.split('; ').find(row => row.startsWith('auth_token='))
-      
-      if (userId && authCookie) {
-        // User is already logged in, redirect to daftar-masjid
-        const redirectPath = localStorage.getItem('redirect_after_login') || '/daftar-masjid'
-        localStorage.removeItem('redirect_after_login')
-        router.push(redirectPath)
-      }
-    }
-    
-    checkAuthAndRedirect()
-  }, [router])
-
   // Countdown timer for resend OTP
   useEffect(() => {
     if (resendCountdown > 0) {
