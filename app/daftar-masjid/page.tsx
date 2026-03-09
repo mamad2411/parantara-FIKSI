@@ -257,12 +257,18 @@ export default function DaftarMasjidPage() {
           const forensicResult = await ImageForensics.validateDocument(file)
           
           if (!forensicResult.isValid) {
-            toast.warning(
+            toast(
               `⚠️ Peringatan: ${forensicResult.message}\n\nFile tetap dapat diupload, namun akan direview manual oleh admin.`,
               {
                 id: 'image-validation',
                 duration: 7000,
                 position: 'top-center',
+                icon: '⚠️',
+                style: {
+                  background: '#FEF3C7',
+                  color: '#92400E',
+                  border: '1px solid #FCD34D'
+                }
               }
             )
           } else {

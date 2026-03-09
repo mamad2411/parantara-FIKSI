@@ -178,11 +178,17 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
         
         // WARNING if suspicious editing detected (non-blocking)
         if (suspiciousPatterns >= 2) {
-          toast.warning(
+          toast(
             `⚠️ Dokumen terdeteksi memiliki ${suspiciousPatterns} pola mencurigakan. File tetap dapat diupload namun akan direview manual oleh admin.`,
             {
               duration: 6000,
               position: 'top-center',
+              icon: '⚠️',
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                border: '1px solid #FCD34D'
+              }
             }
           )
           resolve(true) // Allow upload with warning
@@ -206,11 +212,17 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           if (!hasTextEdges) reasons.push('tidak terdeteksi teks atau konten dokumen yang jelas')
           if (!hasLowColorVariance && !hasGoodContrast) reasons.push('terlalu banyak warna seperti foto biasa')
           
-          toast.warning(
+          toast(
             `⚠️ Peringatan: Gambar tidak terdeteksi sebagai dokumen resmi. Kemungkinan: ${reasons.join(', ')}. File tetap dapat diupload namun akan direview manual.`,
             {
               duration: 6000,
               position: 'top-center',
+              icon: '⚠️',
+              style: {
+                background: '#FEF3C7',
+                color: '#92400E',
+                border: '1px solid #FCD34D'
+              }
             }
           )
         }
@@ -285,12 +297,18 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               const forensicResult = await ImageForensics.validateDocument(file)
               
               if (!forensicResult.isValid) {
-                toast.warning(
+                toast(
                   `⚠️ Peringatan: ${forensicResult.message}\n\nFile tetap dapat diupload, namun akan direview manual oleh admin.`,
                   {
                     id: 'forensic-check',
                     duration: 7000,
                     position: 'top-center',
+                    icon: '⚠️',
+                    style: {
+                      background: '#FEF3C7',
+                      color: '#92400E',
+                      border: '1px solid #FCD34D'
+                    }
                   }
                 )
               } else {
