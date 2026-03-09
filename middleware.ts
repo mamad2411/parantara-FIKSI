@@ -139,7 +139,7 @@ export function middleware(request: NextRequest) {
       
       // If session is older than 1 hour (3600000 ms), redirect to login
       if (sessionDuration > 60 * 60 * 1000) {
-        const response = NextResponse.redirect(new URL('/login?message=Sesi Anda telah berakhir karena tidak aktif lebih dari 1 jam', request.url))
+        const response = NextResponse.redirect(new URL('/login', request.url))
         // Clear the session cookie
         response.cookies.delete('daftar_masjid_session')
         return response

@@ -93,7 +93,7 @@ export default function DaftarMasjidPage() {
       if (inactiveTime > 60 * 60 * 1000) {
         localStorage.setItem('session_expired', 'inactive')
         localStorage.setItem('redirect_after_login', '/daftar-masjid')
-        router.push('/login?message=Sesi Anda telah berakhir karena tidak aktif lebih dari 1 jam')
+        router.push('/login')
         return
       }
     }, 30000) // Check every 30 seconds
