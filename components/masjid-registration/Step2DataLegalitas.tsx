@@ -176,16 +176,16 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           pureBlackPercentage: pureBlackPercentage.toFixed(2) + '%'
         })
         
-        // REJECT if suspicious editing detected
+        // WARNING if suspicious editing detected (non-blocking)
         if (suspiciousPatterns >= 2) {
-          toast.error(
-            `Dokumen terdeteksi telah diedit atau dimanipulasi. Upload dokumen asli tanpa editing. Pola mencurigakan: ${suspiciousPatterns}`,
+          toast.warning(
+            `⚠️ Dokumen terdeteksi memiliki ${suspiciousPatterns} pola mencurigakan. File tetap dapat diupload namun akan direview manual oleh admin.`,
             {
               duration: 6000,
               position: 'top-center',
             }
           )
-          resolve(false)
+          resolve(true) // Allow upload with warning
           return
         }
         
@@ -206,8 +206,8 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           if (!hasTextEdges) reasons.push('tidak terdeteksi teks atau konten dokumen yang jelas')
           if (!hasLowColorVariance && !hasGoodContrast) reasons.push('terlalu banyak warna seperti foto biasa')
           
-          toast.error(
-            `Gambar tidak terdeteksi sebagai dokumen resmi. Kemungkinan: ${reasons.join(', ')}. Pastikan upload scan/foto dokumen yang jelas dengan pencahayaan baik.`,
+          toast.warning(
+            `⚠️ Peringatan: Gambar tidak terdeteksi sebagai dokumen resmi. Kemungkinan: ${reasons.join(', ')}. File tetap dapat diupload namun akan direview manual.`,
             {
               duration: 6000,
               position: 'top-center',
@@ -215,7 +215,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           )
         }
         
-        resolve(isDocument)
+        resolve(true) // Always allow upload, just show warnings
       }
       
       img.onerror = () => resolve(true) // Skip validation on error
@@ -279,23 +279,33 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               return
             }
             
-            // FORENSIC ANALYSIS - Detect image manipulation
-            toast.loading('Memverifikasi keaslian dokumen...', { duration: 2000 })
-            const forensicResult = await ImageForensics.validateDocument(file)
-            
-            if (!forensicResult.isValid) {
-              toast.error(forensicResult.message, {
-                duration: 7000,
-                position: 'top-center',
-              })
-              return
+            // FORENSIC ANALYSIS - Detect image manipulation (non-blocking)
+            try {
+              toast.loading('Memverifikasi keaslian dokumen...', { id: 'forensic-check' })
+              const forensicResult = await ImageForensics.validateDocument(file)
+              
+              if (!forensicResult.isValid) {
+                toast.warning(
+                  `⚠️ Peringatan: ${forensicResult.message}\n\nFile tetap dapat diupload, namun akan direview manual oleh admin.`,
+                  {
+                    id: 'forensic-check',
+                    duration: 7000,
+                    position: 'top-center',
+                  }
+                )
+              } else {
+                toast.success('Dokumen terverifikasi sebagai asli', { 
+                  id: 'forensic-check',
+                  duration: 2000 
+                })
+              }
+            } catch (error) {
+              console.error('Forensic validation error:', error)
+              toast.dismiss('forensic-check')
             }
             
-            // Validate document content (improved algorithm)
-            const isValidDocument = await validateDocumentContent(e.target?.result as string, fieldName)
-            if (!isValidDocument) {
-              return
-            }
+            // Validate document content (non-blocking, just warnings)
+            await validateDocumentContent(e.target?.result as string, fieldName)
             
             // All validations passed
             console.log(`Image validated: ${img.width}x${img.height}, ${(file.size / 1024).toFixed(0)}KB`)

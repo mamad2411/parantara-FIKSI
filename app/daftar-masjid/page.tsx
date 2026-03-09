@@ -246,7 +246,7 @@ export default function DaftarMasjidPage() {
         return
       }
 
-      // Additional validation for image files (detect editing/manipulation)
+      // Additional validation for image files (detect editing/manipulation) - NON-BLOCKING
       if (file.type.startsWith('image/')) {
         // Import image forensics dynamically
         const { ImageForensics } = await import('@/lib/image-forensics')
@@ -257,21 +257,20 @@ export default function DaftarMasjidPage() {
           const forensicResult = await ImageForensics.validateDocument(file)
           
           if (!forensicResult.isValid) {
-            toast.error(
-              forensicResult.message,
+            toast.warning(
+              `⚠️ Peringatan: ${forensicResult.message}\n\nFile tetap dapat diupload, namun akan direview manual oleh admin.`,
               {
                 id: 'image-validation',
                 duration: 7000,
                 position: 'top-center',
               }
             )
-            return
+          } else {
+            toast.success('Dokumen terverifikasi sebagai asli', { 
+              id: 'image-validation', 
+              duration: 2000 
+            })
           }
-          
-          toast.success('Dokumen terverifikasi sebagai asli', { 
-            id: 'image-validation', 
-            duration: 2000 
-          })
         } catch (error) {
           console.error('Error validating image:', error)
           toast.dismiss('image-validation')
