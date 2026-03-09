@@ -424,6 +424,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               file={formData.aktaPendirian}
               guideline={{
                 title: "Panduan Akta Pendirian",
+                image: "/images/daftarmasjid/datapendirimasjid.webp",
                 points: [
                   "Dokumen <strong>Akta Pendirian</strong> harus jelas dan dapat dibaca",
                   "Pastikan <strong>nama masjid, alamat, dan tanggal pendirian</strong> terlihat dengan jelas",
@@ -439,6 +440,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               file={formData.skKemenkumham}
               guideline={{
                 title: "Panduan SK Kemenkumham",
+                image: "/images/daftarmasjid/SKkemenkumham.webp",
                 points: [
                   "Upload <strong>Surat Keputusan</strong> dari Kementerian Hukum dan HAM",
                   "Pastikan <strong>nomor SK dan tanggal penerbitan</strong> terlihat jelas",
@@ -469,27 +471,12 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               file={formData.suratPernyataan}
               guideline={{
                 title: "Panduan Surat Pernyataan Pendirian",
+                image: "/images/daftarmasjid/pernyataanpendirian.webp",
                 points: [
                   "Surat pernyataan ditandatangani oleh <strong>pengurus masjid</strong>",
                   "Harus diketahui oleh <strong>RT/RW atau Kelurahan</strong> setempat",
                   "Mencantumkan <strong>tujuan pendirian masjid</strong>",
                   "Dokumen dalam kondisi baik dan stempel terlihat jelas"
-                ]
-              }}
-              required={false}
-            />
-
-            <FileUploadBox
-              id="sertifikatPendaftaran"
-              label="Sertifikat Pendaftaran"
-              file={formData.sertifikatPendaftaran}
-              guideline={{
-                title: "Panduan Sertifikat Pendaftaran",
-                points: [
-                  "Sertifikat dari <strong>instansi terkait</strong> (Kemenag/Pemda)",
-                  "Menunjukkan bahwa masjid telah <strong>terdaftar secara resmi</strong>",
-                  "Nomor registrasi dan tanggal pendaftaran harus jelas",
-                  "Stempel dan tanda tangan pejabat berwenang terlihat"
                 ]
               }}
               required={false}
@@ -530,10 +517,6 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
               </div>
 
               <div className="p-6">
-                <div className="flex items-center justify-center mb-6 p-4 bg-gray-50 rounded-xl">
-                  <FileText className="w-16 h-16 text-blue-600" />
-                </div>
-
                 {activeGuideline.image && (
                   <div className="mb-6 rounded-lg overflow-hidden border border-gray-200">
                     <img src={activeGuideline.image} alt="Contoh dokumen" className="w-full h-auto" />
