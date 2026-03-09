@@ -209,13 +209,6 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
             file={formData.fotoKTP}
             isValid={!!formData.fotoKTP}
           />
-          {formData.suratKuasa && (
-            <ReviewFile 
-              label="Surat Kuasa" 
-              file={formData.suratKuasa}
-              isValid={true}
-            />
-          )}
         </ReviewSection>
 
         {/* Info Box */}

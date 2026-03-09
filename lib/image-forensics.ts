@@ -1,258 +1,258 @@
-/**
- * Image Forensics Utility
- * Detects if an image has been edited or manipulated
- */
+// Image Forensics Library for detecting manipulated/edited images
+// @ts-nocheck
+import EXIF from 'exif-js'
 
-import ExifReader from 'exifreader'
-
-export interface ImageForensicsResult {
-  isValid: boolean
-  isSuspicious: boolean
-  suspicionReasons: string[]
-  metadata: {
-    software?: string
-    dateTime?: string
-    make?: string
-    model?: string
-    hasExif: boolean
-    hasGPS: boolean
-  }
-  warnings: string[]
+interface ForensicsResult {
+  isAuthentic: boolean
+  confidence: number
+  reasons: string[]
+  metadata: any
 }
 
-/**
- * Analyze image for signs of manipulation
- */
-export async function analyzeImage(file: File): Promise<ImageForensicsResult> {
-  const result: ImageForensicsResult = {
-    isValid: true,
-    isSuspicious: false,
-    suspicionReasons: [],
-    metadata: {
-      hasExif: false,
-      hasGPS: false,
-    },
-    warnings: [],
+export class ImageForensics {
+  /**
+   * Analyze image for signs of manipulation
+   */
+  static async analyzeImage(file: File): Promise<ForensicsResult> {
+    const results: ForensicsResult = {
+      isAuthentic: true,
+      confidence: 100,
+      reasons: [],
+      metadata: {}
+    }
+
+    // 1. Check EXIF metadata
+    const exifData = await this.extractEXIF(file)
+    results.metadata = exifData
+
+    // Check for editing software in metadata
+    if (exifData.Software) {
+      const editingSoftware = [
+        'photoshop', 'gimp', 'paint.net', 'pixlr', 'canva', 
+        'lightroom', 'snapseed', 'vsco', 'picsart', 'photoscape'
+      ]
+      const software = exifData.Software.toLowerCase()
+      
+      if (editingSoftware.some(s => software.includes(s))) {
+        results.isAuthentic = false
+        results.confidence -= 40
+        results.reasons.push(`Terdeteksi software editing: ${exifData.Software}`)
+      }
+    }
+
+    // Check if EXIF data is stripped (suspicious)
+    if (!exifData.Make && !exifData.Model && !exifData.DateTime) {
+      results.confidence -= 20
+      results.reasons.push('Metadata EXIF hilang atau dihapus (mencurigakan)')
+    }
+
+    // 2. Perform Error Level Analysis (ELA)
+    const elaResult = await this.performELA(file)
+    if (!elaResult.passed) {
+      results.isAuthentic = false
+      results.confidence -= 30
+      results.reasons.push(elaResult.reason)
+    }
+
+    // 3. Check for copy-paste patterns
+    const copyPasteResult = await this.detectCopyPaste(file)
+    if (!copyPasteResult.passed) {
+      results.isAuthentic = false
+      results.confidence -= 25
+      results.reasons.push(copyPasteResult.reason)
+    }
+
+    // Final decision
+    results.isAuthentic = results.confidence >= 50
+
+    return results
   }
 
-  try {
-    // Read file as ArrayBuffer
-    const arrayBuffer = await file.arrayBuffer()
-    
-    // Parse EXIF data
-    let tags: any
-    try {
-      tags = ExifReader.load(arrayBuffer)
-      result.metadata.hasExif = true
-    } catch (error) {
-      result.warnings.push('Tidak ada metadata EXIF (mungkin foto screenshot atau diedit)')
-      result.isSuspicious = true
-      result.suspicionReasons.push('Missing EXIF metadata')
-    }
-
-    if (tags) {
-      // Check for editing software
-      const software = tags.Software?.description || tags.ProcessingSoftware?.description
-      if (software) {
-        result.metadata.software = software
-        
-        // List of known photo editing software
-        const editingSoftware = [
-          'photoshop',
-          'gimp',
-          'lightroom',
-          'snapseed',
-          'vsco',
-          'picsart',
-          'canva',
-          'pixlr',
-          'fotor',
-          'befunky',
-          'photoscape',
-          'paint.net',
-          'affinity',
-          'corel',
-          'capture one',
-        ]
-        
-        const softwareLower = software.toLowerCase()
-        const isEdited = editingSoftware.some(editor => softwareLower.includes(editor))
-        
-        if (isEdited) {
-          result.isSuspicious = true
-          result.suspicionReasons.push(`Foto diedit menggunakan: ${software}`)
-          result.warnings.push(`Terdeteksi software editing: ${software}`)
+  /**
+   * Extract EXIF metadata from image
+   */
+  private static extractEXIF(file: File): Promise<any> {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          EXIF.getData(img as any, function(this: any) {
+            const exifData = {
+              Make: EXIF.getTag(this, 'Make'),
+              Model: EXIF.getTag(this, 'Model'),
+              DateTime: EXIF.getTag(this, 'DateTime'),
+              Software: EXIF.getTag(this, 'Software'),
+              Orientation: EXIF.getTag(this, 'Orientation'),
+              XResolution: EXIF.getTag(this, 'XResolution'),
+              YResolution: EXIF.getTag(this, 'YResolution'),
+              ColorSpace: EXIF.getTag(this, 'ColorSpace'),
+            }
+            resolve(exifData)
+          })
         }
+        img.onerror = () => resolve({})
+        img.src = e.target?.result as string
       }
-
-      // Check camera make and model
-      if (tags.Make?.description) {
-        result.metadata.make = tags.Make.description
-      }
-      if (tags.Model?.description) {
-        result.metadata.model = tags.Model.description
-      }
-
-      // Check if photo has GPS data (original photos usually have this)
-      if (tags.GPSLatitude || tags.GPSLongitude) {
-        result.metadata.hasGPS = true
-      }
-
-      // Check DateTime
-      if (tags.DateTime?.description || tags.DateTimeOriginal?.description) {
-        result.metadata.dateTime = tags.DateTime?.description || tags.DateTimeOriginal?.description
-      }
-
-      // Check for missing camera info (suspicious for documents)
-      if (!tags.Make && !tags.Model && file.type.includes('image/jpeg')) {
-        result.warnings.push('Tidak ada informasi kamera (mungkin hasil scan atau screenshot)')
-        result.isSuspicious = true
-        result.suspicionReasons.push('Missing camera information')
-      }
-
-      // Check for modified date vs original date
-      if (tags.DateTime?.description && tags.DateTimeOriginal?.description) {
-        const modified = new Date(tags.DateTime.description.replace(/:/g, '-').replace(' ', 'T'))
-        const original = new Date(tags.DateTimeOriginal.description.replace(/:/g, '-').replace(' ', 'T'))
-        
-        // If modified date is significantly different from original (more than 1 hour)
-        const diffHours = Math.abs(modified.getTime() - original.getTime()) / (1000 * 60 * 60)
-        if (diffHours > 1) {
-          result.warnings.push('Tanggal modifikasi berbeda dari tanggal asli foto')
-          result.isSuspicious = true
-          result.suspicionReasons.push('Modified date differs from original')
-        }
-      }
-    }
-
-    // Check file size vs dimensions ratio (edited images often have unusual ratios)
-    const img = new Image()
-    const objectUrl = URL.createObjectURL(file)
-    
-    await new Promise((resolve, reject) => {
-      img.onload = resolve
-      img.onerror = reject
-      img.src = objectUrl
+      reader.onerror = () => resolve({})
+      reader.readAsDataURL(file)
     })
-
-    const fileSize = file.size
-    const pixels = img.width * img.height
-    const bytesPerPixel = fileSize / pixels
-
-    // Typical JPEG: 0.1-0.5 bytes per pixel
-    // Heavily compressed or edited: < 0.05 or > 1.0
-    if (bytesPerPixel < 0.05) {
-      result.warnings.push('Foto terlalu terkompresi (mungkin hasil screenshot atau edit)')
-      result.isSuspicious = true
-      result.suspicionReasons.push('Unusual compression ratio (too compressed)')
-    } else if (bytesPerPixel > 1.5) {
-      result.warnings.push('Ukuran file tidak wajar untuk dimensi foto')
-      result.isSuspicious = true
-      result.suspicionReasons.push('Unusual compression ratio (too large)')
-    }
-
-    URL.revokeObjectURL(objectUrl)
-
-    // Check file name patterns (screenshots often have specific patterns)
-    const suspiciousPatterns = [
-      /screenshot/i,
-      /screen_shot/i,
-      /screen-shot/i,
-      /capture/i,
-      /edited/i,
-      /modified/i,
-      /copy/i,
-      /scan/i,
-    ]
-
-    const hasSuspiciousName = suspiciousPatterns.some(pattern => pattern.test(file.name))
-    if (hasSuspiciousName) {
-      result.warnings.push('Nama file mencurigakan (screenshot/edited/scan)')
-      result.isSuspicious = true
-      result.suspicionReasons.push('Suspicious filename pattern')
-    }
-
-  } catch (error) {
-    console.error('Error analyzing image:', error)
-    result.warnings.push('Gagal menganalisis foto')
   }
 
-  return result
-}
+  /**
+   * Error Level Analysis - detects JPEG compression inconsistencies
+   */
+  private static async performELA(file: File): Promise<{ passed: boolean; reason: string }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')
+          
+          if (!ctx) {
+            resolve({ passed: true, reason: '' })
+            return
+          }
 
-/**
- * Validate image for document upload (stricter rules)
- */
-export async function validateDocumentImage(file: File): Promise<{
-  isValid: boolean
-  error?: string
-  warnings: string[]
-}> {
-  const forensics = await analyzeImage(file)
+          ctx.drawImage(img, 0, 0)
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          const data = imageData.data
 
-  // For documents, we're more strict
-  if (forensics.isSuspicious) {
-    return {
-      isValid: false,
-      error: 'Foto dokumen tidak boleh hasil editan atau screenshot. Mohon upload foto asli dokumen.',
-      warnings: forensics.warnings,
-    }
+          // Analyze compression artifacts
+          let highVarianceRegions = 0
+          let lowVarianceRegions = 0
+          const blockSize = 8 // JPEG uses 8x8 blocks
+
+          for (let y = 0; y < canvas.height - blockSize; y += blockSize) {
+            for (let x = 0; x < canvas.width - blockSize; x += blockSize) {
+              let blockVariance = 0
+              
+              for (let by = 0; by < blockSize; by++) {
+                for (let bx = 0; bx < blockSize; bx++) {
+                  const idx = ((y + by) * canvas.width + (x + bx)) * 4
+                  const nextIdx = ((y + by) * canvas.width + (x + bx + 1)) * 4
+                  
+                  if (nextIdx < data.length) {
+                    const diff = Math.abs(data[idx] - data[nextIdx]) +
+                                Math.abs(data[idx + 1] - data[nextIdx + 1]) +
+                                Math.abs(data[idx + 2] - data[nextIdx + 2])
+                    blockVariance += diff
+                  }
+                }
+              }
+
+              if (blockVariance > 500) highVarianceRegions++
+              else if (blockVariance < 50) lowVarianceRegions++
+            }
+          }
+
+          const totalBlocks = ((canvas.height / blockSize) * (canvas.width / blockSize))
+          const varianceRatio = highVarianceRegions / totalBlocks
+
+          // Edited images often have inconsistent compression levels
+          if (varianceRatio > 0.4 || (lowVarianceRegions / totalBlocks) > 0.5) {
+            resolve({
+              passed: false,
+              reason: 'Terdeteksi inkonsistensi kompresi JPEG (tanda editing)'
+            })
+          } else {
+            resolve({ passed: true, reason: '' })
+          }
+        }
+        img.onerror = () => resolve({ passed: true, reason: '' })
+        img.src = e.target?.result as string
+      }
+      reader.onerror = () => resolve({ passed: true, reason: '' })
+      reader.readAsDataURL(file)
+    })
   }
 
-  // Warn but allow if only minor issues
-  if (forensics.warnings.length > 0) {
+  /**
+   * Detect copy-paste patterns (cloning)
+   */
+  private static async detectCopyPaste(file: File): Promise<{ passed: boolean; reason: string }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')
+          
+          if (!ctx) {
+            resolve({ passed: true, reason: '' })
+            return
+          }
+
+          ctx.drawImage(img, 0, 0)
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          const data = imageData.data
+
+          // Sample random blocks and check for duplicates
+          const blockSize = 16
+          const samples = 100
+          const blocks: string[] = []
+          let duplicates = 0
+
+          for (let i = 0; i < samples; i++) {
+            const x = Math.floor(Math.random() * (canvas.width - blockSize))
+            const y = Math.floor(Math.random() * (canvas.height - blockSize))
+            
+            let blockHash = ''
+            for (let by = 0; by < blockSize; by += 4) {
+              for (let bx = 0; bx < blockSize; bx += 4) {
+                const idx = ((y + by) * canvas.width + (x + bx)) * 4
+                blockHash += `${data[idx]},${data[idx + 1]},${data[idx + 2]};`
+              }
+            }
+
+            if (blocks.includes(blockHash)) {
+              duplicates++
+            } else {
+              blocks.push(blockHash)
+            }
+          }
+
+          // Too many duplicate blocks suggests cloning/copy-paste
+          if (duplicates > samples * 0.15) {
+            resolve({
+              passed: false,
+              reason: 'Terdeteksi pola duplikasi (copy-paste/cloning)'
+            })
+          } else {
+            resolve({ passed: true, reason: '' })
+          }
+        }
+        img.onerror = () => resolve({ passed: true, reason: '' })
+        img.src = e.target?.result as string
+      }
+      reader.onerror = () => resolve({ passed: true, reason: '' })
+      reader.readAsDataURL(file)
+    })
+  }
+
+  /**
+   * Quick validation for document authenticity
+   */
+  static async validateDocument(file: File): Promise<{ isValid: boolean; message: string }> {
+    const result = await this.analyzeImage(file)
+    
+    if (!result.isAuthentic) {
+      return {
+        isValid: false,
+        message: `Dokumen terdeteksi telah dimanipulasi. ${result.reasons.join('. ')}. Confidence: ${result.confidence}%`
+      }
+    }
+
     return {
       isValid: true,
-      warnings: forensics.warnings,
+      message: 'Dokumen terverifikasi sebagai asli'
     }
   }
-
-  return {
-    isValid: true,
-    warnings: [],
-  }
-}
-
-/**
- * Check if image is a screenshot
- */
-export function isScreenshot(file: File): boolean {
-  const screenshotPatterns = [
-    /screenshot/i,
-    /screen_shot/i,
-    /screen-shot/i,
-    /capture/i,
-    /^IMG-\d{8}-WA\d{4}/, // WhatsApp screenshot pattern
-  ]
-
-  return screenshotPatterns.some(pattern => pattern.test(file.name))
-}
-
-/**
- * Get human-readable validation message
- */
-export function getValidationMessage(forensics: ImageForensicsResult): string {
-  if (!forensics.isSuspicious) {
-    return 'Foto valid'
-  }
-
-  const messages: string[] = []
-
-  if (forensics.suspicionReasons.includes('Missing EXIF metadata')) {
-    messages.push('⚠️ Foto tidak memiliki metadata (mungkin screenshot atau hasil edit)')
-  }
-
-  if (forensics.metadata.software) {
-    messages.push(`⚠️ Foto diedit menggunakan: ${forensics.metadata.software}`)
-  }
-
-  if (forensics.suspicionReasons.includes('Missing camera information')) {
-    messages.push('⚠️ Tidak ada informasi kamera pada foto')
-  }
-
-  if (forensics.suspicionReasons.includes('Suspicious filename pattern')) {
-    messages.push('⚠️ Nama file mencurigakan (screenshot/edited/scan)')
-  }
-
-  return messages.join('\n')
 }

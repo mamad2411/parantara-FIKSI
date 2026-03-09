@@ -84,19 +84,6 @@ export default function Step3PerwakilanResmi({ formData, setFormData, handleFile
               />
             </div>
           </div>
-
-          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-purple-100 rounded-lg sm:rounded-xl">
-            <input
-              type="checkbox"
-              id="isPemilik"
-              checked={formData.isPemilikBisnis}
-              onChange={(e) => setFormData({...formData, isPemilikBisnis: e.target.checked})}
-              className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500 flex-shrink-0"
-            />
-            <label htmlFor="isPemilik" className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer">
-              Saya juga pengurus masjid ini
-            </label>
-          </div>
         </div>
       </div>
 
@@ -227,53 +214,6 @@ export default function Step3PerwakilanResmi({ formData, setFormData, handleFile
               required
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Surat Kuasa <span className="text-gray-400">(Opsional)</span>
-            </label>
-            <p className="text-xs text-gray-500 mb-3">
-              Jika Anda belum memilikinya, Anda dapat mengunduh templat ini
-            </p>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-all bg-white">
-              <input
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,application/pdf"
-                onChange={(e) => handleFileChange('suratKuasa', e.target.files?.[0] || null)}
-                className="hidden"
-                id="suratKuasa"
-              />
-              <label htmlFor="suratKuasa" className="cursor-pointer">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-700 mb-1">Unggah atau seret file ke sini</p>
-                <p className="text-xs text-gray-500">Format File: .jpeg, .jpg, .png, .pdf (Max 2MB)</p>
-              </label>
-            </div>
-            {formData.suratKuasa && (
-              <p className="text-sm text-green-600 mt-2 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                {formData.suratKuasa.name} ({(formData.suratKuasa.size / 1024).toFixed(0)} KB)
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Kontak Person Section */}
-      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-cyan-200">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">Kontak Person Utama</h3>
-        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Kami akan mengirim semua notifikasi ke orang ini</p>
-        <div className="flex items-start sm:items-center gap-2 sm:gap-3">
-          <input
-            type="checkbox"
-            id="kontakSama"
-            checked={formData.kontakPersonSama}
-            onChange={(e) => setFormData({...formData, kontakPersonSama: e.target.checked})}
-            className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 flex-shrink-0 mt-0.5 sm:mt-0"
-          />
-          <label htmlFor="kontakSama" className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer">
-            Kontak person utama sama dengan Perwakilan Resmi
-          </label>
         </div>
       </div>
     </div>

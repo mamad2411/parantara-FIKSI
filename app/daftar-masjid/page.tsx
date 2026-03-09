@@ -249,39 +249,29 @@ export default function DaftarMasjidPage() {
       // Additional validation for image files (detect editing/manipulation)
       if (file.type.startsWith('image/')) {
         // Import image forensics dynamically
-        const { analyzeImage, getValidationMessage } = await import('@/lib/image-forensics')
+        const { ImageForensics } = await import('@/lib/image-forensics')
         
-        toast.loading('Memvalidasi foto...', { id: 'image-validation' })
+        toast.loading('Memvalidasi keaslian dokumen...', { id: 'image-validation' })
         
         try {
-          const forensics = await analyzeImage(file)
+          const forensicResult = await ImageForensics.validateDocument(file)
           
-          if (forensics.isSuspicious) {
-            const message = getValidationMessage(forensics)
+          if (!forensicResult.isValid) {
             toast.error(
-              `Foto tidak valid!\n\n${message}\n\nMohon upload foto asli dokumen, bukan hasil screenshot atau editan.`,
+              forensicResult.message,
               {
                 id: 'image-validation',
-                duration: 6000,
+                duration: 7000,
                 position: 'top-center',
               }
             )
             return
           }
           
-          // Show warnings if any
-          if (forensics.warnings.length > 0) {
-            toast.warning(
-              `Peringatan:\n${forensics.warnings.join('\n')}\n\nPastikan foto adalah dokumen asli.`,
-              {
-                id: 'image-validation',
-                duration: 5000,
-                position: 'top-center',
-              }
-            )
-          } else {
-            toast.success('Foto valid', { id: 'image-validation', duration: 2000 })
-          }
+          toast.success('Dokumen terverifikasi sebagai asli', { 
+            id: 'image-validation', 
+            duration: 2000 
+          })
         } catch (error) {
           console.error('Error validating image:', error)
           toast.dismiss('image-validation')

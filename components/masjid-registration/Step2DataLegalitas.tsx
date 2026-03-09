@@ -3,6 +3,7 @@ import { FileText, Shield, Upload, CheckCircle2, X, Eye, Image as ImageIcon } fr
 import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import toast, { Toaster } from 'react-hot-toast'
+import { ImageForensics } from '@/lib/image-forensics'
 
 interface Step2Props {
   formData: any
@@ -54,10 +55,62 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const data = imageData.data
         
+        // DETECT EDITED/MANIPULATED IMAGES
+        // Check for suspicious patterns that indicate image editing
+        let suspiciousPatterns = 0
+        const sampleSize = Math.min(10000, totalPixels) // Sample untuk performa
+        
+        // 1. Check for unnatural color blocks (common in edited images)
+        let identicalColorBlocks = 0
+        for (let i = 0; i < sampleSize; i++) {
+          const idx = Math.floor(Math.random() * (data.length / 4)) * 4
+          const r = data[idx]
+          const g = data[idx + 1]
+          const b = data[idx + 2]
+          
+          // Check surrounding pixels
+          let identicalNeighbors = 0
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+              if (dx === 0 && dy === 0) continue
+              const x = (idx / 4) % canvas.width + dx
+              const y = Math.floor((idx / 4) / canvas.width) + dy
+              if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                const nIdx = (y * canvas.width + x) * 4
+                if (Math.abs(data[nIdx] - r) < 2 && 
+                    Math.abs(data[nIdx + 1] - g) < 2 && 
+                    Math.abs(data[nIdx + 2] - b) < 2) {
+                  identicalNeighbors++
+                }
+              }
+            }
+          }
+          if (identicalNeighbors > 15) identicalColorBlocks++
+        }
+        
+        if (identicalColorBlocks / sampleSize > 0.3) {
+          suspiciousPatterns++
+          console.warn('Suspicious: Too many identical color blocks detected')
+        }
+        
+        // 2. Check for pure black areas (common in poorly edited documents)
+        let pureBlackPixels = 0
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0) {
+            pureBlackPixels++
+          }
+        }
+        const totalPixels = data.length / 4
+        const pureBlackPercentage = (pureBlackPixels / totalPixels) * 100
+        
+        if (pureBlackPercentage > 15) {
+          suspiciousPatterns++
+          console.warn('Suspicious: Too many pure black pixels (possible editing)')
+        }
+        
         // 1. Check if image is mostly white/light (documents are usually on white paper)
         let whitePixels = 0
         let darkPixels = 0
-        let totalPixels = data.length / 4
         
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i]
@@ -77,7 +130,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
         
         // 2. Check for text-like patterns (high contrast edges)
         let edgePixels = 0
-        const edgeThreshold = 40 // Lebih rendah untuk deteksi lebih sensitif
+        const edgeThreshold = 40
         
         for (let y = 1; y < canvas.height - 1; y++) {
           for (let x = 1; x < canvas.width - 1; x++) {
@@ -118,24 +171,30 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
           darkPercentage: darkPercentage.toFixed(2) + '%',
           edgePercentage: edgePercentage.toFixed(2) + '%',
           avgColorVariance: avgColorVariance.toFixed(2),
-          contrastRatio: contrastRatio.toFixed(2)
+          contrastRatio: contrastRatio.toFixed(2),
+          suspiciousPatterns,
+          pureBlackPercentage: pureBlackPercentage.toFixed(2) + '%'
         })
         
-        // IMPROVED Document validation criteria:
-        // - At least 30% white/light background (lebih fleksibel untuk dokumen dengan watermark/logo)
-        // - At least 3% edges (text creates edges, lebih rendah untuk akomodasi berbagai jenis dokumen)
-        // - Low color variance < 100 (documents are not colorful photos)
-        // - OR has good contrast ratio > 2 (dokumen punya kontras baik antara teks dan background)
+        // REJECT if suspicious editing detected
+        if (suspiciousPatterns >= 2) {
+          toast.error(
+            `Dokumen terdeteksi telah diedit atau dimanipulasi. Upload dokumen asli tanpa editing. Pola mencurigakan: ${suspiciousPatterns}`,
+            {
+              duration: 6000,
+              position: 'top-center',
+            }
+          )
+          resolve(false)
+          return
+        }
         
+        // Document validation criteria
         const hasWhiteBackground = whitePercentage >= 30
         const hasTextEdges = edgePercentage >= 3
         const hasLowColorVariance = avgColorVariance < 100
         const hasGoodContrast = contrastRatio > 2
         
-        // Document valid jika memenuhi salah satu kombinasi:
-        // 1. Background putih + ada edges + low variance
-        // 2. Background putih + good contrast
-        // 3. Ada edges + good contrast (untuk dokumen dengan background tidak putih)
         const isDocument = 
           (hasWhiteBackground && hasTextEdges && hasLowColorVariance) ||
           (hasWhiteBackground && hasGoodContrast) ||
@@ -215,6 +274,18 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
             if (aspectRatio < 0.3 || aspectRatio > 3.0) {
               toast.error("Rasio aspek gambar tidak wajar. Pastikan gambar tidak terlalu panjang atau lebar", {
                 duration: 5000,
+                position: 'top-center',
+              })
+              return
+            }
+            
+            // FORENSIC ANALYSIS - Detect image manipulation
+            toast.loading('Memverifikasi keaslian dokumen...', { duration: 2000 })
+            const forensicResult = await ImageForensics.validateDocument(file)
+            
+            if (!forensicResult.isValid) {
+              toast.error(forensicResult.message, {
+                duration: 7000,
                 position: 'top-center',
               })
               return
