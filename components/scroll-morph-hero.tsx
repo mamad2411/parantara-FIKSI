@@ -599,12 +599,12 @@ export default function IntroAnimation() {
                                 scale: isMobile ? 1.4 : 1.8, // Increased scale for active state
                             };
 
-                            // C. Interpolate (Morph)
+                            // C. Skip circle animation, go directly to arc
                             target = {
-                                x: lerp(circlePos.x, arcPos.x, morphValue),
-                                y: lerp(circlePos.y, arcPos.y, morphValue),
-                                rotation: lerp(circlePos.rotation, arcPos.rotation, morphValue),
-                                scale: lerp(1, arcPos.scale, morphValue),
+                                x: arcPos.x,
+                                y: arcPos.y,
+                                rotation: arcPos.rotation,
+                                scale: arcPos.scale,
                                 opacity: 1,
                             };
                         }

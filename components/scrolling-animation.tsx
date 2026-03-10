@@ -1,149 +1,16 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
-import { useScroll, useMotionValueEvent } from "framer-motion"
-
 export function HomePage() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start center", "end center"],
-  })
-  
-  // Responsive breakpoints
-  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
-  
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth
-      if (width < 640) {
-        setScreenSize('mobile')
-      } else if (width < 1024) {
-        setScreenSize('tablet')
-      } else {
-        setScreenSize('desktop')
-      }
-    }
-    
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // Ukuran yang responsif untuk semua elemen
-  const getDimensions = () => {
-    switch (screenSize) {
-      case 'mobile':
-        return {
-          maxRadius: 120,
-          imageSize: 'w-16 h-16',
-          containerWidth: 'max-w-[280px]',
-          textSize: 'text-lg',
-          subTextSize: 'text-xs',
-          spacing: 'gap-4'
-        }
-      case 'tablet':
-        return {
-          maxRadius: 200,
-          imageSize: 'w-20 h-20',
-          containerWidth: 'max-w-[380px]',
-          textSize: 'text-xl',
-          subTextSize: 'text-sm',
-          spacing: 'gap-6'
-        }
-      default:
-        return {
-          maxRadius: 300,
-          imageSize: 'w-24 h-24',
-          containerWidth: 'max-w-[600px]',
-          textSize: 'text-3xl',
-          subTextSize: 'text-base',
-          spacing: 'gap-8'
-        }
-    }
-  }
-
-  const dimensions = getDimensions()
-  const [progress, setProgress] = useState(0)
-  const [expandedCard, setExpandedCard] = useState<number | null>(null)
-  
-  // Calculate dynamic height based on expanded cards
-  const getContainerHeight = () => {
-    const baseHeight = screenSize === 'desktop' ? 300 : 500 // Mobile/tablet jauh lebih tinggi
-    if (expandedCard !== null) {
-      return `${baseHeight + 150}vh` // Tambah 150vh saat ada card yang dibuka
-    }
-    return `${baseHeight}vh`
-  }
-  
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    // Smooth progression untuk mobile
-    setProgress(latest)
-  })
-  
-  const expandRadius = progress * dimensions.maxRadius
-
-  // Fungsi untuk menghitung opacity dan scale berdasarkan progress
-  const getTopStripStyle = () => {
-    const startProgress = 0
-    const endProgress = 0.3
-    
-    if (progress <= startProgress) {
-      return { opacity: 0, scale: 0.8, stripScale: 0 }
-    } else if (progress >= endProgress) {
-      return { opacity: 1, scale: 1, stripScale: 1 }
-    } else {
-      const range = endProgress - startProgress
-      const progressInRange = (progress - startProgress) / range
-      return {
-        opacity: progressInRange,
-        scale: 0.8 + (progressInRange * 0.2),
-        stripScale: Math.min(progressInRange * 3, 1)
-      }
-    }
-  }
-
-  const getBottomStripStyle = () => {
-    const startProgress = 0.3
-    const endProgress = 0.6
-    
-    if (progress <= startProgress) {
-      return { opacity: 0, scale: 0.8, stripScale: 0 }
-    } else if (progress >= endProgress) {
-      return { opacity: 1, scale: 1, stripScale: 1 }
-    } else {
-      const range = endProgress - startProgress
-      const progressInRange = (progress - startProgress) / range
-      return {
-        opacity: progressInRange,
-        scale: 0.8 + (progressInRange * 0.2),
-        stripScale: Math.min(progressInRange * 3, 1)
-      }
-    }
-  }
-
-  const getImageOpacity = (threshold: number) => {
-    return progress > threshold ? 1 : Math.max(0, (progress - threshold + 0.05) * 20)
-  }
-
-  const getImageScale = (threshold: number) => {
-    return progress > threshold ? 1 : Math.max(0, (progress - threshold + 0.05) * 10)
-  }
-
-  const topStyle = getTopStripStyle()
-  const bottomStyle = getBottomStripStyle()
-
   return (
-    <div ref={containerRef} className={`relative bg-background`} style={{ height: getContainerHeight() }}>
-      <div className="relative sticky top-0 px-4 py-12 overflow-hidden
-                      h-[130vh] sm:h-[120vh] lg:h-screen">
-        {/* Wavy Background */}
-        <div className="absolute inset-0 -z-10">
+    <div className="relative bg-background min-h-[200vh] lg:min-h-[200vh]">
+      <div className="relative px-4 py-8 md:py-12 min-h-[200vh] lg:min-h-[135vh]">
+        {/* Wavy Background - Only in this section */}
+        <div className="absolute inset-0 z-0">
           {/* Top Wave */}
           <svg 
-            className="absolute top-0 left-0 w-full h-full" 
+            className="absolute top-0 left-0 w-full h-[60vh]" 
             viewBox="0 0 1440 800" 
-            preserveAspectRatio="xMidYMid slice"
+            preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
@@ -156,15 +23,14 @@ export function HomePage() {
             <path 
               d="M0,0 C240,150 480,200 720,180 C960,160 1200,100 1440,150 L1440,0 L0,0 Z" 
               fill="url(#waveGradient)"
-              opacity="0.9"
             />
           </svg>
           
           {/* Bottom Wave */}
           <svg 
-            className="absolute bottom-0 left-0 w-full h-full" 
+            className="absolute bottom-0 left-0 w-full h-[60vh]" 
             viewBox="0 0 1440 800" 
-            preserveAspectRatio="xMidYMid slice"
+            preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
@@ -177,220 +43,149 @@ export function HomePage() {
             <path 
               d="M0,800 C240,650 480,600 720,620 C960,640 1200,700 1440,650 L1440,800 L0,800 Z" 
               fill="url(#waveGradient2)"
-              opacity="0.9"
             />
           </svg>
         </div>
-        {/* TRANSPARAN - Pojok Kanan Atas (Desktop) / Atas (Mobile/Tablet) */}
-        <div 
-          className="absolute 
-                     top-4 left-1/2 -translate-x-1/2
-                     lg:top-12 lg:right-16 lg:left-auto lg:translate-x-0
-                     overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw] z-30"
-          style={{
-            opacity: topStyle.opacity,
-            transform: `scale(${topStyle.scale}) translateX(${progress < 0.2 ? 50 : 0}px) translateY(${progress < 0.2 ? -30 : 0}px)`,
-            transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          }}
-        >
+
+        {/* TRANSPARAN - Pojok Kanan Atas */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 lg:top-12 lg:right-16 lg:left-auto lg:translate-x-0 overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw] z-50">
           <div className="relative inline-block w-full">
             {/* Frame Border */}
             <div className="absolute inset-0 border-3 sm:border-4 border-gray-200 dark:border-gray-700 rounded-2xl sm:rounded-3xl pointer-events-none z-20 shadow-lg"></div>
             
-            {/* Animated Strip Background */}
-            <div 
-              className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-2xl sm:rounded-3xl shadow-xl"
-              style={{
-                transform: `scaleX(${topStyle.stripScale})`,
-                transformOrigin: 'left',
-                transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              }}
-            ></div>
+            {/* Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 rounded-2xl sm:rounded-3xl shadow-xl"></div>
             
             {/* Text */}
             <span className="relative z-10 font-bold text-center text-[8vw] sm:text-[7vw] md:text-[6vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-4 block drop-shadow-lg">
               TRANSPARAN
             </span>
           </div>
-          
-          {/* Collapsible Stats Cards - Below TRANSPARAN */}
-          {topStyle.opacity > 0.8 && (
-            <div className="mt-4 space-y-2">
+        </div>
+
+        {/* Main Content */}
+        <div className="relative w-full px-4 md:px-6 lg:px-8 z-20">
+          <div className="max-w-[1400px] mx-auto scale-90 md:scale-95 lg:scale-100">
+            
+            {/* Hero Section */}
+            <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-10 lg:gap-20 mb-8">
+              {/* Left Content */}
+              <div className="max-w-[536px] pt-0 md:pt-10 lg:pb-10">
+              </div>
+            </div>
+
+            {/* Top 3 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-gray-200 dark:border-gray-700">
               {[
-                { 
-                  value: "351K", 
-                  label: "Total Donasi Terkumpul", 
-                  color: "from-blue-100 to-cyan-100", 
-                  textColor: "text-blue-900",
-                  details: "Rp 351.234.567 terkumpul dari 1,234 donatur aktif yang tersebar di 156 masjid terdaftar di seluruh Indonesia"
+                {
+                  gradient: "linear-gradient(177deg, rgb(9, 138, 95) 2.45%, rgb(5, 227, 156) 97.55%)",
+                  icon: "/images/scroll/2.webp",
+                  title: "Ruang Kerja Tim Bersama",
+                  desc: "Kredit bersama dan perpustakaan aset yang terintegrasi menjaga tim Anda tetap sinkron dan memungkinkan kolaborasi yang lancar sepanjang alur kerja."
                 },
-                { 
-                  value: "99%", 
-                  label: "Tingkat Kepuasan Pengguna", 
-                  color: "from-yellow-100 to-orange-100", 
-                  textColor: "text-orange-900",
-                  details: "Pengguna sangat puas dengan kemudahan berdonasi, transparansi laporan keuangan real-time, dan keamanan transaksi"
+                {
+                  gradient: "linear-gradient(177deg, rgb(67, 49, 94) 2.45%, rgb(168, 119, 217) 97.55%)",
+                  icon: "/images/scroll/3.webp",
+                  title: "Sertifikasi ISO27001, SOC2 Tipe II, & GDPR",
+                  desc: "Kami menyediakan keamanan tingkat perusahaan di setiap lapisan platform kami. Platform kami telah disertifikasi di bawah SOC2 Type II, ISO27001, dan GDPR."
                 },
-                { 
-                  value: "4.89", 
-                  label: "Rating Aplikasi", 
-                  color: "from-pink-100 to-rose-100", 
-                  textColor: "text-rose-900",
-                  details: "Rating tinggi dari 5,678 ulasan pengguna di Google Play Store dan App Store dengan fitur yang terus berkembang"
+                {
+                  gradient: "linear-gradient(177deg, rgb(251, 186, 111) 2.45%, rgb(255, 236, 225) 97.55%)",
+                  icon: "/images/scroll/4.webp",
+                  title: "Single Sign-On (SSO)",
+                  desc: "DanaMasjid Enterprise mendukung SSO melalui SAML, memungkinkan login yang aman dan terpusat untuk tim besar menggunakan penyedia identitas seperti Okta, Google Workspace, atau Microsoft Entra."
                 }
-              ].map((stat, index) => (
+              ].map((card, index) => (
                 <div
                   key={index}
-                  className={`bg-gradient-to-r ${stat.color} rounded-xl sm:rounded-2xl shadow-lg border-2 border-white/50 backdrop-blur-sm overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl`}
-                  style={{
-                    opacity: topStyle.opacity,
-                    transform: `translateY(${topStyle.opacity < 1 ? 10 : 0}px)`,
-                    transition: `all 0.4s ease-out ${index * 0.1}s`,
-                  }}
-                  onClick={() => setExpandedCard(expandedCard === index ? null : index)}
+                  className="flex flex-col p-4 md:p-8 border-r border-gray-200 dark:border-gray-700 last:border-r-0"
                 >
-                  <div className="p-3 sm:p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`text-2xl sm:text-3xl md:text-4xl font-bold ${stat.textColor}`}>
-                        {stat.value}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-[10px] sm:text-xs ${stat.textColor} opacity-80 leading-tight`}>
-                          {stat.label}
-                        </p>
-                      </div>
-                      <svg 
-                        className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.textColor} transition-transform duration-300 ${expandedCard === index ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                  {/* Gradient Header with Icon */}
+                  <div 
+                    className="relative h-12 md:h-16 lg:h-20 w-full rounded-xl md:rounded-2xl rounded-tl-[32px] md:rounded-tl-[40px] lg:rounded-tl-[60px] shadow-lg mt-12 sm:mt-16 lg:mt-20 mb-4 md:mb-8"
+                    style={{ background: card.gradient }}
+                  >
+                    <div className="absolute bottom-0 left-0 h-[200%] max-h-[160px] aspect-[340/160]">
+                      <img
+                        src={card.icon}
+                        alt={card.title}
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                   </div>
                   
-                  {/* Expanded Content */}
-                  <div 
-                    className={`overflow-hidden transition-all duration-300 ${expandedCard === index ? 'max-h-32 sm:max-h-24 lg:max-h-20' : 'max-h-0'}`}
-                  >
-                    <div className={`px-3 sm:px-4 pb-3 sm:pb-4 pt-0`}>
-                      <p className={`text-[9px] sm:text-[10px] ${stat.textColor} opacity-70 leading-relaxed`}>
-                        {stat.details}
-                      </p>
-                    </div>
+                  {/* Text Content */}
+                  <h4 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-3">
+                    {card.title}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {card.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom 4 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-900 rounded-[20px] border border-gray-200 dark:border-gray-700 p-4 md:p-0 md:bg-transparent md:border-0 mt-6">
+              {[
+                {
+                  icon: "/images/scroll/5.webp",
+                  title: "Privasi Data yang Ditingkatkan",
+                  desc: "Data pelanggan perusahaan disimpan dalam database terpisah yang aman untuk memastikan privasi dan memenuhi kebutuhan kepatuhan organisasi."
+                },
+                {
+                  icon: "/images/scroll/6.webp",
+                  title: "Dukungan Akun Khusus",
+                  desc: "Eksekutif akun dan insinyur solusi yang berdedikasi siap mendukung pengaturan perusahaan Anda dan membantu dengan pertanyaan umum apa pun dengan cepat."
+                },
+                {
+                  icon: "/images/scroll/7.webp",
+                  title: "Retensi Aset Selamanya",
+                  desc: "Setelah dihasilkan, model Anda selalu tersedia untuk diunduh—kapan saja Anda membutuhkannya."
+                },
+                {
+                  icon: "/images/scroll/8.webp",
+                  title: "Penagihan Terpusat",
+                  desc: "Semua anggota tim berbagi satu akun penagihan, sehingga memudahkan tim TI dan keuangan untuk mengelola pembayaran dan faktur."
+                }
+              ].map((card, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 md:gap-5 border-t border-gray-200 dark:border-gray-700 p-0 md:p-5 lg:px-8 lg:py-6"
+                >
+                  {/* Icon */}
+                  <div className="relative size-16 sm:size-24 md:size-[120px] shrink-0">
+                    <img
+                      src={card.icon}
+                      alt={card.title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  
+                  {/* Text */}
+                  <div>
+                    <h4 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3">
+                      {card.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {card.desc}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
 
-        {/* Center Circle with Images */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 
-                        -translate-y-[20%] sm:-translate-y-[10%] lg:-translate-y-1/2">
-          <div className={`relative ${dimensions.containerWidth}`}>
-          <div
-            className={`w-full aspect-square rounded-full flex items-center justify-center transition-all duration-300 ${
-              progress > 0.6 ? "border-2 border-[#e9e9e9] dark:border-gray-700" : ""
-            }`}
-          >
-            <div
-              className={`w-[85%] aspect-square rounded-full flex items-center justify-center relative transition-all duration-300 ${
-                progress > 0.2 ? "border-2 border-blue-100 dark:border-blue-800" : ""
-              }`}
-            >
-              <div className="w-[80%] aspect-square rounded-full bg-gradient-to-r from-blue-400 via-cyan-400 to-yellow-400 dark:from-blue-600 dark:via-cyan-600 dark:to-yellow-600 p-0.5 flex items-center justify-center relative">
-                <div className="w-full h-full rounded-full bg-[#ffffff] dark:bg-black flex items-center justify-center relative">
-                  {/* Images in circle */}
-                  {[
-                    { angle: 0, threshold: 0.1, src: "/images/profil/profil1.webp", alt: "Profile 1" },
-                    { angle: Math.PI / 4, threshold: 0.15, src: "/images/profil/profil2.webp", alt: "Profile 2" },
-                    { angle: Math.PI / 2, threshold: 0.2, src: "/images/profil/profil3.webp", alt: "Profile 3" },
-                    { angle: 3 * Math.PI / 4, threshold: 0.25, src: "/images/profil/profil4.webp", alt: "Profile 4" },
-                    { angle: Math.PI, threshold: 0.3, src: "/images/profil/profil5.webp", alt: "Profile 5" },
-                    { angle: 5 * Math.PI / 4, threshold: 0.35, src: "/images/profil/profil6.webp", alt: "Profile 6" },
-                    { angle: 3 * Math.PI / 2, threshold: 0.4, src: "/images/profil/profil7.webp", alt: "Profile 7" },
-                    { angle: 7 * Math.PI / 4, threshold: 0.45, src: "/images/profil/profil8.webp", alt: "Profile 8" }
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className={`absolute ${dimensions.imageSize} rounded-xl sm:rounded-2xl overflow-hidden border-2 sm:border-3 md:border-4 border-white dark:border-gray-800 shadow-lg z-0`}
-                      style={{
-                        transform: `translate(${expandRadius * Math.cos(item.angle)}px, ${expandRadius * Math.sin(item.angle)}px) scale(${getImageScale(item.threshold)})`,
-                        opacity: getImageOpacity(item.threshold),
-                        transition: progress === 0 || progress === 1 ? 'all 0.5s ease-out' : 'none',
-                      }}
-                    >
-                      <img
-                        src={item.src}
-                        alt={item.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-
-                  {/* Center Text */}
-                  <div
-                    className={`flex flex-col items-center justify-center relative z-20 px-4 transition-opacity duration-500 ${
-                      progress > 0.5 ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    <h2 
-                      className={`${dimensions.textSize} font-bold text-gray-800 dark:text-white text-center whitespace-nowrap`}
-                      style={{
-                        transform: `translateY(${progress > 0.6 ? 0 : 20}px)`,
-                        opacity: progress > 0.6 ? 1 : Math.max(0, (progress - 0.55) * 20),
-                        transition: progress === 0 || progress === 1 ? 'all 0.6s ease-out' : 'none',
-                      }}
-                    >
-                      Transparansi Keuangan Masjid
-                    </h2>
-
-                    <p 
-                      className={`${dimensions.subTextSize} text-gray-500 dark:text-gray-400 text-center max-w-[180px] sm:max-w-[240px] md:max-w-xs mt-2 sm:mt-3`}
-                      style={{
-                        transform: `translateY(${progress > 0.7 ? 0 : 20}px)`,
-                        opacity: progress > 0.7 ? 1 : Math.max(0, (progress - 0.65) * 20),
-                        transition: progress === 0 || progress === 1 ? 'all 0.6s ease-out 0.2s' : 'none',
-                      }}
-                    >
-                      Laporan keuangan real-time, transparansi penuh, dan pengalaman yang menyenangkan di semua perangkat.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           </div>
         </div>
 
-        {/* JUJUR - Pojok Kiri Bawah (Desktop) / Bawah (Mobile/Tablet) */}
-        <div 
-          className="absolute 
-                     bottom-8 left-1/2 -translate-x-1/2
-                     sm:bottom-12
-                     lg:bottom-12 lg:left-16 lg:translate-x-0
-                     overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw]"
-          style={{
-            opacity: bottomStyle.opacity,
-            transform: `scale(${bottomStyle.scale}) translateX(${progress < 0.4 ? -50 : 0}px) translateY(${progress < 0.4 ? 30 : 0}px)`,
-            transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          }}
-        >
+        {/* JUJUR - Pojok Kiri Bawah */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 sm:bottom-12 lg:bottom-12 lg:left-16 lg:translate-x-0 overflow-visible w-[85vw] sm:w-[70vw] md:w-[60vw] lg:w-[25vw] z-50">
           <div className="relative inline-block w-full">
             {/* Frame Border */}
             <div className="absolute inset-0 border-3 sm:border-4 border-gray-200 dark:border-gray-700 rounded-2xl sm:rounded-3xl pointer-events-none z-20 shadow-lg"></div>
             
-            {/* Animated Strip Background */}
-            <div 
-              className="absolute inset-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 rounded-2xl sm:rounded-3xl shadow-xl"
-              style={{
-                transform: `scaleX(${bottomStyle.stripScale})`,
-                transformOrigin: 'right',
-                transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              }}
-            ></div>
+            {/* Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 rounded-2xl sm:rounded-3xl shadow-xl"></div>
             
             {/* Text */}
             <span className="relative z-10 font-bold text-center text-[8vw] sm:text-[7vw] md:text-[6vw] lg:text-[3.5vw] leading-none tracking-tighter text-white whitespace-nowrap px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-4 block drop-shadow-lg">
