@@ -4,13 +4,21 @@
 import { motion } from "framer-motion"
 import { MapPin, Phone, Mail, Globe, Instagram, BadgeCheck, Calendar } from "lucide-react"
 import type { MosqueProfile } from "@/lib/types/masjid"
-import { MorqueSection } from "@/components/sections/morque-section"
+import { MarqueeSection } from "@/components/sections/marquee-section"
 
 interface MosqueHeaderProps {
     profile: MosqueProfile
 }
 
 export function MosqueHeader({ profile }: MosqueHeaderProps) {
+    // Default sponsor data for marquee section
+    const sponsors = [
+        { src: "/images/sponsor/alikhlas.webp", alt: "Masjid Al Ikhlas PIK" },
+        { src: "/images/sponsor/pondokIT.webp", alt: "Pondok IT" },
+        { src: "/images/sponsor/tb.webp", alt: "SMK Taruna Bhakti" },
+        { src: "/images/sponsor/ysb.webp", alt: "Yayasan Setia Bhakti" },
+    ];
+    const sponsorOrder = [0, 1, 2, 3];
     return (
         <>
             <motion.section
@@ -147,7 +155,7 @@ export function MosqueHeader({ profile }: MosqueHeaderProps) {
                 </div>
             </motion.section>
 
-            <MorqueSection />
+            <MarqueeSection sponsors={sponsors} sponsorOrder={sponsorOrder} />
         </>
     )
 }

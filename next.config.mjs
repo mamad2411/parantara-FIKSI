@@ -36,20 +36,21 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion', 'lottie-react'],
     optimizeCss: true,
-    // Enable modern bundling
-    serverComponentsExternalPackages: ['sharp'],
     // Optimize server components
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001']
     },
-    // Enable SWC minification for better performance
-    swcMinify: true,
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+  
+  // Move serverComponentsExternalPackages to root level
+  serverExternalPackages: ['sharp'],
+  
+  // Enable Turbopack (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
