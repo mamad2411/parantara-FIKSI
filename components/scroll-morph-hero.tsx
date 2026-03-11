@@ -105,7 +105,6 @@ function FlipCard({
                         fill
                         sizes="(max-width: 640px) 55px, (max-width: 1024px) 60px, 60px"
                         className="object-cover"
-                        quality={70}
                     />
                     {/* Click hint */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-1 sm:pb-2">
@@ -435,7 +434,6 @@ export default function IntroAnimation() {
                                                         className="h-10 md:h-12 w-auto object-contain"
                                                         loading="lazy"
                                                         sizes="120px"
-                                                        quality={80}
                                                     />
                                                 </motion.div>
                                                 <p className="text-[10px] md:text-xs font-semibold text-gray-800 text-center">

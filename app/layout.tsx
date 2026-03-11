@@ -70,8 +70,6 @@ export default function RootLayout({
       <head>
         {/* Meta Description */}
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
-        {/* Preload LCP image */}
-        <link rel="preload" href="/images/iphone.webp" as="image" fetchPriority="high" />
         {/* Prefetch to critical domains */}
         <link rel="dns-prefetch" href="https://www.google.com" />
       </head>

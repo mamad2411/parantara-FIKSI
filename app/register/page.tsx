@@ -784,6 +784,8 @@ export default function RegisterPage() {
               fill
               className="object-cover"
               priority
+              sizes="100vw"
+              quality={80}
             />
           </motion.div>
 
@@ -1493,6 +1495,8 @@ export default function RegisterPage() {
             fill
             className="object-cover"
             priority
+            sizes="(max-width: 1024px) 0vw, 50vw"
+            quality={80}
           />
           
           {/* Curved Divider */}

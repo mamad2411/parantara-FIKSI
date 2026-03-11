@@ -31,6 +31,7 @@ export function Footer() {
                     alt="DanaMasjid Logo"
                     fill
                     className="object-contain"
+                    sizes="48px"
                   />
                 </div>
               </Link>

@@ -272,10 +272,8 @@ export default function LoginPage() {
               fill
               className="object-cover"
               priority
-              fetchPriority="high"
-              sizes="50vw"
-              quality={75}
-              loading="eager"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              quality={80}
             />
           </div>
           
@@ -353,10 +351,8 @@ export default function LoginPage() {
               fill
               className="object-cover"
               priority
-              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 0vw"
-              quality={75}
-              loading="eager"
+              quality={80}
             />
           </motion.div>
 

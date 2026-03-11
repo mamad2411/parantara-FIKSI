@@ -129,7 +129,6 @@ export function ServicesSection() {
               }}
               loading="lazy"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-              quality={85}
             />
             {/* Overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />

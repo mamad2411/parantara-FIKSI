@@ -213,7 +213,6 @@ export function HeroSection() {
                 className="w-full h-auto relative z-10"
                 priority
                 fetchPriority="high"
-                quality={90}
               />
             </div>
           </div>

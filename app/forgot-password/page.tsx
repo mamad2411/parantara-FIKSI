@@ -172,6 +172,7 @@ export default function ForgotPasswordPage() {
             className="object-cover"
             priority
             sizes="100vw"
+            quality={80}
           />
           
           {/* Curved Divider */}
