@@ -66,6 +66,8 @@ export function DonationProgramsSection() {
                 <img 
                   src="/images/program/terpercaya.webp" 
                   alt="Transparansi" 
+                  width={128}
+                  height={128}
                   className="h-24 w-24 md:h-32 md:w-32 object-contain"
                   loading="lazy"
                 />
@@ -238,29 +240,44 @@ export function DonationProgramsSection() {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex -space-x-3">
                     <img 
-                      src="https://i.pravatar.cc/150?img=12" 
+                      src="https://i.pravatar.cc/40?img=12" 
                       alt="Donatur 1" 
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                      loading="lazy"
                     />
                     <img 
-                      src="https://i.pravatar.cc/150?img=47" 
+                      src="https://i.pravatar.cc/40?img=47" 
                       alt="Donatur 2" 
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                      loading="lazy"
                     />
                     <img 
-                      src="https://i.pravatar.cc/150?img=33" 
+                      src="https://i.pravatar.cc/40?img=33" 
                       alt="Donatur 3" 
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                      loading="lazy"
                     />
                     <img 
-                      src="https://i.pravatar.cc/150?img=32" 
+                      src="https://i.pravatar.cc/40?img=32" 
                       alt="Donatur 4" 
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                      loading="lazy"
                     />
                     <img 
-                      src="https://i.pravatar.cc/150?img=15" 
+                      src="https://i.pravatar.cc/40?img=15" 
                       alt="Donatur 5" 
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
+                      loading="lazy"
                     />
                     <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
                       <span className="text-white text-xs font-bold">+10K</span>

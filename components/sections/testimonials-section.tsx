@@ -10,7 +10,7 @@ const testimonials = [
     content: "Alhamdulillah, dengan DanaMasjid transparansi keuangan masjid kami meningkat drastis. Sistemnya sangat mudah dan transparan! Jamaah jadi lebih percaya untuk berdonasi.",
     rating: 5,
     color: "#3b82f6",
-    avatar: "https://i.pravatar.cc/150?img=12",
+    avatar: "https://i.pravatar.cc/56?img=12",
   },
   {
     name: "Siti Nurhaliza",
@@ -18,7 +18,7 @@ const testimonials = [
     content: "Akhirnya ada platform yang benar-benar transparan. Saya bisa lihat laporan keuangan masjid secara real-time dan kemana donasi saya digunakan. Sangat recommended!",
     rating: 5,
     color: "#10b981",
-    avatar: "https://i.pravatar.cc/150?img=47",
+    avatar: "https://i.pravatar.cc/56?img=47",
   },
   {
     name: "Budi Santoso",
@@ -26,7 +26,7 @@ const testimonials = [
     content: "Sistem verifikasi yang ketat membuat donatur lebih percaya. Sangat membantu masjid kami dalam mengelola keuangan dengan lebih baik.",
     rating: 5,
     color: "#8b5cf6",
-    avatar: "https://i.pravatar.cc/150?img=33",
+    avatar: "https://i.pravatar.cc/56?img=33",
   },
 ]
 
@@ -37,7 +37,7 @@ const testimonials2 = [
     content: "Pengalaman berdonasi terbaik yang pernah saya alami. Prosesnya mudah, cepat, dan aman. Terima kasih DanaMasjid!",
     rating: 5,
     color: "#f59e0b",
-    avatar: "https://i.pravatar.cc/150?img=32",
+    avatar: "https://i.pravatar.cc/56?img=32",
   },
   {
     name: "Muhammad Rizki",
@@ -45,7 +45,7 @@ const testimonials2 = [
     content: "Masjid kami terdaftar dan mendapat donasi dalam hitungan hari. Platform yang luar biasa! Dashboard-nya juga sangat informatif.",
     rating: 5,
     color: "#ef4444",
-    avatar: "https://i.pravatar.cc/150?img=15",
+    avatar: "https://i.pravatar.cc/56?img=15",
   },
   {
     name: "Dewi Lestari",
@@ -53,7 +53,7 @@ const testimonials2 = [
     content: "Tanpa biaya tersembunyi, tanpa keraguan. Persis seperti yang saya cari untuk berdonasi. Semoga makin banyak masjid yang bergabung.",
     rating: 5,
     color: "#06b6d4",
-    avatar: "https://i.pravatar.cc/150?img=45",
+    avatar: "https://i.pravatar.cc/56?img=45",
   },
 ]
 

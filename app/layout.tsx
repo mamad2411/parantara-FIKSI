@@ -70,14 +70,11 @@ export default function RootLayout({
       <head>
         {/* Meta Description */}
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
-        {/* Preload critical font */}
-        <link rel="preload" href="/__nextjs_font/geist-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        {/* Preload LCP image */}
+        <link rel="preload" href="/images/iphone.webp" as="image" fetchPriority="high" />
         {/* Preconnect to critical domains */}
-        <link rel="preconnect" href="https://www.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://www.google.com" />
-        {/* Defer non-critical resources */}
-        <link rel="preload" href="/images/masjid1.webp" as="image" media="(min-width: 768px)" fetchPriority="low" />
-        <link rel="preload" href="/images/iphone.webp" as="image" fetchPriority="low" />
       </head>
       <body className={`font-sans antialiased`}>
         {/* Defer structured data */}

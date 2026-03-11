@@ -426,7 +426,10 @@ export default function IntroAnimation() {
                                                     <img 
                                                         src={sponsors[sponsorIndex].src} 
                                                         alt={sponsors[sponsorIndex].alt} 
+                                                        width={120}
+                                                        height={48}
                                                         className="h-10 md:h-12 w-auto object-contain"
+                                                        loading="lazy"
                                                     />
                                                 </motion.div>
                                                 <p className="text-[10px] md:text-xs font-semibold text-gray-800 text-center">

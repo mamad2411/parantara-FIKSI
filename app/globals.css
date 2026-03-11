@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Font optimization */
+@font-face {
+  font-display: swap;
+}
+
 /* Added auto scroll behavior for smooth animations */
 html {
   scroll-behavior: auto;

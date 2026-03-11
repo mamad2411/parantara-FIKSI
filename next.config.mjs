@@ -11,7 +11,10 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 31536000, // 1 year
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
@@ -32,6 +35,45 @@ const nextConfig = {
   
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
+  },
+  
+  // Optimize CSS
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  
+  // Optimize webpack
+  webpack: (config, { isServer }) => {
+    // Optimize bundle size
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true
+            }
+          }
+        }
+      }
+    }
+    return config
   },
   
   // Complex Security Headers Configuration
@@ -95,17 +137,17 @@ const nextConfig = {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin'
           },
-          // Comprehensive CSP - Relaxed for compatibility with Google services
+          // Comprehensive CSP - Allow Google reCAPTCHA
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
-              "frame-src 'none'",
+              "frame-src 'self' https://www.google.com",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
               "object-src 'none'",
@@ -128,6 +170,25 @@ const nextConfig = {
             key: 'Expect-CT',
             value: 'max-age=86400, enforce'
           }
+        ],
+      },
+      // Cache static assets aggressively
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
     ]

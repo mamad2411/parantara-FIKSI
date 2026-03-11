@@ -21,12 +21,12 @@ export function HeroSection() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !videoLoaded) {
-            // Delay video loading slightly
-            setTimeout(() => setVideoLoaded(true), 100)
+            // Load video immediately when in viewport
+            setVideoLoaded(true)
           }
         })
       },
-      { threshold: 0.1, rootMargin: '50px' }
+      { threshold: 0, rootMargin: '200px' }
     )
 
     if (sectionRef.current) {
@@ -129,7 +129,8 @@ export function HeroSection() {
               loop
               muted 
               playsInline
-              preload="none"
+              preload="metadata"
+              poster="/images/video-poster.jpg"
               className="w-full h-full object-cover"
               style={{
                 transform: 'translate3d(0, 0, 0)',
@@ -140,12 +141,7 @@ export function HeroSection() {
               <track kind="captions" srcLang="id" label="Indonesian" />
             </video>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 border-4 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-500 text-sm">Loading...</p>
-              </div>
-            </div>
+            <div className="w-full h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-yellow-50" />
           )}
         </div>
       </div>
@@ -198,19 +194,15 @@ export function HeroSection() {
                 isVisible ? "opacity-100" : "opacity-0"
               }`}
             >
-              {isVisible ? (
-                <img 
-                  src="/images/iphone.webp" 
-                  alt="DanaMasjid Mobile App" 
-                  width={350}
-                  height={688}
-                  sizes="(max-width: 768px) 200px, (max-width: 1024px) 250px, 350px"
-                  className="w-full h-auto relative z-10"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full aspect-[350/688] bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 rounded-3xl animate-pulse" />
-              )}
+              <img 
+                src="/images/iphone.webp" 
+                alt="DanaMasjid Mobile App" 
+                width={350}
+                height={688}
+                sizes="(max-width: 768px) 200px, (max-width: 1024px) 250px, 350px"
+                className="w-full h-auto relative z-10"
+                fetchPriority="high"
+              />
             </div>
           </div>
         </div>

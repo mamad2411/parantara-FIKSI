@@ -109,7 +109,10 @@ export function HomePage() {
                       <img
                         src={card.icon}
                         alt={card.title}
+                        width={340}
+                        height={160}
                         className="w-full h-full object-contain"
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -158,7 +161,10 @@ export function HomePage() {
                     <img
                       src={card.icon}
                       alt={card.title}
+                      width={120}
+                      height={120}
                       className="w-full h-full object-contain"
+                      loading="lazy"
                     />
                   </div>
                   
