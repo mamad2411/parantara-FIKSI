@@ -137,24 +137,25 @@ const nextConfig = {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin'
           },
-          // Comprehensive CSP - Allow Google reCAPTCHA
+          // Comprehensive CSP with Trusted Types
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
-              "frame-src 'self' https://www.google.com",
+              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.net",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
               "manifest-src 'self'",
-              "media-src 'self' blob: data:"
+              "media-src 'self' blob: data:",
+              "upgrade-insecure-requests"
             ].join('; ')
           },
           // Additional security headers

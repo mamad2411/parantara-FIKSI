@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
+import Image from "next/image"
 
 const Lottie = dynamic(() => import("lottie-react"), { 
   ssr: false,
@@ -286,13 +287,15 @@ export function DonationProgramsSection() {
                 </div>
 
                 {/* Komunitas Image */}
-                <div className="relative rounded-xl overflow-hidden shadow-md border border-slate-200 mb-4">
-                  <img 
+                <div className="relative rounded-xl overflow-hidden shadow-md border border-slate-200 mb-4 aspect-[4/3]">
+                  <Image 
                     src="/images/program/komunitas.webp" 
                     alt="Komunitas Donatur" 
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                    loading="lazy"
+                    quality={85}
                   />
                 </div>
 

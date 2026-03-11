@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
 import { AnimatedText } from "@/components/animations"
+import Image from "next/image"
 
 export function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
@@ -10,10 +11,7 @@ export function HeroSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, 100)
-    return () => clearTimeout(timer)
+    setIsVisible(true)
   }, [])
 
   useEffect(() => {
@@ -130,7 +128,6 @@ export function HeroSection() {
               muted 
               playsInline
               preload="metadata"
-              poster="/images/video-poster.jpg"
               className="w-full h-full object-cover"
               style={{
                 transform: 'translate3d(0, 0, 0)',
@@ -173,7 +170,7 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="text-center mb-12 max-w-full">
           <div
-            className={`transition-opacity duration-1000 delay-[800ms] ${isVisible ? "opacity-100" : "opacity-0"}`}
+            className={`transition-opacity duration-700 ${isVisible ? "opacity-100" : "opacity-0"}`}
           >
             <h1 className="font-serif text-[2rem] xs:text-[2.5rem] sm:text-[3rem] md:text-[4rem] lg:text-[5rem] xl:text-[6rem] 2xl:text-[7rem] font-normal leading-tight mb-6 w-full px-4 max-w-6xl mx-auto text-center">
               <span className="inline-block whitespace-nowrap">
@@ -190,18 +187,19 @@ export function HeroSection() {
         <div className="flex flex-col items-center justify-center gap-8">
           <div className="relative">
             <div
-              className={`relative w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] transition-opacity duration-1000 ease-out delay-500 ${
-                isVisible ? "opacity-100" : "opacity-0"
+              className={`relative w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] transition-all duration-700 ease-out ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              <img 
+              <Image 
                 src="/images/iphone.webp" 
                 alt="DanaMasjid Mobile App" 
                 width={350}
                 height={688}
                 sizes="(max-width: 768px) 200px, (max-width: 1024px) 250px, 350px"
                 className="w-full h-auto relative z-10"
-                fetchPriority="high"
+                priority
+                quality={90}
               />
             </div>
           </div>
