@@ -2,12 +2,12 @@
 import { useEffect, useState, useRef } from "react"
 import { AnimatedText } from "@/components/animations"
 import Image from "next/image"
+import { LazyVideo } from "@/components/ui/lazy-video"
 
 export function HeroSection() {
   const [isVisible, setIsVisible] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [videoLoaded, setVideoLoaded] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -15,61 +15,22 @@ export function HeroSection() {
   }, [])
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !videoLoaded) {
-            // Load video immediately when in viewport
-            setVideoLoaded(true)
-          }
-        })
-      },
-      { threshold: 0, rootMargin: '200px' }
-    )
+    // Do not load the large hero MP4 in the critical path (Lighthouse).
+    // Defer until after first render + idle time, and skip on save-data / 2g.
+    const conn = (navigator as any).connection
+    const saveData = Boolean(conn?.saveData)
+    const slow = typeof conn?.effectiveType === "string" && /(^2g$|slow-2g)/.test(conn.effectiveType)
+    if (saveData || slow) return
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
+    const timeoutId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        ;(window as any).requestIdleCallback(() => setShouldLoadVideo(true), { timeout: 3000 })
+      } else {
+        setShouldLoadVideo(true)
+      }
+    }, 1500)
 
-    return () => observer.disconnect()
-  }, [videoLoaded])
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video || !videoLoaded) return
-
-    // Force hardware acceleration
-    video.style.transform = 'translateZ(0)'
-    video.style.backfaceVisibility = 'hidden'
-    
-    // Load video only when needed
-    video.load()
-    
-    // Ensure video starts from beginning
-    video.currentTime = 0
-    
-    // Play video immediately when loaded
-    const playVideo = () => {
-      video.play().catch(err => console.log('Video autoplay prevented:', err))
-    }
-    
-    if (video.readyState >= 3) {
-      playVideo()
-    } else {
-      video.addEventListener('loadeddata', playVideo, { once: true })
-    }
-
-    // Simple loop without reverse (much smoother)
-    const handleEnded = () => {
-      video.currentTime = 0
-      video.play()
-    }
-
-    video.addEventListener('ended', handleEnded)
-    
-    return () => {
-      video.removeEventListener('ended', handleEnded)
-    }
+    return () => window.clearTimeout(timeoutId)
   }, [])
 
   useEffect(() => {
@@ -101,7 +62,6 @@ export function HeroSection() {
 
   const scale = 1 - easeOutQuad(scrollProgress) * 0.15
   const borderRadius = easeOutCubic(scrollProgress) * 48
-  const heightVh = 100 - easeOutQuad(scrollProgress) * 37.5
 
   return (
     <section ref={sectionRef} className="pt-32 pb-12 px-6 min-h-screen flex items-center relative overflow-hidden max-w-full">
@@ -111,7 +71,7 @@ export function HeroSection() {
           style={{
             transform: `scale(${scale}) translate3d(0, 0, 0)`,
             borderRadius: `${borderRadius}px`,
-            height: `${heightVh}vh`,
+            height: "100vh",
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
             perspective: 1000,
@@ -120,26 +80,17 @@ export function HeroSection() {
             contain: 'layout style paint',
           }}
         >
-          {videoLoaded ? (
-            <video 
-              ref={videoRef}
-              autoPlay 
+          <div className="w-full h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-yellow-50" />
+          {shouldLoadVideo ? (
+            <LazyVideo
+              src="/vidio/vidio1.mp4"
+              className="absolute inset-0 w-full h-full object-cover"
+              autoPlay
               loop
-              muted 
+              muted
               playsInline
-              preload="metadata"
-              className="w-full h-full object-cover"
-              style={{
-                transform: 'translate3d(0, 0, 0)',
-                backfaceVisibility: 'hidden',
-              }}
-            >
-              <source src="/vidio/vidio1.mp4" type="video/mp4" />
-              <track kind="captions" srcLang="id" label="Indonesian" />
-            </video>
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-50 via-cyan-50 to-yellow-50" />
-          )}
+            />
+          ) : null}
         </div>
       </div>
 

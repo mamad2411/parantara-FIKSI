@@ -2,13 +2,26 @@ import type React from "react"
 import type { Metadata } from "next"
 import Script from "next/script"
 import { CookieConsentBanner } from "@/components/cookie-consent"
-import { QueryProvider, RecaptchaProvider, SecurityProvider } from "@/components/providers"
+import { QueryProvider, SecurityProvider } from "@/components/providers"
 import { AuthProvider } from "@/lib/auth-context"
 import { ScrollProgress } from "@/components/ui/scroll-progress"
 import { BackToTop } from "@/components/ui/back-to-top"
 import { PageLoadingTransition } from "@/components/ui/page-loading-transition"
 import { SuppressExtensionErrors } from "@/components/suppress-extension-errors"
+import { Inter, Playfair_Display } from "next/font/google"
 import "./globals.css"
+
+const fontSans = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+})
+
+const fontSerif = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-serif",
+})
 
 export const metadata: Metadata = {
   title: "DanaMasjid - Platform Donasi Masjid Transparan & Amanah",
@@ -72,11 +85,8 @@ export default function RootLayout({
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
         {/* Preload LCP image */}
         <link rel="preload" href="/images/iphone.webp" as="image" fetchPriority="high" />
-        {/* Preconnect to critical domains */}
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://www.google.com" />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}>
         {/* Defer structured data */}
         <Script
           id="organization-schema"
@@ -130,11 +140,9 @@ export default function RootLayout({
         <SecurityProvider>
           <AuthProvider>
             <QueryProvider>
-              <RecaptchaProvider>
-                {children}
-                <CookieConsentBanner />
-                <BackToTop />
-              </RecaptchaProvider>
+              {children}
+              <CookieConsentBanner />
+              <BackToTop />
             </QueryProvider>
           </AuthProvider>
         </SecurityProvider>
