@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { randomBytes } from 'crypto'
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
@@ -200,8 +199,10 @@ export function middleware(request: NextRequest) {
   // Add security headers with CSP nonce
   const response = NextResponse.next()
   
-  // Generate CSP nonce for this request
-  const nonce = randomBytes(16).toString('base64')
+  // Generate CSP nonce for this request using Web Crypto API
+  const array = new Uint8Array(16)
+  crypto.getRandomValues(array)
+  const nonce = btoa(String.fromCharCode(...array))
   
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
