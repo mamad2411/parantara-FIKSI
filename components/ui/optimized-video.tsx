@@ -10,6 +10,8 @@ interface OptimizedVideoProps {
   muted?: boolean
   loop?: boolean
   playsInline?: boolean
+  preload?: "none" | "metadata" | "auto"
+  loading?: "lazy" | "eager"
 }
 
 export function OptimizedVideo({
@@ -19,7 +21,9 @@ export function OptimizedVideo({
   autoPlay = false,
   muted = true,
   loop = false,
-  playsInline = true
+  playsInline = true,
+  preload = "none",
+  loading = "lazy"
 }: OptimizedVideoProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [shouldLoad, setShouldLoad] = useState(false)
@@ -27,7 +31,12 @@ export function OptimizedVideo({
   const observerRef = useRef<IntersectionObserver>()
 
   useEffect(() => {
-    // Only load video when it's near viewport
+    // Only load video when it's near viewport and loading is lazy
+    if (loading === "eager") {
+      setShouldLoad(true)
+      return
+    }
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -45,7 +54,7 @@ export function OptimizedVideo({
     }
 
     return () => observerRef.current?.disconnect()
-  }, [])
+  }, [loading])
 
   const handleLoadedData = () => {
     setIsLoaded(true)
@@ -70,7 +79,7 @@ export function OptimizedVideo({
         playsInline={playsInline}
         poster={poster}
         onLoadedData={handleLoadedData}
-        preload="none"
+        preload={preload}
       >
         {shouldLoad && <source src={src} type="video/mp4" />}
         Your browser does not support the video tag.

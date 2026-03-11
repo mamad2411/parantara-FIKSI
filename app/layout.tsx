@@ -8,6 +8,7 @@ import { ScrollProgress } from "@/components/ui/scroll-progress"
 import { BackToTop } from "@/components/ui/back-to-top"
 import { PageLoadingTransition } from "@/components/ui/page-loading-transition"
 import { SuppressExtensionErrors } from "@/components/suppress-extension-errors"
+import { TrustedTypesSetup } from "@/components/security/trusted-types"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -71,9 +72,33 @@ export default function RootLayout({
         {/* DNS prefetch for external domains we actually use */}
         <link rel="dns-prefetch" href="//danamasjid.firebaseapp.com" />
         <link rel="dns-prefetch" href="//identitytoolkit.googleapis.com" />
+        <link rel="dns-prefetch" href="//apis.google.com" />
         
         {/* Preconnect only for critical external resources */}
         <link rel="preconnect" href="https://danamasjid.firebaseapp.com" />
+        <link rel="preconnect" href="https://apis.google.com" crossOrigin="" />
+        
+        {/* Critical CSS inline - moved from globals.css */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            html{scroll-behavior:auto;overflow-x:hidden;overflow-y:scroll}
+            body{overflow-x:hidden;position:relative;background-color:white;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+            html,body{max-width:100vw;background-color:white}
+            #__next{overflow:visible}
+            body{overflow:visible!important}
+            .min-h-screen{min-height:100vh}
+            .bg-white{background-color:white}
+            .flex{display:flex}
+            .items-center{align-items:center}
+            .justify-center{justify-content:center}
+            .w-full{width:100%}
+            .relative{position:relative}
+            .loading-spinner{width:2rem;height:2rem;border:2px solid #e5e7eb;border-top:2px solid #3b82f6;border-radius:50%;animation:spin 1s linear infinite}
+            @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+            .font-sans{font-family:system-ui,-apple-system,sans-serif}
+            .antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+          `
+        }} />
         
         {/* Meta Description */}
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
@@ -155,6 +180,7 @@ export default function RootLayout({
         />
         
         <SuppressExtensionErrors />
+        <TrustedTypesSetup />
         <ScrollProgress />
         <PageLoadingTransition />
         <SecurityProvider>

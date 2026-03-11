@@ -26,7 +26,7 @@ const nextConfig = {
   poweredByHeader: false,
   
   // Enable source maps in production for better debugging
-  productionBrowserSourceMaps: false, // Disable to reduce bundle size
+  productionBrowserSourceMaps: true, // Enable for better debugging and Lighthouse insights
   
   // Generate unique build IDs to prevent cache issues
   generateBuildId: async () => {
@@ -70,19 +70,19 @@ const nextConfig = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
-          minSize: 10000, // Smaller minimum size
-          maxSize: 50000, // Much smaller chunks for faster loading
+          minSize: 20000, // Increase minimum size
+          maxSize: 30000, // Smaller chunks for faster loading
           cacheGroups: {
             default: false,
             vendors: false,
-            // Framework chunk (React, Next.js) - keep very small
+            // Framework chunk (React, Next.js) - keep small
             framework: {
               chunks: 'all',
               name: 'framework',
               test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
               priority: 40,
               enforce: true,
-              maxSize: 50000,
+              maxSize: 30000,
             },
             // Animation libraries - completely async and small
             animations: {
@@ -91,7 +91,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](framer-motion|lottie-react|motion-dom|lottie-web)[\\/]/,
               priority: 30,
               enforce: true,
-              maxSize: 30000,
+              maxSize: 25000,
             },
             // UI libraries - async and small
             ui: {
@@ -100,7 +100,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](lucide-react|recharts|@radix-ui)[\\/]/,
               priority: 25,
               enforce: true,
-              maxSize: 25000,
+              maxSize: 20000,
             },
             // Firebase - separate async chunk
             firebase: {
@@ -109,7 +109,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](firebase|@firebase)[\\/]/,
               priority: 28,
               enforce: true,
-              maxSize: 40000,
+              maxSize: 35000,
             },
             // Utilities - async and very small
             utils: {
@@ -118,7 +118,7 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](date-fns|clsx|class-variance-authority|tailwind-merge)[\\/]/,
               priority: 22,
               enforce: true,
-              maxSize: 20000,
+              maxSize: 15000,
             },
             // React ecosystem - separate chunk
             reactEcosystem: {
@@ -127,16 +127,16 @@ const nextConfig = {
               test: /[\\/]node_modules[\\/](react-hook-form|react-hot-toast|react-query|@tanstack)[\\/]/,
               priority: 24,
               enforce: true,
-              maxSize: 30000,
+              maxSize: 25000,
             },
-            // Vendor chunk - much smaller pieces
+            // Vendor chunk - smaller pieces
             vendor: {
               name: 'vendor',
               chunks: 'all',
               test: /[\\/]node_modules[\\/]/,
               priority: 20,
               minChunks: 1,
-              maxSize: 40000,
+              maxSize: 30000,
             },
             // Common chunk - very small
             common: {
@@ -146,7 +146,7 @@ const nextConfig = {
               priority: 10,
               reuseExistingChunk: true,
               enforce: true,
-              maxSize: 20000,
+              maxSize: 15000,
             }
           }
         },
@@ -207,7 +207,7 @@ const nextConfig = {
             key: 'X-DNS-Prefetch-Control',
             value: 'on'
           },
-          // HSTS - Force HTTPS for 2 years including subdomains
+          // HSTS - Force HTTPS for 2 years including subdomains with preload
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload'
@@ -237,10 +237,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
           },
-          // COOP - Relaxed for GTM compatibility but still secure
+          // COOP - Same origin for better isolation
           {
             key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups'
+            value: 'same-origin'
           },
           // COEP - Allow cross-origin resources
           {
@@ -252,13 +252,13 @@ const nextConfig = {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin'
           },
-          // Comprehensive CSP with Trusted Types
+          // Comprehensive CSP with Trusted Types and stricter policies
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com",
-              "style-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'nonce-lighthouse-csp' https://www.gstatic.com https://www.google.com https://www.recaptcha.net https://apis.google.com",
+              "style-src 'self' 'nonce-lighthouse-csp' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' https: wss:",
@@ -270,6 +270,8 @@ const nextConfig = {
               "form-action 'self'",
               "manifest-src 'self'",
               "media-src 'self' blob: data:",
+              "require-trusted-types-for 'script'",
+              "trusted-types default",
               "upgrade-insecure-requests"
             ].join('; ')
           },
@@ -288,13 +290,43 @@ const nextConfig = {
           }
         ],
       },
-      // Cache static assets aggressively
+      // Cache static assets aggressively with proper MIME types
       {
         source: '/images/:path*',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Content-Type',
+            value: 'image/*',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/css/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/js/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
           },
         ],
       },

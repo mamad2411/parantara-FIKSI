@@ -1,13 +1,15 @@
 'use client';
 
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 
 interface RecaptchaProviderProps {
   children: ReactNode;
 }
 
 export function RecaptchaProvider({ children }: RecaptchaProviderProps) {
+  const [shouldLoadRecaptcha, setShouldLoadRecaptcha] = useState(false);
+  
   // reCAPTCHA v3 Site Key (public key - aman untuk di frontend)
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -18,7 +20,26 @@ export function RecaptchaProvider({ children }: RecaptchaProviderProps) {
     recaptchaSiteKey === 'your_recaptcha_site_key_here' ||
     recaptchaSiteKey.startsWith('your_recaptcha_site_key');
 
-  if (isDev || isPlaceholder) {
+  // Load reCAPTCHA only when user interacts with forms
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setShouldLoadRecaptcha(true);
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+
+    // Add listeners for user interaction
+    document.addEventListener('click', handleUserInteraction, { passive: true });
+    document.addEventListener('keydown', handleUserInteraction, { passive: true });
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
+
+  if (isDev || isPlaceholder || !shouldLoadRecaptcha) {
     return <>{children}</>;
   }
 
