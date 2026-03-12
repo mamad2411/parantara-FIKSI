@@ -1,7 +1,17 @@
 "use client"
 
-import { motion, Variants } from "framer-motion"
+import dynamic from 'next/dynamic'
 import { ReactNode } from "react"
+import type { Variants } from "framer-motion"
+
+// Lazy load motion component
+const MotionDiv = dynamic(
+  () => import('framer-motion').then((mod) => mod.motion.div),
+  { 
+    ssr: false,
+    loading: () => <div />
+  }
+)
 
 // Variasi animasi yang berbeda
 export const fadeInUp: Variants = {
@@ -164,7 +174,7 @@ export function AnimatedSection({
   const selectedVariant = variantMap[variant]
   
   return (
-    <motion.div
+    <MotionDiv
       initial="hidden"
       whileInView="visible"
       viewport={{ once, margin: "-100px" }}
@@ -173,7 +183,7 @@ export function AnimatedSection({
       className={className}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   )
 }
 
@@ -186,7 +196,7 @@ interface StaggerContainerProps {
 
 export function StaggerContainer({ children, className = "", fast = false, once = true }: StaggerContainerProps) {
   return (
-    <motion.div
+    <MotionDiv
       initial="hidden"
       whileInView="visible"
       viewport={{ once, margin: "-50px" }}
@@ -194,7 +204,7 @@ export function StaggerContainer({ children, className = "", fast = false, once 
       className={className}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   )
 }
 
@@ -205,8 +215,8 @@ interface StaggerItemProps {
 
 export function StaggerItem({ children, className = "" }: StaggerItemProps) {
   return (
-    <motion.div variants={staggerItem} className={className}>
+    <MotionDiv variants={staggerItem} className={className}>
       {children}
-    </motion.div>
+    </MotionDiv>
   )
 }

@@ -6,6 +6,7 @@ export { default as MasjidHero } from "./masjid-hero"
 export { MasjidHeroV2 } from "./masjid-hero-v2"
 export { DonationHeroSection } from "./donation-hero-section"
 export { DonationCategoriesSection } from "./donation-categories-section"
+export { SimpleHero } from "./simple-hero"
 
 // Feature Sections
 export { FeaturesSection } from "./features-section"

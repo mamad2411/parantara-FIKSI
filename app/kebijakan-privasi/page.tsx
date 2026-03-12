@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { ArrowLeft, Shield, Eye, Lock, Users, Database, Mail } from "lucide-react"
 import Link from "next/link"
+import { SimpleHero } from "@/components/sections/simple-hero"
 
 export default function KebijakanPrivasiPage() {
   return (
@@ -20,27 +21,27 @@ export default function KebijakanPrivasiPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+      {/* Hero Section */}
+      <SimpleHero
+        title={
+          <>
+            Kebijakan <br className="hidden md:block" />
+            Privasi
+          </>
+        }
+        subtitle="Kami menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi Anda"
+      />
+
+      <div className="max-w-4xl mx-auto px-6 pb-12">
+        {/* Last Updated */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-sm text-gray-500 text-center mb-12"
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-            <Shield className="w-8 h-8 text-blue-600" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Kebijakan Privasi
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Komitmen kami untuk melindungi privasi dan data pribadi Anda
-          </p>
-          <p className="text-sm text-gray-500 mt-4">
-            Terakhir diperbarui: 11 Maret 2026
-          </p>
-        </motion.div>
+          Terakhir diperbarui: 11 Maret 2026
+        </motion.p>
 
         {/* Content */}
         <motion.div

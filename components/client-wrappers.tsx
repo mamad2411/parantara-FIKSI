@@ -2,25 +2,25 @@
 
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
-import { LottieLoading } from "@/components/ui/lottie-loading"
+import { SimpleSpinner } from "@/components/ui/simple-spinner"
 
 // Optimize dynamic imports with better chunking
 const MarqueeLazy = dynamic(() => import("@/components/marquee"), {
   ssr: false,
-  loading: () => <LottieLoading className="h-screen bg-white flex items-center justify-center" />
+  loading: () => <SimpleSpinner className="h-screen bg-white" />
 })
 
 const ScrollingAnimationLazy = dynamic(
   () => import("@/components/scrolling-animation").then(mod => ({ default: mod.HomePage })), 
   {
     ssr: false,
-    loading: () => <LottieLoading className="min-h-screen bg-white flex items-center justify-center" />
+    loading: () => <SimpleSpinner className="min-h-screen bg-white" />
   }
 )
 
 export function Marquee() {
   return (
-    <Suspense fallback={<LottieLoading className="h-screen bg-white flex items-center justify-center" />}>
+    <Suspense fallback={<SimpleSpinner className="h-screen bg-white" />}>
       <MarqueeLazy />
     </Suspense>
   )
@@ -28,7 +28,7 @@ export function Marquee() {
 
 export function ScrollingAnimation() {
   return (
-    <Suspense fallback={<LottieLoading className="min-h-screen bg-white flex items-center justify-center" />}>
+    <Suspense fallback={<SimpleSpinner className="min-h-screen bg-white" />}>
       <ScrollingAnimationLazy />
     </Suspense>
   )
