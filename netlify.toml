@@ -112,13 +112,6 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# API proxy to Cloudflare Workers (everything else under /api/)
-[[redirects]]
-  from = "/api/*"
-  to = "https://danamasjid-api.danamsjid-api.workers.dev/:splat"
-  status = 200
-  force = false
-
 # Force HTTPS
 [[redirects]]
   from = "http://danamasjid.netlify.app/*"
