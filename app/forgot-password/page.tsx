@@ -10,8 +10,6 @@ import { ArrowLeft, Mail, CheckCircle2, AlertCircle, Clock } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
 import { VideoBackground } from '@/components/auth/video-background';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { PolicyModal } from '@/components/policy-modal';
 
 export default function ForgotPasswordPage() {
@@ -82,10 +80,16 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
 
     try {
-      await sendPasswordResetEmail(auth, email, {
-        url: `${window.location.origin}/login`,
-        handleCodeInApp: false,
-      });
+      const res = await fetch('/api/send-reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Gagal mengirim email')
+      }
       
       setSuccess(true);
       setCooldown(60);
@@ -98,24 +102,7 @@ export default function ForgotPasswordPage() {
       }, 1000);
       
     } catch (err: any) {
-      console.error('Reset password error:', err);
-      
-      switch (err.code) {
-        case 'auth/user-not-found':
-          setError('Email tidak terdaftar. Silakan daftar terlebih dahulu.');
-          break;
-        case 'auth/invalid-email':
-          setError('Format email tidak valid. Periksa kembali email Anda.');
-          break;
-        case 'auth/too-many-requests':
-          setError('Terlalu banyak percobaan. Silakan coba lagi dalam beberapa menit.');
-          break;
-        case 'auth/network-request-failed':
-          setError('Koneksi internet bermasalah. Periksa koneksi Anda.');
-          break;
-        default:
-          setError(`Gagal mengirim email reset: ${err.code} - ${err.message || 'Silakan coba lagi'}`);
-      }
+      setError(err.message || 'Gagal mengirim email reset password. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }

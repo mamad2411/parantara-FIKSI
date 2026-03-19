@@ -5,8 +5,7 @@ export default [
       'node_modules/**',
       'api/**',
       '.netlify/**',
+      'SuperAdmin-danamasjid/**',
     ],
   },
 ]
-
-

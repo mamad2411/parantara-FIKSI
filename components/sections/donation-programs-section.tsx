@@ -1,15 +1,8 @@
 "use client"
 
-import dynamic from "next/dynamic"
-import { useState, useEffect, useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-
-// Lottie only loaded when card is visible
-const Lottie = dynamic(() => import("lottie-react"), {
-  ssr: false,
-  loading: () => <div className="w-full h-48 bg-gray-100 rounded-xl" />,
-})
 
 const cardAnim = (i: number) => ({
   initial: { opacity: 0, y: 20 },
@@ -18,9 +11,13 @@ const cardAnim = (i: number) => ({
   viewport: { once: true as const },
 })
 
-// Placeholder avatars — no external requests
-const AVATAR_COLORS = ["bg-blue-400", "bg-green-400", "bg-yellow-400", "bg-pink-400", "bg-purple-400"]
-const AVATAR_INITIALS = ["A", "B", "C", "D", "E"]
+const AVATAR_IMAGES = [
+  "/images/profil/profil1.webp",
+  "/images/profil/profil2.webp",
+  "/images/profil/profil6.webp",
+  "/images/profil/profil7.webp",
+  "/images/profil/profil5.webp",
+]
 
 export function DonationProgramsSection() {
   const [animationData, setAnimationData] = useState<any>(null)
@@ -220,13 +217,15 @@ export function DonationProgramsSection() {
                   </p>
                 </div>
 
-                {/* Lottie — lazy loaded via IntersectionObserver */}
-                <div ref={lottieRef} className="relative rounded-xl overflow-hidden border border-slate-200 bg-gradient-to-br from-blue-50 to-cyan-50 min-h-[12rem]">
-                  {animationData ? (
-                    <Lottie animationData={animationData} loop className="w-full h-auto" />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-100 rounded-xl" />
-                  )}
+                {/* Program illustration */}
+                <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+                  <Image
+                    src="/images/program/program.webp"
+                    alt="Ilustrasi Program Masjid"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto object-cover"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
@@ -262,12 +261,18 @@ export function DonationProgramsSection() {
                 {/* Avatar placeholders — no external requests */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex -space-x-3">
-                    {AVATAR_INITIALS.map((initial, i) => (
+                    {AVATAR_IMAGES.map((src, i) => (
                       <div
                         key={i}
-                        className={`w-10 h-10 rounded-full border-2 border-white ${AVATAR_COLORS[i]} flex items-center justify-center text-white text-xs font-bold`}
+                        className="w-10 h-10 rounded-full border-2 border-white overflow-hidden"
                       >
-                        {initial}
+                        <Image
+                          src={src}
+                          alt={`Donatur ${i + 1}`}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     ))}
                     <div className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">

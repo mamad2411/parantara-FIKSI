@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, id: data?.id })
-  } catch (err) {
-    console.error('Send device verification error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (err: any) {
+    console.error('Send device verification error:', err?.message || err)
+    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 })
   }
 }

@@ -100,6 +100,7 @@
     "exif-js": "^2.3.0",
     "exifreader": "^4.36.2",
     "firebase": "^12.9.0",
+    "firebase-admin": "^13.7.0",
     "framer-motion": "^12.35.0",
     "hono": "^4.12.2",
     "husky": "^9.1.7",

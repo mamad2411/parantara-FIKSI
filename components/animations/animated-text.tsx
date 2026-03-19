@@ -12,8 +12,8 @@ export function AnimatedText({ text, delay = 0 }: AnimatedTextProps) {
 
   return (
     <span
-      className="font-bold text-center leading-[0.75] tracking-tighter font-serif text-black block"
-      style={{ perspective: 400 }}
+      className="font-bold text-center leading-[0.75] text-black block"
+      style={{ perspective: 400, fontFamily: "'ArabicRamadan', serif", letterSpacing: "0.08em" }}
     >
       {chars.map((char, i) => {
         const isSpace = char === " "

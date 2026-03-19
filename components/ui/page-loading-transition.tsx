@@ -95,22 +95,27 @@ function Inner() {
   })
 
   // Mount: preload lottie + check pending flag
+  // Only show overlay if navigation was triggered programmatically (not on initial page load)
   useEffect(() => {
     // Client-only preload
     preload().then(() => setLottieReady(true))
-    if (window.__pageLoadingPending) {
+    // Check if this is a real navigation (not initial load)
+    // navigation.type === 'navigate' means user typed URL or opened new tab — skip overlay
+    const navType = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type
+    if (window.__pageLoadingPending && navType !== "navigate") {
       showOverlay()
+    } else {
+      // Clear stale pending flag from previous session
+      window.__pageLoadingPending = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []) // eslint-disable-line
 
   // Fallback event listener
   useEffect(() => {
     const onNavigate = () => showOverlay()
     window.addEventListener("page-navigate", onNavigate)
     return () => window.removeEventListener("page-navigate", onNavigate)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []) // eslint-disable-line
 
   // Intercept plain <a> clicks
   useEffect(() => {
@@ -124,8 +129,7 @@ function Inner() {
     }
     document.addEventListener("click", onClick, true)
     return () => document.removeEventListener("click", onClick, true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []) // eslint-disable-line
 
   useEffect(
     () => () => {

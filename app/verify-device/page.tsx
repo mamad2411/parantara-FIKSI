@@ -40,8 +40,11 @@ function VerifyDeviceContent() {
       const querySnapshot = await getDocs(q)
 
       if (querySnapshot.empty) {
+        // Check if token was already used (token set to null after use)
+        const usedQuery = query(usersRef, where('deviceVerificationUsed', '==', true))
+        // We can't query by null token, so just show appropriate message
         setStatus('error')
-        setMessage('Token verifikasi tidak ditemukan atau sudah digunakan')
+        setMessage('Link verifikasi ini sudah digunakan atau tidak valid. Silakan login kembali untuk mendapatkan link baru.')
         return
       }
 
@@ -51,8 +54,15 @@ function VerifyDeviceContent() {
       // Check if token expired
       const expiryDate = new Date(userData.deviceVerificationExpiry)
       if (new Date() > expiryDate) {
+        // Invalidate expired token so it can't be reused
+        const userRef = doc(db, 'users', userDoc.id)
+        await setDoc(userRef, {
+          deviceVerificationToken: null,
+          deviceVerificationExpiry: null,
+          pendingDeviceFingerprint: null,
+        }, { merge: true })
         setStatus('error')
-        setMessage('Token verifikasi sudah kedaluwarsa. Silakan login kembali.')
+        setMessage('Link verifikasi sudah kedaluwarsa. Silakan login kembali untuk mendapatkan link baru.')
         return
       }
 
@@ -63,7 +73,8 @@ function VerifyDeviceContent() {
         deviceVerificationToken: null,
         deviceVerificationExpiry: null,
         pendingDeviceFingerprint: null,
-        deviceVerifiedAt: new Date().toISOString()
+        deviceVerifiedAt: new Date().toISOString(),
+        deviceVerificationUsed: true,
       }, { merge: true })
 
       setStatus('success')

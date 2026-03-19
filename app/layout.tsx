@@ -88,24 +88,21 @@ export default function RootLayout({
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
 
         {/* Scroll restoration — keep position on refresh */}
-        <Script
+        <script
           id="scroll-restoration"
-          strategy="beforeInteractive"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                if (typeof window === 'undefined') return;
                 if ('scrollRestoration' in history) {
                   history.scrollRestoration = 'manual';
                 }
                 var key = 'sr_' + location.pathname;
                 var saved = sessionStorage.getItem(key);
                 if (saved) {
-                  var pos = parseInt(saved, 10);
-                  // Restore after paint so layout is ready
                   requestAnimationFrame(function() {
                     requestAnimationFrame(function() {
-                      window.scrollTo(0, pos);
+                      window.scrollTo(0, parseInt(saved, 10));
                     });
                   });
                 }
@@ -117,7 +114,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased`} suppressHydrationWarning>
         {/* Defer all structured data to after interactive */}
         <Script
           id="organization-schema"
