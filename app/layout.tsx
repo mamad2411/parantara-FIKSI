@@ -70,15 +70,6 @@ export default function RootLayout({
         {/* Viewport - required to avoid 300ms tap delay on mobile */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         
-        {/* Preload LCP image so browser discovers it immediately from HTML */}
-        <link
-          rel="preload"
-          href="/images/iphone.webp"
-          as="image"
-          type="image/webp"
-          fetchPriority="high"
-        />
-        
         {/* Only preconnect to origins that will actually be used on login page */}
         <link rel="preconnect" href="https://apis.google.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://danamasjid.firebaseapp.com" />
