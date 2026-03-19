@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminAuth, adminDb } from '@/lib/firebase-admin'
+import { getAuth, getFirestore } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user with this reset token
-    const usersRef = adminDb.collection('users')
+    const usersRef = getFirestore().collection('users')
     const snap = await usersRef.where('passwordResetToken', '==', token).get()
 
     if (snap.empty) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password via Firebase Admin
-    await adminAuth.updateUser(userDoc.id, { password: newPassword })
+    await getAuth().updateUser(userDoc.id, { password: newPassword })
 
     // Invalidate token (one-time use)
     await userDoc.ref.update({

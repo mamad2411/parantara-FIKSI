@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { adminDb } from '@/lib/firebase-admin'
+import { getFirestore } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email in Firestore
-    const usersRef = adminDb.collection('users')
+    const usersRef = getFirestore().collection('users')
     const snap = await usersRef.where('email', '==', email.toLowerCase().trim()).get()
 
     // Always return success to prevent email enumeration

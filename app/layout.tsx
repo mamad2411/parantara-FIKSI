@@ -69,6 +69,9 @@ export default function RootLayout({
       <head>
         {/* Viewport - required to avoid 300ms tap delay on mobile */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* Console ASCII art */}
+        <script src="/console-art.js" />
         
         {/* Only preconnect to origins that will actually be used on login page */}
         <link rel="preconnect" href="https://apis.google.com" crossOrigin="anonymous" />

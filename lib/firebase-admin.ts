@@ -1,6 +1,20 @@
-import admin from 'firebase-admin'
+let adminModule: typeof import('firebase-admin') | null = null
+
+async function getAdmin() {
+  if (!adminModule) {
+    adminModule = (await import('firebase-admin')).default
+  }
+  return adminModule
+}
+
+function getAdminSync() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const admin = require('firebase-admin') as typeof import('firebase-admin')
+  return admin
+}
 
 function getAdminApp() {
+  const admin = getAdminSync()
   if (admin.apps.length) return admin.apps[0]!
 
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID
@@ -16,13 +30,10 @@ function getAdminApp() {
   })
 }
 
-export const adminAuth = {
-  updateUser: (...args: Parameters<admin.auth.Auth['updateUser']>) =>
-    getAdminApp().auth().updateUser(...args),
+export function getAuth() {
+  return getAdminApp().auth()
 }
 
-export const adminDb = new Proxy({} as admin.firestore.Firestore, {
-  get(_target, prop) {
-    return (getAdminApp().firestore() as any)[prop]
-  },
-})
+export function getFirestore() {
+  return getAdminApp().firestore()
+}
