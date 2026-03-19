@@ -363,44 +363,31 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
     try {
       toast.loading("Mengambil alamat dari lokasi...", { id: "reverse-geocoding" })
       
-      // Satu request saja — zoom 16 sudah cukup untuk dapat jalan + kelurahan + kecamatan
-      // Nominatim rate limit: 1 req/detik, jadi jangan kirim multiple request sekaligus
+      // Single request, no retry delays — zoom 16 cukup untuk jalan + kelurahan + kecamatan
       let bestData = null
       
-      const fetchWithRetry = async (zoom: number, retries = 2): Promise<any> => {
-        for (let i = 0; i <= retries; i++) {
-          try {
-            const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}&zoom=${zoom}`)
-            if (res.status === 429) {
-              // Rate limited — tunggu 1.5 detik lalu coba lagi
-              if (i < retries) await new Promise(r => setTimeout(r, 1500))
-              continue
-            }
-            if (res.ok) return await res.json()
-          } catch { /* ignore, coba lagi */ }
-          if (i < retries) await new Promise(r => setTimeout(r, 800))
-        }
-        return null
-      }
+      try {
+        const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}&zoom=16`)
+        if (res.ok) bestData = await res.json()
+      } catch { /* ignore */ }
 
-      bestData = await fetchWithRetry(16)
-      
-      // Fallback ke zoom lebih rendah jika data kurang lengkap
-      if (bestData && bestData.address && !bestData.address.state) {
-        await new Promise(r => setTimeout(r, 1100)) // tunggu rate limit
-        const adminData = await fetchWithRetry(10)
-        if (adminData?.address?.state) {
-          // Merge: ambil admin data dari zoom rendah, street data dari zoom tinggi
-          bestData.address = { ...adminData.address, ...bestData.address }
-        }
+      // Jika state kosong, coba zoom 10 sekali tanpa delay (Netlify serverless tidak perlu rate limit client-side)
+      if (bestData?.address && !bestData.address.state) {
+        try {
+          const adminRes = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}&zoom=10`)
+          if (adminRes.ok) {
+            const adminData = await adminRes.json()
+            if (adminData?.address?.state) {
+              bestData.address = { ...adminData.address, ...bestData.address }
+            }
+          }
+        } catch { /* ignore */ }
       }
       
       if (bestData && bestData.address) {
         const address = bestData.address
         const streetAddress = address
         const adminAddress = address
-        
-        console.log("Raw address data:", address)
         // Build comprehensive full address with aggressive data extraction
         const addressComponents = []
         
@@ -646,8 +633,6 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
         }
         
         console.log("Final extracted address:", { fullAddress, province, regency, district, village })
-        
-        // Build comprehensive address with all administrative levels
         const comprehensiveAddress = []
         
         // Add street details if available
