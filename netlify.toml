@@ -29,8 +29,8 @@
     # Referrer Policy
     Referrer-Policy = "strict-origin-when-cross-origin"
     
-    # Permissions Policy - Disable dangerous features
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()"
+    # Permissions Policy - Disable dangerous features, allow geolocation for mosque registration
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()"
     
     # Cross-Origin Policies
     Cross-Origin-Opener-Policy = "same-origin"
@@ -113,12 +113,12 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# API proxy to Cloudflare Workers
+# API proxy to Cloudflare Workers (everything else under /api/)
 [[redirects]]
   from = "/api/*"
   to = "https://danamasjid-api.danamsjid-api.workers.dev/:splat"
   status = 200
-  force = true
+  force = false
 
 # Force HTTPS
 [[redirects]]

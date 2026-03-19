@@ -210,7 +210,7 @@ export default function MasjidPage() {
           </AnimatedSection>
           <AnimatedSection variant="scaleIn" delay={0.4}>
             <Link
-              href="/daftar-masjid"
+              href="/login?redirect=/daftar-masjid&type=daftar-masjid&message=Login+dulu+sebelum+daftarkan+masjid+Anda"
               className="inline-block px-10 py-5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
             >
               Daftarkan Masjid Sekarang

@@ -162,7 +162,7 @@ export function CTASection() {
             <motion.button 
               whileHover={{ scale: 1.05, rotate: 1 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/daftar-masjid')}
+              onClick={() => router.push('/login?redirect=/daftar-masjid&type=daftar-masjid&message=Login+dulu+sebelum+daftarkan+masjid+Anda')}
               className="relative flex items-center justify-center gap-0 bg-foreground text-background rounded-full pl-6 pr-1.5 py-1.5 transition-all duration-300 group overflow-hidden"
             >
               <span className="text-sm pr-4">Daftarkan Masjid</span>
