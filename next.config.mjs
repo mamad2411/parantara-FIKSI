@@ -129,10 +129,10 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
           },
-          // Permissions Policy - Restrict browser features
+          // Permissions Policy - allow geolocation for mosque registration
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+            value: 'camera=(), microphone=(), geolocation=*, interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
           },
           // COOP - Same origin for better isolation
           {
