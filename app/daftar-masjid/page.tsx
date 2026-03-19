@@ -496,6 +496,9 @@ export default function DaftarMasjidPage() {
         localStorage.setItem(`mosque_registration_${userId}`, 'completed')
         localStorage.setItem(`mosque_registration_id_${userId}`, data.registrationId)
         
+        // Set cookie so middleware can redirect completed users
+        document.cookie = `mosque_registered=true; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict`
+        
         // Clear the force verification flag since registration is complete
         localStorage.removeItem(`force_device_verification_${userId}`)
         
@@ -505,7 +508,7 @@ export default function DaftarMasjidPage() {
         })
         setTimeout(() => {
           toast.dismiss() // Dismiss sebelum redirect
-          router.push("/masjid?message=Pendaftaran berhasil dikirim")
+          router.push("/menunggu")
         }, 2000)
       } else {
         toast.error(data.error || "Gagal mendaftar", {

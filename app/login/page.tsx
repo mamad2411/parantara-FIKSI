@@ -145,9 +145,12 @@ export default function LoginPage() {
       // Wait for auth state to fully update before redirect
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Check if there's a redirect URL
+      // Check if already registered — go to waiting page
+      const isRegistered = document.cookie.includes('mosque_registered=true')
       const redirectUrl = searchParams.get('redirect')
-      if (redirectUrl) {
+      if (isRegistered) {
+        window.location.href = '/menunggu'
+      } else if (redirectUrl) {
         window.location.href = redirectUrl
       } else {
         window.location.href = '/daftar-masjid'
@@ -182,9 +185,12 @@ export default function LoginPage() {
       // Wait a bit then redirect
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Check if there's a redirect URL
+      // Check if already registered — go to waiting page
+      const isRegistered = document.cookie.includes('mosque_registered=true')
       const redirectUrl = searchParams.get('redirect')
-      if (redirectUrl) {
+      if (isRegistered) {
+        window.location.href = '/menunggu'
+      } else if (redirectUrl) {
         window.location.href = redirectUrl
       } else {
         window.location.href = '/daftar-masjid'

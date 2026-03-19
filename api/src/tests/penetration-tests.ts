@@ -70,9 +70,9 @@ export class PenetrationTester {
           }),
         });
 
-        const data = await response.json();
+        const data = await response.json() as Record<string, unknown>;
 
-        if (response.ok && data.success) {
+        if (response.ok && (data as { success?: boolean }).success) {
           this.results.push({
             testName: 'SQL Injection',
             passed: false,

@@ -118,17 +118,30 @@ export function middleware(request: NextRequest) {
 
   // Protected routes that require authentication
   const protectedRoutes = ['/dashboard'] // '/jamaah' temporarily removed for preview
-  const authRoutes = ['/login', '/register']
   
   // Check if route is protected
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
   const isDaftarMasjid = pathname.startsWith('/daftar-masjid')
+  const isMenunggu = pathname === '/menunggu'
   
   // Get auth token from cookies
   const authToken = request.cookies.get('auth_token')?.value
   const isAuthenticated = !!authToken
   
+  // GUARD: /menunggu hanya bisa diakses setelah submit daftar masjid
+  if (isMenunggu) {
+    if (!isAuthenticated) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', '/menunggu')
+      return NextResponse.redirect(loginUrl)
+    }
+    const mosqueRegistered = request.cookies.get('mosque_registered')?.value
+    if (mosqueRegistered !== 'true') {
+      return NextResponse.redirect(new URL('/daftar-masjid', request.url))
+    }
+    return NextResponse.next()
+  }
+
   // STRICT PROTECTION FOR DAFTAR-MASJID ROUTE
   if (isDaftarMasjid) {
     if (!isAuthenticated) {
@@ -142,6 +155,12 @@ export function middleware(request: NextRequest) {
       response.cookies.delete('daftar_masjid_data')
       response.cookies.delete('daftar_masjid_started_at')
       return response
+    }
+
+    // Already submitted — redirect to waiting page
+    const mosqueRegistered = request.cookies.get('mosque_registered')?.value
+    if (mosqueRegistered === 'true') {
+      return NextResponse.redirect(new URL('/menunggu', request.url))
     }
 
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000

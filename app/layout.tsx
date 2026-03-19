@@ -86,6 +86,36 @@ export default function RootLayout({
         
         {/* Meta Description */}
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
+
+        {/* Scroll restoration — keep position on refresh */}
+        <Script
+          id="scroll-restoration"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window === 'undefined') return;
+                if ('scrollRestoration' in history) {
+                  history.scrollRestoration = 'manual';
+                }
+                var key = 'sr_' + location.pathname;
+                var saved = sessionStorage.getItem(key);
+                if (saved) {
+                  var pos = parseInt(saved, 10);
+                  // Restore after paint so layout is ready
+                  requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                      window.scrollTo(0, pos);
+                    });
+                  });
+                }
+                window.addEventListener('beforeunload', function() {
+                  sessionStorage.setItem(key, String(window.scrollY));
+                });
+              })();
+            `
+          }}
+        />
       </head>
       <body className={`font-sans antialiased`}>
         {/* Defer all structured data to after interactive */}

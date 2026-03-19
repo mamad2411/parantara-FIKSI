@@ -127,6 +127,7 @@ model MasjidRegistration {
   // Status
   status                String   @default("pending") // pending, approved, rejected
   rejectionReason       String?
+  fieldFeedback         Json?    // per-field review feedback
   approvedAt            DateTime?
   approvedBy            String?
   

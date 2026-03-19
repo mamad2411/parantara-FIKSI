@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { AnimatedSection } from "@/components/animations/animated-section"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 // Counter hook
 function useCountUp(end: number, duration = 2000, suffix = "") {
@@ -47,6 +48,7 @@ const AnimatedRevenueChart = dynamic(() => import("@/components/charts").then(mo
 })
 
 export function CTASection() {
+  const router = useRouter()
   const donatur = useCountUp(50, 2500, "K+")
   const masjid = useCountUp(15, 2800, "K+")
   const laporan = useCountUp(120, 3000, "M+")
@@ -160,6 +162,7 @@ export function CTASection() {
             <motion.button 
               whileHover={{ scale: 1.05, rotate: 1 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/daftar-masjid')}
               className="relative flex items-center justify-center gap-0 bg-foreground text-background rounded-full pl-6 pr-1.5 py-1.5 transition-all duration-300 group overflow-hidden"
             >
               <span className="text-sm pr-4">Daftarkan Masjid</span>
