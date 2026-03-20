@@ -41,7 +41,12 @@ service cloud.firestore {
                       request.resource.data.email == resource.data.email) ||
                       // Allow device verification update without auth (token-based)
                       (resource.data.deviceVerificationToken != null &&
-                      request.resource.data.keys().hasOnly(['deviceFingerprint', 'deviceVerificationToken', 'deviceVerificationExpiry', 'pendingDeviceFingerprint', 'deviceVerifiedAt', 'deviceVerificationUsed']) &&
+                      request.resource.data.keys().hasOnly([
+                        'deviceFingerprint', 'deviceFingerprintStable',
+                        'deviceVerificationToken', 'deviceVerificationExpiry',
+                        'pendingDeviceFingerprint', 'pendingDeviceFingerprintStable',
+                        'deviceVerifiedAt', 'deviceVerificationUsed'
+                      ]) &&
                       request.resource.data.deviceVerificationToken == null);
       
       // Prevent deletion
