@@ -174,44 +174,44 @@ export function Header() {
             <div className={`h-6 w-px ${isScrolled ? "bg-zinc-300" : "bg-border"}`} />
             
             {/* Masjid Link */}
-            <a
-              href="/masjid"
+            <button
+              onClick={() => { triggerPageLoading(); router.push("/masjid") }}
               className={`text-sm transition-colors cursor-pointer ${
                 isScrolled ? "text-zinc-600 hover:text-black" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Masjid
-            </a>
+            </button>
             
             {/* Harga Link */}
-            <a
-              href="/pricing"
+            <button
+              onClick={() => { triggerPageLoading(); router.push("/pricing") }}
               className={`text-sm transition-colors cursor-pointer ${
                 isScrolled ? "text-zinc-600 hover:text-black" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Harga
-            </a>
+            </button>
             
             {/* Tim Link */}
-            <a
-              href="/team"
+            <button
+              onClick={() => { triggerPageLoading(); router.push("/team") }}
               className={`text-sm transition-colors cursor-pointer ${
                 isScrolled ? "text-zinc-600 hover:text-black" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Tim
-            </a>
+            </button>
             
             {/* Donasi Link */}
-            <a
-              href="/donasi"
+            <button
+              onClick={() => { triggerPageLoading(); router.push("/donasi") }}
               className={`text-sm transition-colors cursor-pointer ${
                 isScrolled ? "text-zinc-600 hover:text-black" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Donasi
-            </a>
+            </button>
           </nav>
 
           <div className="hidden xl:flex items-center gap-3">
@@ -283,8 +283,8 @@ export function Header() {
               )}
             </div>
 
-            <a
-              href="/donasi"
+            <button
+              onClick={() => { triggerPageLoading(); router.push("/donasi") }}
               className={`relative flex items-center gap-0 border rounded-full pl-5 pr-1 py-1 transition-all duration-300 group overflow-hidden ${
                 isScrolled ? "border-zinc-300" : "border-border"
               }`}
@@ -313,7 +313,7 @@ export function Header() {
                   }`}
                 />
               </span>
-            </a>
+            </button>
           </div>
 
           <button
@@ -383,44 +383,44 @@ export function Header() {
             <div className={`h-px w-full ${isScrolled ? "bg-zinc-200" : "bg-border"}`} />
             
             {/* Masjid Link */}
-            <a
-              href="/masjid"
-              className={`transition-colors cursor-pointer font-medium ${
+            <button
+              onClick={() => { setIsOpen(false); triggerPageLoading(); router.push("/masjid") }}
+              className={`transition-colors cursor-pointer font-medium text-left ${
                 isScrolled ? "text-zinc-700 hover:text-black" : "text-foreground hover:text-foreground"
               }`}
             >
               Masjid
-            </a>
+            </button>
             
             {/* Harga Link */}
-            <a
-              href="/pricing"
-              className={`transition-colors cursor-pointer font-medium ${
+            <button
+              onClick={() => { setIsOpen(false); triggerPageLoading(); router.push("/pricing") }}
+              className={`transition-colors cursor-pointer font-medium text-left ${
                 isScrolled ? "text-zinc-700 hover:text-black" : "text-foreground hover:text-foreground"
               }`}
             >
               Harga
-            </a>
+            </button>
             
             {/* Tim Link */}
-            <a
-              href="/team"
-              className={`transition-colors cursor-pointer font-medium ${
+            <button
+              onClick={() => { setIsOpen(false); triggerPageLoading(); router.push("/team") }}
+              className={`transition-colors cursor-pointer font-medium text-left ${
                 isScrolled ? "text-zinc-700 hover:text-black" : "text-foreground hover:text-foreground"
               }`}
             >
               Tim
-            </a>
+            </button>
             
             {/* Donasi Link */}
-            <a
-              href="/donasi"
-              className={`transition-colors cursor-pointer font-medium ${
+            <button
+              onClick={() => { setIsOpen(false); triggerPageLoading(); router.push("/donasi") }}
+              className={`transition-colors cursor-pointer font-medium text-left ${
                 isScrolled ? "text-zinc-700 hover:text-black" : "text-foreground hover:text-foreground"
               }`}
             >
               Donasi
-            </a>
+            </button>
             
             <div
               className={`flex flex-col gap-3 mt-4 pt-4 border-t ${isScrolled ? "border-zinc-200" : "border-border"}`}
@@ -497,6 +497,7 @@ export function Header() {
               </div>
 
               <button
+                onClick={() => { setIsOpen(false); triggerPageLoading(); router.push("/donasi") }}
                 className={`relative flex items-center gap-0 border rounded-full pl-5 pr-1 py-1 w-fit transition-all duration-300 group overflow-hidden ${
                   isScrolled ? "border-zinc-300" : "border-border"
                 }`}

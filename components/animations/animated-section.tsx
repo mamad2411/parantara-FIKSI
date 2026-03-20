@@ -52,13 +52,8 @@ const animationVariants: Record<string, Variants> = {
     }
   },
   flipIn: {
-    hidden: { opacity: 0, rotateY: -90, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      rotateY: 0,
-      scale: 1,
-      transition: { type: "spring" as const, stiffness: 200, damping: 15 }
-    }
+    hidden: { opacity: 0, x: -30 },
+    visible: { opacity: 1, x: 0 }
   },
   slideRotate: {
     hidden: { opacity: 0, x: -100, rotate: -15 },
@@ -79,20 +74,19 @@ const animationVariants: Record<string, Variants> = {
     }
   },
   elasticIn: {
-    hidden: { opacity: 0, scale: 0, skewX: -15 },
+    hidden: { opacity: 0, scale: 0.8, y: 20 },
     visible: {
       opacity: 1,
       scale: 1,
-      skewX: 0,
-      transition: { type: "spring" as const, stiffness: 400, damping: 25, mass: 1 }
+      y: 0,
+      transition: { type: "spring" as const, stiffness: 300, damping: 25 }
     }
   },
   waveIn: {
-    hidden: { opacity: 0, y: 100, rotateX: -90 },
+    hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
       y: 0,
-      rotateX: 0,
       transition: { type: "spring" as const, stiffness: 150, damping: 20 }
     }
   }

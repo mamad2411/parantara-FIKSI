@@ -416,22 +416,20 @@ img[width][height] {
 
 .dm-animated-char {
   display: inline-block;
-  transform-style: preserve-3d;
-  transform-origin: center bottom;
   opacity: 0;
-  transform: translateY(30px) rotateX(-45deg);
-  animation: dmCharIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  transform: translateY(20px);
+  animation: dmCharIn 0.5s ease-out both;
   will-change: transform, opacity;
 }
 
 @keyframes dmCharIn {
   from {
     opacity: 0;
-    transform: translateY(30px) rotateX(-45deg);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) rotateX(0deg);
+    transform: translateY(0);
   }
 }
 
