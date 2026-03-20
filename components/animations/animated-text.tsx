@@ -24,7 +24,7 @@ export function AnimatedText({ text, delay = 0 }: AnimatedTextProps) {
             key={`${char}-${i}`}
             className="dm-animated-char"
             style={{
-              animationDelay: `${delay + i * 0.04}s`,
+              animationDelay: `${delay + i * 0.025}s`,
             }}
             aria-hidden="true"
           >

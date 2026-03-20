@@ -43,7 +43,7 @@ function LottieOverlay({ fading }: { fading: boolean }) {
         pointerEvents: fading ? "none" : "all",
       }}
     >
-      <LottieLoading className="flex items-center justify-center" />
+      <LottieLoading className="flex flex-col items-center gap-3" />
     </div>
   )
 }

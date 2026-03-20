@@ -183,8 +183,7 @@ export function HomePage() {
                     ease: [0.16, 1, 0.3, 1]
                   }}
                   viewport={{ once: true }}
-                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                  className="flex items-center gap-3 md:gap-5 border-t border-gray-200 dark:border-gray-700 p-0 md:p-5 lg:px-8 lg:py-6"
+                  className="flex items-center gap-3 md:gap-5 border-t border-gray-200 dark:border-gray-700 p-0 md:p-5 lg:px-8 lg:py-6 hover:bg-gray-50 transition-colors duration-200"
                 >
                   {/* Icon */}
                   <div className="relative size-12 sm:size-16 md:size-20 shrink-0">

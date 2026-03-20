@@ -1,17 +1,7 @@
 "use client"
 
-import dynamic from 'next/dynamic'
+import { motion, type Variants } from "framer-motion"
 import { ReactNode } from "react"
-import type { Variants } from "framer-motion"
-
-// Lazy load motion component
-const MotionDiv = dynamic(
-  () => import('framer-motion').then((mod) => mod.motion.div),
-  { 
-    ssr: false,
-    loading: () => <div />
-  }
-)
 
 // Variasi animasi yang berbeda
 export const fadeInUp: Variants = {
@@ -116,8 +106,8 @@ export const staggerContainer: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
+      staggerChildren: 0.07,
+      delayChildren: 0.05
     }
   }
 }
@@ -127,8 +117,8 @@ export const staggerFastContainer: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.1
+      staggerChildren: 0.04,
+      delayChildren: 0
     }
   }
 }
@@ -176,17 +166,17 @@ export function AnimatedSection({
   const selectedVariant = variantMap[variant]
   
   return (
-    <MotionDiv
+    <motion.div
       id={id}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once, margin: "-100px" }}
+      viewport={{ once, margin: "-80px" }}
       variants={selectedVariant}
       transition={{ delay }}
       className={className}
     >
       {children}
-    </MotionDiv>
+    </motion.div>
   )
 }
 
@@ -199,7 +189,7 @@ interface StaggerContainerProps {
 
 export function StaggerContainer({ children, className = "", fast = false, once = true }: StaggerContainerProps) {
   return (
-    <MotionDiv
+    <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once, margin: "-50px" }}
@@ -207,7 +197,7 @@ export function StaggerContainer({ children, className = "", fast = false, once 
       className={className}
     >
       {children}
-    </MotionDiv>
+    </motion.div>
   )
 }
 
@@ -218,8 +208,8 @@ interface StaggerItemProps {
 
 export function StaggerItem({ children, className = "" }: StaggerItemProps) {
   return (
-    <MotionDiv variants={staggerItem} className={className}>
+    <motion.div variants={staggerItem} className={className}>
       {children}
-    </MotionDiv>
+    </motion.div>
   )
 }
