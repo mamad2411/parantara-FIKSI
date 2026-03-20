@@ -80,6 +80,9 @@ export default function RootLayout({
           body.loading-active > *:not(#initial-loader-overlay) { opacity: 0 !important; }
         `}} />
         
+        {/* Preload Lottie animation JSON for faster loading screens */}
+        <link rel="preload" href="/lotie-loading.json" as="fetch" crossOrigin="anonymous" />
+        
         {/* Only preconnect to origins that will actually be used on login page */}
         <link rel="preconnect" href="https://apis.google.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://danamasjid.firebaseapp.com" />

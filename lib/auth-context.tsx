@@ -90,27 +90,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!auth) {
-      // Firebase not initialized (e.g. missing env vars) — unblock children
       setLoading(false)
       return
     }
-    
+
+    // Safety timeout — if onAuthStateChanged doesn't fire within 3s, unblock
+    const timeout = setTimeout(() => setLoading(false), 3000)
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(timeout)
       setUser(firebaseUser)
       setLoading(false)
       if (firebaseUser) {
-        // Refresh proper httpOnly session cookie
         await createServerSession(firebaseUser)
-        // Also keep legacy cookie for any remaining checks
         document.cookie = `auth_token=${firebaseUser.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
       } else {
-        // Clear session
         fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {})
         document.cookie = 'auth_token=; path=/; max-age=0'
       }
     })
 
-    return unsubscribe
+    return () => {
+      clearTimeout(timeout)
+      unsubscribe()
+    }
   }, [])
 
   const signInWithGoogle = async () => {

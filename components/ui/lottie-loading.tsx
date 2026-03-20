@@ -2,11 +2,14 @@
 
 import { memo, Suspense, useState, useEffect } from "react";
 
-// Minimal loading fallback
+// Minimal loading fallback — shown while lottie-react loads (~300ms)
 const LoadingFallback = memo(function LoadingFallback() {
   return (
     <div className="w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+      <svg className="animate-spin w-12 h-12 text-yellow-400" viewBox="0 0 24 24" fill="none">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      </svg>
     </div>
   );
 });

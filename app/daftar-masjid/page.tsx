@@ -15,6 +15,7 @@ import dynamic from "next/dynamic"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
+import { LottieLoading } from "@/components/ui/lottie-loading"
 
 // Lazy load each step — only Step1 is needed on initial render
 const Step1DataMasjid = dynamic(
@@ -532,12 +533,8 @@ export default function DaftarMasjidPage() {
   }
 
   // Show nothing while checking auth (prevents flash of content)
-  if (authLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  if (authLoading || (!user && firebaseReady)) {
+    return <LottieLoading className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 flex items-center justify-center" />
   }
 
   return (
