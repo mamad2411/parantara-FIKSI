@@ -7,10 +7,16 @@ export const runtime = 'nodejs'
 export async function POST(request: NextRequest) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const { email, userName, deviceInfo, verificationToken } = await request.json()
+    const body = await request.json()
+    const { email, userName, deviceInfo, verificationToken } = body
 
     if (!email || !verificationToken) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set')
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

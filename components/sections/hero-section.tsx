@@ -139,7 +139,7 @@ export function HeroSection() {
             }
           }}
           className="block font-bold text-[28vw] sm:text-[25vw] md:text-[22vw] lg:text-[20vw] tracking-tighter select-none text-center leading-none bg-gradient-to-r from-blue-400 via-cyan-400 to-yellow-400 bg-clip-text text-transparent max-w-full"
-          style={{ marginBottom: "0", contain: 'layout style paint' }}
+          style={{ contain: 'layout style paint' } as React.CSSProperties}
         >
           MASJID
         </motion.span>

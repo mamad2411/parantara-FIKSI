@@ -1,7 +1,9 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useEffect, useRef, useState, Suspense } from "react"
+import { useEffect, useRef, useState, useCallback, Suspense } from "react"
+
+import { LottieLoading } from "@/components/ui/lottie-loading"
 
 declare global {
   interface Window {
@@ -11,76 +13,105 @@ declare global {
   }
 }
 
-// PathWatcher: detects route change and hides overlay
-function PathWatcher() {
+function PathWatcher({ onHide }: { onHide: () => void }) {
   const pathname = usePathname()
   const prevRef = useRef(pathname)
 
   useEffect(() => {
     if (prevRef.current !== pathname) {
       prevRef.current = pathname
-      window.__pageLoadingHide?.()
+      onHide()
     }
-  }, [pathname])
+  }, [pathname, onHide])
 
   return null
 }
 
+function LottieOverlay({ fading }: { fading: boolean }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: fading ? 0 : 1,
+        transition: fading ? "opacity 300ms ease" : "none",
+        pointerEvents: fading ? "none" : "all",
+      }}
+    >
+      <LottieLoading className="flex items-center justify-center" />
+    </div>
+  )
+}
+
 function Inner() {
-  const [opacity, setOpacity] = useState(0)
-  const [display, setDisplay] = useState(false)
-  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [visible, setVisible] = useState(false)
+  const [fading, setFading] = useState(false)
   const isShowingRef = useRef(false)
+  const showStartRef = useRef(0)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const clearAll = () => {
-    if (showTimerRef.current) clearTimeout(showTimerRef.current)
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
     if (safetyRef.current) clearTimeout(safetyRef.current)
-  }
+  }, [])
 
-  const showOverlay = () => {
-    clearAll()
-    isShowingRef.current = true
-    setDisplay(true)
-    // Small tick to allow display:block before opacity transition
-    showTimerRef.current = setTimeout(() => setOpacity(1), 16)
-    // Safety: auto-hide after 5s
-    safetyRef.current = setTimeout(() => hideOverlay(), 5000)
-  }
-
-  const hideOverlay = () => {
+  const hideOverlay = useCallback(() => {
     if (!isShowingRef.current) return
-    clearAll()
+    clearTimers()
     isShowingRef.current = false
     window.__pageLoadingPending = false
-    setOpacity(0)
-    // Remove from DOM after fade-out completes (300ms)
-    hideTimerRef.current = setTimeout(() => setDisplay(false), 320)
-  }
+
+    const elapsed = Date.now() - showStartRef.current
+    const remaining = Math.max(0, 400 - elapsed)
+
+    timerRef.current = setTimeout(() => {
+      setFading(true)
+      timerRef.current = setTimeout(() => {
+        setVisible(false)
+        setFading(false)
+      }, 300)
+    }, remaining)
+  }, [clearTimers])
+
+  const showOverlay = useCallback(() => {
+    clearTimers()
+    isShowingRef.current = true
+    showStartRef.current = Date.now()
+    setFading(false)
+    setVisible(true)
+    safetyRef.current = setTimeout(() => hideOverlay(), 5000)
+  }, [clearTimers, hideOverlay])
 
   useEffect(() => {
     window.__pageLoadingShow = showOverlay
     window.__pageLoadingHide = hideOverlay
-    return () => {
-      window.__pageLoadingShow = undefined
-      window.__pageLoadingHide = undefined
-    }
-  })
+  }, [showOverlay, hideOverlay])
 
   useEffect(() => {
-    // Check if navigation was pending before mount
-    const navType = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type
-    if (window.__pageLoadingPending && navType !== "navigate") {
+    if (window.__pageLoadingPending) {
       showOverlay()
     } else {
       window.__pageLoadingPending = false
     }
-    return () => clearAll()
-  }, []) // eslint-disable-line
 
-  // Intercept <a> clicks for internal navigation
+    const onNavigate = () => showOverlay()
+    window.addEventListener("page-navigate", onNavigate)
+
+    return () => {
+      clearTimers()
+      window.removeEventListener("page-navigate", onNavigate)
+      window.__pageLoadingShow = undefined
+      window.__pageLoadingHide = undefined
+    }
+  }, [showOverlay, clearTimers])
+
+  // Intercept <a> clicks
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest("a")
@@ -92,38 +123,14 @@ function Inner() {
     }
     document.addEventListener("click", onClick, true)
     return () => document.removeEventListener("click", onClick, true)
-  }, []) // eslint-disable-line
-
-  // Listen for programmatic navigation events
-  useEffect(() => {
-    const onNavigate = () => showOverlay()
-    window.addEventListener("page-navigate", onNavigate)
-    return () => window.removeEventListener("page-navigate", onNavigate)
-  }, []) // eslint-disable-line
-
-  if (!display) return (
-    <Suspense fallback={null}>
-      <PathWatcher />
-    </Suspense>
-  )
+  }, [showOverlay])
 
   return (
     <>
       <Suspense fallback={null}>
-        <PathWatcher />
+        <PathWatcher onHide={hideOverlay} />
       </Suspense>
-      {/* Simple fade overlay — no Lottie, no heavy animations */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 9999,
-          background: "white",
-          opacity,
-          transition: "opacity 280ms ease",
-          pointerEvents: opacity > 0 ? "all" : "none",
-        }}
-      />
+      {visible && <LottieOverlay fading={fading} />}
     </>
   )
 }

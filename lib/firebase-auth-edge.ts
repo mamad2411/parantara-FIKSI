@@ -3,14 +3,18 @@
 
 export const COOKIE_NAME = 'fb_session'
 
-// Must be at least 32 chars — use private key prefix as signing secret
 const rawKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY ?? ''
-const signingKey = rawKey.replace(/\\n/g, '\n').slice(0, 64) || 'fallback-dev-key-change-in-production'
+
+// Cookie signing secret — use dedicated env var, fallback to a derived key
+// Set AUTH_COOKIE_SECRET in your deployment env (any random 32+ char string)
+const cookieSecret = process.env.AUTH_COOKIE_SECRET
+  || process.env.FIREBASE_ADMIN_CLIENT_EMAIL?.replace(/[^a-zA-Z0-9]/g, '').slice(0, 32)
+  || 'danamasjid-cookie-secret-dev-only'
 
 export const authEdgeConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
   cookieName: COOKIE_NAME,
-  cookieSignatureKeys: [signingKey],
+  cookieSignatureKeys: [cookieSecret],
   cookieSerializeOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
