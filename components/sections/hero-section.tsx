@@ -81,14 +81,8 @@ export function HeroSection() {
     }
   }, [])
 
-  const easeOutQuad = (t: number) => t * (2 - t)
   const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
-
-  // Use only composited properties (transform + opacity) to avoid layout/paint
-  const scale = 1 - easeOutQuad(scrollProgress) * 0.15
   const borderRadius = easeOutCubic(scrollProgress) * 48
-  // Replace height animation with scaleY (composited) + transform-origin top
-  const scaleY = 1 - easeOutQuad(scrollProgress) * 0.375
 
   return (
     <section ref={sectionRef} className="pt-32 pb-12 px-6 min-h-screen flex items-center relative max-w-full">
@@ -96,14 +90,10 @@ export function HeroSection() {
         <div
           className="w-full overflow-hidden relative"
           style={{
-            // Only transform is composited - no height/borderRadius changes
-            transform: `scale(${scale}) scaleY(${scaleY}) translate3d(0, 0, 0)`,
             borderRadius: `${borderRadius}px`,
             height: '100vh',
-            transformOrigin: 'top center',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            willChange: 'transform',
           }}
         >
           <video 
@@ -159,7 +149,7 @@ export function HeroSection() {
         <div className="text-center mb-12 max-w-full">
           <div
             className={`transition-all duration-1000 delay-[800ms] ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+              isVisible ? "opacity-100" : "opacity-0"
             }`}
           >
             <h1 className="text-[2rem] xs:text-[2.5rem] sm:text-[3rem] md:text-[4rem] lg:text-[5rem] xl:text-[6rem] 2xl:text-[7rem] font-normal leading-tight mb-6 w-full px-4 max-w-6xl mx-auto text-center" style={{ fontFamily: "'ArabicRamadan', serif" }}>

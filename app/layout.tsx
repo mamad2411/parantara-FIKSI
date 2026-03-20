@@ -8,6 +8,7 @@ import { BackToTop } from "@/components/ui/back-to-top"
 import { SuppressExtensionErrors } from "@/components/suppress-extension-errors"
 import "./globals.css"
 import { PageLoadingTransition } from "@/components/ui/page-loading-transition"
+import { LottieLoading } from "@/components/ui/lottie-loading"
 
 export const metadata: Metadata = {
   title: "DanaMasjid - Platform Donasi Masjid Transparan & Amanah",
@@ -72,6 +73,12 @@ export default function RootLayout({
 
         {/* Console ASCII art */}
         <script src="/console-art.js" />
+
+        {/* Block page content until loader dismisses */}
+        <style id="initial-loader-style" dangerouslySetInnerHTML={{ __html: `
+          body.loading-active { overflow: hidden; }
+          body.loading-active > *:not(#initial-loader-overlay) { opacity: 0 !important; }
+        `}} />
         
         {/* Only preconnect to origins that will actually be used on login page */}
         <link rel="preconnect" href="https://apis.google.com" crossOrigin="anonymous" />
@@ -81,7 +88,7 @@ export default function RootLayout({
         {/* Meta Description */}
         <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
 
-        {/* Scroll restoration — keep position on refresh */}
+        {/* Scroll restoration — keep position on refresh, skip for home page */}
         <script
           id="scroll-restoration"
           suppressHydrationWarning
@@ -92,13 +99,19 @@ export default function RootLayout({
                   history.scrollRestoration = 'manual';
                 }
                 var key = 'sr_' + location.pathname;
-                var saved = sessionStorage.getItem(key);
-                if (saved) {
-                  requestAnimationFrame(function() {
+                // Always scroll to top on home page
+                if (location.pathname === '/') {
+                  sessionStorage.removeItem(key);
+                  window.scrollTo(0, 0);
+                } else {
+                  var saved = sessionStorage.getItem(key);
+                  if (saved) {
                     requestAnimationFrame(function() {
-                      window.scrollTo(0, parseInt(saved, 10));
+                      requestAnimationFrame(function() {
+                        window.scrollTo(0, parseInt(saved, 10));
+                      });
                     });
-                  });
+                  }
                 }
                 window.addEventListener('beforeunload', function() {
                   sessionStorage.setItem(key, String(window.scrollY));
@@ -109,6 +122,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`font-sans antialiased`} suppressHydrationWarning>
+        {/* Run immediately — blocks content before React hydrates */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `document.body.classList.add('loading-active');` }} />
         {/* Defer all structured data to after interactive */}
         <Script
           id="organization-schema"
@@ -179,6 +194,7 @@ export default function RootLayout({
         />
         
         <SuppressExtensionErrors />
+        <LottieLoading initialLoad />
         <ScrollProgress />
         <PageLoadingTransition />
         <SecurityProvider>

@@ -70,9 +70,11 @@ function VerifyDeviceContent() {
       const userRef = doc(db, 'users', userDoc.id)
       await setDoc(userRef, {
         deviceFingerprint: userData.pendingDeviceFingerprint,
+        deviceFingerprintStable: userData.pendingDeviceFingerprintStable || userData.pendingDeviceFingerprint,
         deviceVerificationToken: null,
         deviceVerificationExpiry: null,
         pendingDeviceFingerprint: null,
+        pendingDeviceFingerprintStable: null,
         deviceVerifiedAt: new Date().toISOString(),
         deviceVerificationUsed: true,
       }, { merge: true })
@@ -80,9 +82,9 @@ function VerifyDeviceContent() {
       setStatus('success')
       setMessage('Perangkat berhasil diverifikasi! Anda sekarang dapat login.')
 
-      // Redirect to login after 3 seconds
+      // Redirect to login after 3 seconds, with redirect back to daftar-masjid
       setTimeout(() => {
-        router.push('/login?message=Perangkat berhasil diverifikasi. Silakan login.')
+        router.push('/login?message=Perangkat berhasil diverifikasi. Silakan login.&redirect=/daftar-masjid')
       }, 3000)
 
     } catch (error) {

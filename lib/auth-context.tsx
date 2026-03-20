@@ -27,6 +27,36 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
+// Stable device signature — only OS + browser engine, ignores minor version changes
+function getStableDeviceId(): string {
+  const ua = navigator.userAgent
+  const os = /Windows/.test(ua) ? 'Windows'
+    : /Mac OS X/.test(ua) ? 'MacOS'
+    : /Android/.test(ua) ? 'Android'
+    : /iPhone|iPad/.test(ua) ? 'iOS'
+    : /Linux/.test(ua) ? 'Linux' : 'Unknown'
+  const browser = /Edg\//.test(ua) ? 'Edge'
+    : /OPR\//.test(ua) ? 'Opera'
+    : /Chrome\//.test(ua) ? 'Chrome'
+    : /Firefox\//.test(ua) ? 'Firefox'
+    : /Safari\//.test(ua) ? 'Safari' : 'Unknown'
+  return `${os}|${browser}`
+}
+
+// Create proper httpOnly session cookie via API route
+async function createServerSession(user: User): Promise<void> {
+  try {
+    const idToken = await user.getIdToken()
+    await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    })
+  } catch (err) {
+    console.error('Failed to create server session:', err)
+  }
+}
+
 // Simple client-side rate limiter: max 5 attempts per 15 minutes per email
 const loginAttempts: Record<string, { count: number; resetAt: number }> = {}
 
@@ -59,9 +89,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!auth) return
     
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser)
       setLoading(false)
+      if (firebaseUser) {
+        // Refresh proper httpOnly session cookie
+        await createServerSession(firebaseUser)
+        // Also keep legacy cookie for any remaining checks
+        document.cookie = `auth_token=${firebaseUser.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
+      } else {
+        // Clear session
+        fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {})
+        document.cookie = 'auth_token=; path=/; max-age=0'
+      }
     })
 
     return unsubscribe
@@ -77,8 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Save userId to localStorage
       localStorage.setItem('userId', user.uid)
       
-      // Set auth cookie for middleware
-      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+      // Set proper httpOnly session cookie + legacy cookie
+      await createServerSession(user)
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
 
       // Save user data to Firestore
       const userRef = doc(db, 'users', user.uid)
@@ -114,8 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Save userId to localStorage immediately
       localStorage.setItem('userId', user.uid)
       
-      // Set auth cookie for middleware
-      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+      // Set proper httpOnly session cookie + legacy cookie
+      await createServerSession(user)
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
 
       // Save user data to Firestore (must wait to ensure data is saved)
       console.log('Saving user data to Firestore...')
@@ -130,7 +172,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         registrationDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), // 48 hours from now
         accountStatus: 'pending_mosque_registration', // pending_mosque_registration, active, suspended
         lastLoginAt: new Date().toISOString(),
-        deviceFingerprint: navigator.userAgent // Simple device tracking
+        deviceFingerprint: navigator.userAgent, // Simple device tracking
+        deviceFingerprintStable: getStableDeviceId(),
       })
       console.log('User data saved to Firestore successfully')
       
@@ -169,17 +212,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Reset rate limit on successful login
       resetRateLimit(email)
 
-      // Check device fingerprint
-      const currentDevice = navigator.userAgent
+      // Check device fingerprint (stable: OS + browser engine only)
+      const currentDevice = getStableDeviceId()
       const userRef = doc(db, 'users', user.uid)
       const userSnap = await getDoc(userRef)
 
       if (userSnap.exists()) {
         const userData = userSnap.data()
+        // Support both old full-UA fingerprints and new stable ones
         const lastDevice = userData.deviceFingerprint
+        const lastDeviceStable = userData.deviceFingerprintStable
 
-        // Only trigger verification if device changed (not first login)
-        if (lastDevice && lastDevice !== currentDevice) {
+        // Only trigger verification if stable device changed (not first login)
+        // Also skip in development — no point verifying devices locally
+        const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        const stableChanged = !isDev && lastDeviceStable
+          ? lastDeviceStable !== currentDevice
+          : false
+
+        if (stableChanged) {
           // Generate verification token
           const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36)
 
@@ -187,6 +238,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             deviceVerificationToken: verificationToken,
             deviceVerificationExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
             pendingDeviceFingerprint: currentDevice,
+            pendingDeviceFingerprintStable: currentDevice,
           }, { merge: true })
 
           // Send verification email (fire and forget — don't block login flow on failure)
@@ -210,8 +262,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Save userId to localStorage immediately for faster UX
       localStorage.setItem('userId', user.uid)
 
-      // Set auth cookie for middleware
-      document.cookie = `auth_token=${user.uid}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict`
+      // Set proper httpOnly session cookie + legacy cookie
+      await createServerSession(user)
+      document.cookie = `auth_token=${user.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
 
       // Do Firestore operations in background (non-blocking)
       updateUserLoginData(user.uid).catch(err => {
@@ -264,7 +317,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Update last login (fire and forget)
         setDoc(userRef, {
           lastLoginAt: now.toISOString(),
-          deviceFingerprint: currentDevice
+          deviceFingerprint: currentDevice,
+          deviceFingerprintStable: getStableDeviceId(),
         }, { merge: true }).catch(err => console.error('Failed to update login time:', err))
       }
     } catch (error) {

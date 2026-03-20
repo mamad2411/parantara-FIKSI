@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useEffect, useLayoutEffect, useState, useRef, Suspense } from "react"
+import { useEffect, useRef, useState, Suspense } from "react"
 
 declare global {
   interface Window {
@@ -11,26 +11,7 @@ declare global {
   }
 }
 
-let _Lottie: any = null
-let _animData: any = null
-let _preloadPromise: Promise<void> | null = null
-
-function preload() {
-  if (_Lottie && _animData) return Promise.resolve()
-  if (_preloadPromise) return _preloadPromise
-  _preloadPromise = Promise.all([
-    import("lottie-react"),
-    fetch("/lotie-loading.json").then((r) => r.json()),
-  ])
-    .then(([mod, data]) => {
-      _Lottie = mod.default
-      _animData = data
-    })
-    .catch(() => {})
-  return _preloadPromise
-}
-
-// PathWatcher: only this tiny component needs Suspense (uses usePathname)
+// PathWatcher: detects route change and hides overlay
 function PathWatcher() {
   const pathname = usePathname()
   const prevRef = useRef(pathname)
@@ -38,9 +19,7 @@ function PathWatcher() {
   useEffect(() => {
     if (prevRef.current !== pathname) {
       prevRef.current = pathname
-      if (typeof window.__pageLoadingHide === "function") {
-        window.__pageLoadingHide()
-      }
+      window.__pageLoadingHide?.()
     }
   }, [pathname])
 
@@ -48,44 +27,40 @@ function PathWatcher() {
 }
 
 function Inner() {
-  const [visible, setVisible] = useState(false)
-  const [lottieReady, setLottieReady] = useState(false)
+  const [opacity, setOpacity] = useState(0)
+  const [display, setDisplay] = useState(false)
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const showTimeRef = useRef<number>(0)
   const isShowingRef = useRef(false)
 
-  const showOverlay = () => {
-    if (hideRef.current) clearTimeout(hideRef.current)
+  const clearAll = () => {
+    if (showTimerRef.current) clearTimeout(showTimerRef.current)
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
     if (safetyRef.current) clearTimeout(safetyRef.current)
+  }
+
+  const showOverlay = () => {
+    clearAll()
     isShowingRef.current = true
-    showTimeRef.current = Date.now()
-    setVisible(true)
-    if (!(_Lottie && _animData)) {
-      preload().then(() => setLottieReady(true))
-    }
-    safetyRef.current = setTimeout(() => {
-      isShowingRef.current = false
-      window.__pageLoadingPending = false
-      setVisible(false)
-    }, 8000)
+    setDisplay(true)
+    // Small tick to allow display:block before opacity transition
+    showTimerRef.current = setTimeout(() => setOpacity(1), 16)
+    // Safety: auto-hide after 5s
+    safetyRef.current = setTimeout(() => hideOverlay(), 5000)
   }
 
   const hideOverlay = () => {
     if (!isShowingRef.current) return
-    if (safetyRef.current) clearTimeout(safetyRef.current)
+    clearAll()
+    isShowingRef.current = false
     window.__pageLoadingPending = false
-    const elapsed = Date.now() - showTimeRef.current
-    const delay = Math.max(0, 600 - elapsed)
-    hideRef.current = setTimeout(() => {
-      isShowingRef.current = false
-      setVisible(false)
-    }, delay)
+    setOpacity(0)
+    // Remove from DOM after fade-out completes (300ms)
+    hideTimerRef.current = setTimeout(() => setDisplay(false), 320)
   }
 
-  // Register globals — useLayoutEffect runs synchronously after DOM paint
-  // Inner is NOT inside Suspense so it never gets suspended/remounted during navigation
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.__pageLoadingShow = showOverlay
     window.__pageLoadingHide = hideOverlay
     return () => {
@@ -94,30 +69,18 @@ function Inner() {
     }
   })
 
-  // Mount: preload lottie + check pending flag
-  // Only show overlay if navigation was triggered programmatically (not on initial page load)
   useEffect(() => {
-    // Client-only preload
-    preload().then(() => setLottieReady(true))
-    // Check if this is a real navigation (not initial load)
-    // navigation.type === 'navigate' means user typed URL or opened new tab — skip overlay
+    // Check if navigation was pending before mount
     const navType = (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming)?.type
     if (window.__pageLoadingPending && navType !== "navigate") {
       showOverlay()
     } else {
-      // Clear stale pending flag from previous session
       window.__pageLoadingPending = false
     }
+    return () => clearAll()
   }, []) // eslint-disable-line
 
-  // Fallback event listener
-  useEffect(() => {
-    const onNavigate = () => showOverlay()
-    window.addEventListener("page-navigate", onNavigate)
-    return () => window.removeEventListener("page-navigate", onNavigate)
-  }, []) // eslint-disable-line
-
-  // Intercept plain <a> clicks
+  // Intercept <a> clicks for internal navigation
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       const a = (e.target as HTMLElement).closest("a")
@@ -131,51 +94,40 @@ function Inner() {
     return () => document.removeEventListener("click", onClick, true)
   }, []) // eslint-disable-line
 
-  useEffect(
-    () => () => {
-      if (safetyRef.current) clearTimeout(safetyRef.current)
-      if (hideRef.current) clearTimeout(hideRef.current)
-    },
-    []
+  // Listen for programmatic navigation events
+  useEffect(() => {
+    const onNavigate = () => showOverlay()
+    window.addEventListener("page-navigate", onNavigate)
+    return () => window.removeEventListener("page-navigate", onNavigate)
+  }, []) // eslint-disable-line
+
+  if (!display) return (
+    <Suspense fallback={null}>
+      <PathWatcher />
+    </Suspense>
   )
 
   return (
     <>
-      {/* PathWatcher wrapped in Suspense — only this part suspends, Inner stays mounted */}
       <Suspense fallback={null}>
         <PathWatcher />
       </Suspense>
-
-      {visible && (
-        <>
-          <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" />
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-[200px] h-[200px] md:w-[280px] md:h-[280px]">
-                {lottieReady && _Lottie && _animData ? (
-                  <_Lottie
-                    animationData={_animData}
-                    loop
-                    autoplay
-                    rendererSettings={{ preserveAspectRatio: "xMidYMid slice" }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-              </div>
-              <p className="text-white text-lg font-semibold drop-shadow-lg">Memuat halaman...</p>
-            </div>
-          </div>
-        </>
-      )}
+      {/* Simple fade overlay — no Lottie, no heavy animations */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          background: "white",
+          opacity,
+          transition: "opacity 280ms ease",
+          pointerEvents: opacity > 0 ? "all" : "none",
+        }}
+      />
     </>
   )
 }
 
-// Inner is NOT wrapped in Suspense — stays mounted throughout navigation
-// Only PathWatcher (inside Inner) uses Suspense
 export function PageLoadingTransition() {
   return <Inner />
 }

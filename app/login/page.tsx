@@ -1,6 +1,22 @@
 ﻿// @ts-nocheck
 "use client"
 
+// Stable device signature helper (same logic as auth-context)
+function getStableDeviceId(ua?: string): string {
+  const s = ua || navigator.userAgent
+  const os = /Windows/.test(s) ? 'Windows'
+    : /Mac OS X/.test(s) ? 'MacOS'
+    : /Android/.test(s) ? 'Android'
+    : /iPhone|iPad/.test(s) ? 'iOS'
+    : /Linux/.test(s) ? 'Linux' : 'Unknown'
+  const browser = /Edg\//.test(s) ? 'Edge'
+    : /OPR\//.test(s) ? 'Opera'
+    : /Chrome\//.test(s) ? 'Chrome'
+    : /Firefox\//.test(s) ? 'Firefox'
+    : /Safari\//.test(s) ? 'Safari' : 'Unknown'
+  return `${os}|${browser}`
+}
+
 import { useState, useEffect, lazy, Suspense } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -114,6 +130,7 @@ export default function LoginPage() {
         deviceVerificationToken: verificationToken,
         deviceVerificationExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         pendingDeviceFingerprint: navigator.userAgent,
+        pendingDeviceFingerprintStable: getStableDeviceId(navigator.userAgent),
       }, { merge: true })
 
       const res = await fetch('/api/send-device-verification', {
@@ -142,8 +159,8 @@ export default function LoginPage() {
       setError("")
       await signInWithGoogle()
       
-      // Wait for auth state to fully update before redirect
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // signInWithGoogle already calls createServerSession — small delay for propagation
+      await new Promise(resolve => setTimeout(resolve, 300))
       
       // Check if already registered — go to waiting page
       const isRegistered = document.cookie.includes('mosque_registered=true')
@@ -182,8 +199,8 @@ export default function LoginPage() {
       // Show success message and redirect
       setSuccess(true)
       
-      // Wait a bit then redirect
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // signInWithEmail already calls createServerSession — just small delay for cookie propagation
+      await new Promise(resolve => setTimeout(resolve, 300))
       
       // Check if already registered — go to waiting page
       const isRegistered = document.cookie.includes('mosque_registered=true')

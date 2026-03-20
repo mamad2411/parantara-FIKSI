@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       : 'Perangkat tidak diketahui'
 
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      from: process.env.RESEND_FROM_EMAIL || 'DanaMasjid <onboarding@resend.dev>',
       to: email,
       subject: '🔒 Verifikasi Perangkat Baru - DanaMasjid',
       html: `
@@ -87,7 +87,9 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Resend error:', error)
-      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+      // Don't return 500 — log the error but don't block the flow
+      // The verification token is already saved in Firestore
+      return NextResponse.json({ success: true, warning: 'Email delivery failed, token saved' })
     }
 
     return NextResponse.json({ success: true, id: data?.id })
