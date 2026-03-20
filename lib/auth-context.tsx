@@ -94,19 +94,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // Safety timeout — if onAuthStateChanged doesn't fire within 3s, unblock
-    const timeout = setTimeout(() => setLoading(false), 3000)
+    // Safety timeout — if onAuthStateChanged doesn't fire within 5s, unblock
+    const timeout = setTimeout(() => setLoading(false), 5000)
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(timeout)
-      setUser(firebaseUser)
-      setLoading(false)
       if (firebaseUser) {
-        await createServerSession(firebaseUser)
+        // Set localStorage BEFORE setLoading so guard sees userId immediately
+        localStorage.setItem('userId', firebaseUser.uid)
         document.cookie = `auth_token=${firebaseUser.uid}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Strict`
       } else {
         fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {})
         document.cookie = 'auth_token=; path=/; max-age=0'
+        document.cookie = 'mosque_registered=; path=/; max-age=0'
+        localStorage.removeItem('userId')
+      }
+      setUser(firebaseUser)
+      setLoading(false)
+      // createServerSession is non-blocking — don't await it
+      if (firebaseUser) {
+        createServerSession(firebaseUser).catch(err => console.error('Session error:', err))
       }
     })
 
@@ -341,8 +348,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await firebaseSignOut(auth)
       
-      // Clear auth cookie
+      // Clear all auth + registration cookies
       document.cookie = 'auth_token=; path=/; max-age=0'
+      document.cookie = 'mosque_registered=; path=/; max-age=0'
       
       // Clear localStorage
       localStorage.removeItem('userId')

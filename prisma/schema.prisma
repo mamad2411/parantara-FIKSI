@@ -71,12 +71,15 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  masjidRegistrations MasjidRegistration[]
+  
   @@map("users")
 }
 
 model MasjidRegistration {
   id                    String   @id @default(cuid())
-  userId                String   // Firebase UID — no FK relation, auth handled by Firebase
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Step 1: Data Masjid
   mosqueName            String
@@ -86,7 +89,6 @@ model MasjidRegistration {
   district              String
   village               String
   postalCode            String
-  mosqueImage           String?
   
   // Step 2: Data Legalitas
   aktaPendirian         String?

@@ -70,7 +70,8 @@ if (typeof window !== 'undefined') {
         firstArg.includes('Failed to load https://apis.google.com/js/api.js') ||
         firstArg.includes('ERR_CONNECTION_CLOSED') ||
         firstArg.includes('Failed to get document because the client is offline') ||
-        firstArg.includes('FirebaseError: Failed to get document')
+        firstArg.includes('FirebaseError: Failed to get document') ||
+        firstArg.includes('Failed to obtain primary lease')
       ) {
         return
       }

@@ -15,6 +15,7 @@ import dynamic from "next/dynamic"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
+import { uploadAllFiles } from "@/lib/upload-file"
 import { LottieLoading } from "@/components/ui/lottie-loading"
 
 // Lazy load each step — only Step1 is needed on initial render
@@ -71,6 +72,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 // Initialize rate limiter (max 3 submissions per 5 minutes)
 const rateLimiter = new RateLimiter(3, 5 * 60 * 1000)
 
+// Safe toast position helper — avoids window.innerWidth during SSR
+const toastPos = () =>
+  typeof window !== "undefined" && window.innerWidth >= 768
+    ? ("top-right" as const)
+    : ("top-center" as const)
+
 export default function DaftarMasjidPage() {
   const router = useRouter()
   const { user, loading: authLoading, firebaseReady } = useAuth()
@@ -115,24 +122,49 @@ export default function DaftarMasjidPage() {
     console.log('🧹 Registration data cleared - fresh start required')
   }, []) // Run only once on mount
 
-  // Firebase auth guard — redirect to login if not authenticated
+  const [authChecked, setAuthChecked] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Firebase auth guard — with grace period to handle onAuthStateChanged race condition
   useEffect(() => {
-    if (authLoading) return
-    if (!firebaseReady) return // Firebase not initialized — don't redirect
-    if (!user) {
-      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
-      if (userId) {
-        // userId exists but user null — Firebase still catching up, wait
-        const timer = setTimeout(() => {
-          if (!localStorage.getItem('userId')) {
-            router.replace('/login?redirect=/daftar-masjid&message=Harus+login+terlebih+dahulu+untuk+mendaftar+masjid&type=daftar-masjid')
-          }
-        }, 3000)
-        return () => clearTimeout(timer)
-      }
-      router.replace('/login?redirect=/daftar-masjid&message=Harus+login+terlebih+dahulu+untuk+mendaftar+masjid&type=daftar-masjid')
+    if (!mounted) return
+
+    // If user is already set, allow immediately
+    if (user) {
+      setAuthChecked(true)
+      return
     }
-  }, [user, authLoading, firebaseReady, router])
+
+    // If still loading, wait
+    if (authLoading) return
+
+    // authLoading=false but user=null — check localStorage first
+    const userId = localStorage.getItem('userId')
+    if (userId) {
+      // userId exists in localStorage — Firebase session likely still restoring
+      // Give it a grace period before redirecting
+      setAuthChecked(true)
+      return
+    }
+
+    // No user, no localStorage userId — wait a short grace period
+    // in case onAuthStateChanged fires slightly after authLoading=false
+    const grace = setTimeout(() => {
+      // Re-check after grace period
+      const uid = localStorage.getItem('userId')
+      if (uid) {
+        setAuthChecked(true)
+      } else {
+        router.replace(
+          '/login?redirect=/daftar-masjid&message=Harus+login+terlebih+dahulu+untuk+mendaftar+masjid&type=daftar-masjid'
+        )
+      }
+    }, 800)
+
+    return () => clearTimeout(grace)
+  }, [user, authLoading, mounted, router])
 
   // Track form inactivity and session timeout
   useEffect(() => {
@@ -215,21 +247,32 @@ export default function DaftarMasjidPage() {
   }, [])
   
   // Pre-fill user data from Firestore
+  // Pre-fill user data — runs when user object is available (handles Google sign-in race condition)
   useEffect(() => {
     const prefillUserData = async () => {
-      const userId = localStorage.getItem('userId')
+      // First try from Firebase user object directly (fastest, works for Google sign-in)
+      // Only prefill email — name fields in Step 3 are filled manually by user
+      if (user) {
+        const emailFromUser = user.email || ""
+        if (emailFromUser) {
+          setFormData(prev => ({
+            ...prev,
+            emailPerwakilan: prev.emailPerwakilan || emailFromUser,
+            adminEmail: prev.adminEmail || emailFromUser,
+          }))
+        }
+      }
+
+      // Then enrich from Firestore (email only)
+      const userId = user?.uid || localStorage.getItem('userId')
       if (!userId || !db) return
       try {
         const snap = await getDoc(doc(db, 'users', userId))
         if (snap.exists()) {
           const data = snap.data()
-          const name = data.name || data.displayName || ""
           const email = data.email || ""
           setFormData(prev => ({
             ...prev,
-            namaLengkap: prev.namaLengkap || name,
-            namaDepan: prev.namaDepan || name.split(' ')[0] || "",
-            namaBelakang: prev.namaBelakang || name.split(' ').slice(1).join(' ') || "",
             emailPerwakilan: prev.emailPerwakilan || email,
             adminEmail: prev.adminEmail || email,
           }))
@@ -239,7 +282,7 @@ export default function DaftarMasjidPage() {
       }
     }
     prefillUserData()
-  }, [])
+  }, [user])
 
 
   const [formData, setFormData] = useState({
@@ -253,7 +296,6 @@ export default function DaftarMasjidPage() {
     village: "",
     rt: "",
     rw: "",
-    postalCode: "",
     
     // Step 2: Data Legalitas
     aktaPendirian: "",
@@ -292,6 +334,7 @@ export default function DaftarMasjidPage() {
     adminEmail: "",
     adminPassword: "",
     adminConfirmPassword: "",
+    adminPin: "",
     recaptchaToken: "",
   })
 
@@ -323,7 +366,7 @@ export default function DaftarMasjidPage() {
       if (!validation.valid) {
         toast.error(validation.error || "File tidak valid", {
           duration: 4000,
-          position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
+          position: toastPos(),
         })
         return
       }
@@ -355,70 +398,74 @@ export default function DaftarMasjidPage() {
   }
 
   const validateStep = (step: number): boolean => {
-    
+    const err = (msg: string) => {
+      toast.error(msg, { duration: 4000, position: toastPos() })
+      return false
+    }
+
     switch (step) {
       case 1:
-        if (!formData.mosqueName || !formData.mosqueAddress || !formData.province || 
-            !formData.regency || !formData.district || !formData.village) {
-          toast.error("Semua field harus diisi", {
-            duration: 4000,
-            position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-          })
-          return false
-        }
-        if (!formData.mosqueImage) {
-          toast.error("Foto masjid wajib diupload", {
-            duration: 4000,
-            position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-          })
-          return false
-        }
-        
-        // Check if any administrative data contains placeholder text
-        const hasPlaceholder = [formData.province, formData.regency, formData.district, formData.village]
-          .some(field => field && field.includes('[Belum Terdeteksi]'))
-        
-        if (hasPlaceholder) {
-          toast.error("Mohon lengkapi data administratif yang belum terdeteksi di alamat lengkap", {
-            duration: 5000,
-            position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-          })
-          return false
+        if (!formData.mosqueName) return err("Nama masjid wajib diisi")
+        if (!formData.mosqueImage) return err("Foto masjid wajib diupload")
+        if (!formData.mosqueAddress) return err("Alamat lengkap masjid wajib diisi")
+        if (!formData.province) return err("Provinsi wajib diisi")
+        if (!formData.regency) return err("Kota/Kabupaten wajib diisi")
+        if (!formData.district) return err("Kecamatan wajib diisi")
+        if (!formData.village) return err("Kelurahan/Desa wajib diisi")
+        if (!formData.rt) return err("RT wajib diisi")
+        if (!formData.rw) return err("RW wajib diisi")
+        if ([formData.province, formData.regency, formData.district, formData.village].some(f => f?.includes('[Belum Terdeteksi]'))) {
+          return err("Mohon lengkapi data administratif yang belum terdeteksi")
         }
         break
-        
+
       case 2:
-        if (!formData.aktaPendirian || !formData.skKemenkumham) {
-          toast.error("Semua field legalitas harus diisi", {
-            duration: 4000,
-            position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-          })
-          return false
-        }
+        if (!formData.aktaPendirian) return err("Akta Pendirian wajib diupload")
+        if (!formData.skKemenkumham) return err("SK Kemenkumham wajib diupload")
+        if (!formData.npwpDokumen) return err("Dokumen NPWP wajib diupload")
+        if (!formData.suratPernyataan) return err("Surat Pernyataan Pendirian wajib diupload")
         break
-        
+
       case 3:
-        if (!formData.namaLengkap || !formData.jenisKelamin || 
-            !formData.pekerjaan || !formData.emailPerwakilan || !formData.tanggalLahir ||
-            !formData.nomorHandphone || !formData.alamatTempat || !formData.fotoKTP) {
-          toast.error("Semua field perwakilan resmi harus diisi", {
-            duration: 4000,
-            position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-          })
-          return false
-        }
+        if (!formData.fotoKTP) return err(`Foto ${formData.jenisID || 'KTP'} wajib diupload`)
+        if (!formData.imageKTP) return err(`Foto selfie memegang ${formData.jenisID || 'KTP'} wajib diupload`)
+        if (!formData.namaLengkap) return err("Nama lengkap wajib diisi")
+        if (!formData.jenisKelamin) return err("Jenis kelamin wajib dipilih")
+        if (!formData.pekerjaan) return err("Pekerjaan wajib diisi")
+        if (!formData.tanggalLahir) return err("Tanggal lahir wajib diisi")
+        if (!formData.nomorHandphone) return err("Nomor handphone wajib diisi")
+        if (!formData.alamatTempat) return err("Alamat tempat tinggal wajib diisi")
         break
-        
+
       case 4:
-        // Step 4 is review, no validation needed
+        // Validate all required fields are filled before proceeding to step 5
+        if (!formData.mosqueName) return err("Nama masjid belum diisi — edit di bagian Data Masjid")
+        if (!formData.mosqueImage) return err("Foto masjid belum diupload — edit di bagian Data Masjid")
+        if (!formData.mosqueAddress) return err("Alamat masjid belum diisi — edit di bagian Data Masjid")
+        if (!formData.province || !formData.regency || !formData.district || !formData.village) return err("Data wilayah masjid belum lengkap — edit di bagian Data Masjid")
+        if (!formData.rt) return err("RT belum diisi — edit di bagian Data Masjid")
+        if (!formData.rw) return err("RW belum diisi — edit di bagian Data Masjid")
+        if (!formData.aktaPendirian) return err("Akta Pendirian belum diupload — edit di bagian Data Legalitas")
+        if (!formData.skKemenkumham) return err("SK Kemenkumham belum diupload — edit di bagian Data Legalitas")
+        if (!formData.npwpDokumen) return err("Dokumen NPWP belum diupload — edit di bagian Data Legalitas")
+        if (!formData.suratPernyataan) return err("Surat Pernyataan Pendirian belum diupload — edit di bagian Data Legalitas")
+        if (!formData.fotoKTP) return err(`Foto ${formData.jenisID || 'KTP'} belum diupload — edit di bagian Perwakilan Resmi`)
+        if (!formData.imageKTP) return err("Foto selfie belum diupload — edit di bagian Perwakilan Resmi")
+        if (!formData.namaLengkap) return err("Nama lengkap belum diisi — edit di bagian Perwakilan Resmi")
+        if (!formData.jenisKelamin) return err("Jenis kelamin belum dipilih — edit di bagian Perwakilan Resmi")
+        if (!formData.pekerjaan) return err("Pekerjaan belum diisi — edit di bagian Perwakilan Resmi")
+        if (!formData.tanggalLahir) return err("Tanggal lahir belum diisi — edit di bagian Perwakilan Resmi")
+        if (!formData.nomorHandphone) return err("Nomor handphone belum diisi — edit di bagian Perwakilan Resmi")
+        if (!formData.alamatTempat) return err("Alamat tempat tinggal belum diisi — edit di bagian Perwakilan Resmi")
         break
-        
+
       case 5:
-        // Step 5 is now just 2FA setup (optional), no validation needed
-        // Email is already set from logged in user
+        if (!formData.adminPin || formData.adminPin.length !== 6) {
+          return err("PIN 6 digit wajib diisi")
+        }
         break
     }
-    
+
     return true
   }
 
@@ -430,14 +477,7 @@ export default function DaftarMasjidPage() {
     }
     
     if (currentStep < totalSteps) {
-      toast.success("Data tersimpan! Lanjut ke tahap berikutnya", {
-        duration: 3000,
-        position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
-      })
-      setTimeout(() => {
-        toast.dismiss() // Dismiss semua toast sebelum pindah step
-        handleNext()
-      }, 800)
+      handleNext()
       return
     }
     
@@ -451,18 +491,24 @@ export default function DaftarMasjidPage() {
       if (!userId) {
         toast.error("Sesi Anda telah berakhir. Silakan login kembali.", {
           duration: 4000,
-          position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
+          position: toastPos(),
         })
         router.push('/login?redirect=/daftar-masjid')
         return
       }
       
-      // Prepare data for PostgreSQL (via Prisma)
+      // Prepare data — upload File objects first, then submit URLs
+      const toastId = toast.loading('Mengupload dokumen...', { position: toastPos() })
+
+      const dataWithUrls = await uploadAllFiles(formData, userId, (done, total) => {
+        toast.loading(`Mengupload dokumen ${done}/${total}...`, { id: toastId, position: toastPos() })
+      })
+
+      toast.loading('Menyimpan pendaftaran...', { id: toastId, position: toastPos() })
+
       const registrationData = {
         userId,
-        ...formData,
-        // Convert file objects to base64 or URLs if needed
-        // For now, we'll send file names/paths
+        ...dataWithUrls,
       }
       
       const response = await fetch('/api/masjid-registration', {
@@ -476,34 +522,33 @@ export default function DaftarMasjidPage() {
       const data = await response.json()
       
       if (data.success) {
+        toast.dismiss(toastId)
         // Save registration completion status to localStorage
         localStorage.setItem(`mosque_registration_${userId}`, 'completed')
         localStorage.setItem(`mosque_registration_id_${userId}`, data.registrationId)
         
-        // Set cookie so middleware can redirect completed users
-        document.cookie = `mosque_registered=true; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict`
+        // Set cookie so middleware can redirect completed users — include userId to prevent cross-account leakage
+        document.cookie = `mosque_registered=${userId}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Strict`
         
         // Clear the force verification flag since registration is complete
         localStorage.removeItem(`force_device_verification_${userId}`)
         
         toast.success("Pendaftaran berhasil! Menunggu verifikasi admin...", {
-          duration: 3000,
-          position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
+          duration: 2000,
+          position: toastPos(),
         })
-        setTimeout(() => {
-          toast.dismiss() // Dismiss sebelum redirect
-          router.push("/menunggu")
-        }, 2000)
+        setTimeout(() => router.push("/menunggu"), 1000)
       } else {
+        toast.dismiss(toastId)
         toast.error(data.error || "Gagal mendaftar", {
           duration: 4000,
-          position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
+          position: toastPos(),
         })
       }
     } catch (err) {
       toast.error("Terjadi kesalahan. Silakan coba lagi.", {
         duration: 4000,
-        position: window.innerWidth >= 768 ? 'top-right' : 'top-center',
+        position: toastPos(),
       })
     } finally {
       setLoading(false)
@@ -532,8 +577,9 @@ export default function DaftarMasjidPage() {
     })
   }
 
-  // Show nothing while checking auth (prevents flash of content)
-  if (authLoading || (!user && firebaseReady)) {
+  // SSR renders null to avoid hydration mismatch — client handles auth check
+  if (!mounted) return null
+  if (!authChecked) {
     return <LottieLoading className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 flex items-center justify-center" />
   }
 
@@ -589,6 +635,7 @@ export default function DaftarMasjidPage() {
                   <AnimatePresence>
                     {currentStep === 1 && (
                       <motion.div 
+                        key="step1-active"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -598,14 +645,15 @@ export default function DaftarMasjidPage() {
                           <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                           <span>Informasi Dasar</span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                        <div className={`flex items-center gap-2 font-medium ${formData.mosqueName && formData.mosqueImage ? 'text-blue-600' : 'text-gray-400'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${formData.mosqueName && formData.mosqueImage ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                           <span>Alamat Lengkap</span>
                         </div>
                       </motion.div>
                     )}
                     {currentStep > 1 && formData.mosqueName && (
                       <motion.div 
+                        key="step1-done"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="ml-11 mt-1 text-xs text-gray-500"
@@ -644,6 +692,7 @@ export default function DaftarMasjidPage() {
                   <AnimatePresence>
                     {currentStep === 2 && (
                       <motion.div 
+                        key="step2-active"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -653,8 +702,8 @@ export default function DaftarMasjidPage() {
                           <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
                           <span>Akta & SK</span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                        <div className={`flex items-center gap-2 font-medium ${formData.aktaPendirian && formData.skKemenkumham ? 'text-blue-600' : 'text-gray-400'}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${formData.aktaPendirian && formData.skKemenkumham ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                           <span>NPWP</span>
                         </div>
                       </motion.div>
@@ -690,6 +739,7 @@ export default function DaftarMasjidPage() {
                   <AnimatePresence>
                     {currentStep === 3 && (
                       <motion.div 
+                        key="step3-active"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -711,6 +761,7 @@ export default function DaftarMasjidPage() {
                     )}
                     {currentStep > 3 && formData.namaLengkap && (
                       <motion.div 
+                        key="step3-done"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="ml-11 mt-1 text-xs text-gray-500"
@@ -749,6 +800,7 @@ export default function DaftarMasjidPage() {
                   <AnimatePresence>
                     {currentStep === 4 && (
                       <motion.div 
+                        key="step4-active"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -766,6 +818,7 @@ export default function DaftarMasjidPage() {
                     )}
                     {currentStep > 4 && (
                       <motion.div 
+                        key="step4-done"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="ml-11 mt-1 text-xs text-gray-500"
@@ -804,6 +857,7 @@ export default function DaftarMasjidPage() {
                   <AnimatePresence>
                     {currentStep === 5 && (
                       <motion.div 
+                        key="step5-active"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -821,6 +875,7 @@ export default function DaftarMasjidPage() {
                     )}
                     {formData.adminEmail && (
                       <motion.div 
+                        key="step5-done"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="ml-11 mt-1 text-xs text-gray-500"

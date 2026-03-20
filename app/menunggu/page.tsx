@@ -45,6 +45,11 @@ export default function MenungguPage() {
             rejectionReason: latest.rejectionReason,
             fieldFeedback: latest.fieldFeedback,
           })
+
+          // If rejected, clear the mosque_registered cookie so user can re-register
+          if (latest.status === "rejected") {
+            document.cookie = "mosque_registered=; path=/; max-age=0; SameSite=Strict"
+          }
         }
       }
     } catch {
@@ -57,6 +62,12 @@ export default function MenungguPage() {
   useEffect(() => {
     setMounted(true)
     fetchStatus()
+
+    // Auto-poll every 30s while pending
+    const interval = setInterval(() => {
+      if (regStatus.status === "pending") fetchStatus()
+    }, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   // Load lottie based on status
@@ -237,12 +248,20 @@ export default function MenungguPage() {
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/daftar-masjid"
+            <button
+              onClick={() => {
+                // Clear registration localStorage so form starts fresh
+                const userId = localStorage.getItem("userId")
+                if (userId) {
+                  localStorage.removeItem(`mosque_registration_${userId}`)
+                  localStorage.removeItem(`mosque_registration_id_${userId}`)
+                }
+                window.location.href = "/daftar-masjid"
+              }}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-700 transition-colors text-sm"
             >
               Daftar Ulang
-            </Link>
+            </button>
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition-colors text-sm"

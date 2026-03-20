@@ -173,6 +173,11 @@ function LoginPageInner() {
         window.location.href = '/daftar-masjid'
       }
     } catch (err: any) {
+      // Ignore popup closed by user — not an error
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        setLoading(false)
+        return
+      }
       setError(err.message || "Gagal login dengan Google")
     } finally {
       setLoading(false)

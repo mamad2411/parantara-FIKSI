@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS donasi (
 -- masjid_registrations (@@map("masjid_registrations"))
 CREATE TABLE IF NOT EXISTS masjid_registrations (
     id                    TEXT PRIMARY KEY,
-    "userId"              TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    "userId"              TEXT NOT NULL, -- Firebase UID (no FK — auth is handled by Firebase, not Prisma users table)
 
     -- Step 1: Data Masjid
     "mosqueName"          TEXT NOT NULL,
@@ -153,3 +153,15 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+-- uploaded_files — stores file uploads as base64 in Postgres (no external storage needed)
+CREATE TABLE IF NOT EXISTS uploaded_files (
+    id          TEXT PRIMARY KEY,
+    filename    TEXT NOT NULL,
+    mimetype    TEXT NOT NULL,
+    size        INTEGER NOT NULL,
+    data        TEXT NOT NULL,
+    "uploadedBy" TEXT,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_by ON uploaded_files("uploadedBy");

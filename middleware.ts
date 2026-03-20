@@ -103,11 +103,13 @@ export async function middleware(request: NextRequest) {
   const isProtected = PROTECTED_PATHS.some(p => pathname.startsWith(p))
   const isDaftarMasjid = pathname.startsWith('/daftar-masjid')
 
-  // /daftar-masjid: only redirect if already submitted (mosque_registered cookie)
+  // /daftar-masjid: only redirect if already submitted (mosque_registered cookie matches current user)
   // Auth check is handled client-side — Firebase auth lives in browser localStorage
   if (isDaftarMasjid) {
     const mosqueRegistered = request.cookies.get('mosque_registered')?.value
-    if (mosqueRegistered === 'true') {
+    const authToken = request.cookies.get('auth_token')?.value
+    // Only redirect if the registered userId matches the currently logged-in user
+    if (mosqueRegistered && authToken && mosqueRegistered === authToken) {
       return NextResponse.redirect(new URL('/menunggu', request.url))
     }
     return addSecurityHeaders(NextResponse.next())
@@ -123,18 +125,14 @@ export async function middleware(request: NextRequest) {
         // Token valid — check extra conditions per route
         const response = NextResponse.next({ request: { headers } })
 
-        // /menunggu: must have mosque_registered cookie
-        if (pathname === '/menunggu') {
-          const mosqueRegistered = request.cookies.get('mosque_registered')?.value
-          if (mosqueRegistered !== 'true') {
-            return NextResponse.redirect(new URL('/daftar-masjid', request.url))
-          }
-        }
+        // /menunggu: accessible to any logged-in user — page handles its own state
+        // (rejected users have their cookie cleared by the page itself)
 
         // /daftar-masjid: already submitted → go to waiting
         if (pathname.startsWith('/daftar-masjid')) {
           const mosqueRegistered = request.cookies.get('mosque_registered')?.value
-          if (mosqueRegistered === 'true') {
+          const authToken = request.cookies.get('auth_token')?.value
+          if (mosqueRegistered && authToken && mosqueRegistered === authToken) {
             return NextResponse.redirect(new URL('/menunggu', request.url))
           }
         }

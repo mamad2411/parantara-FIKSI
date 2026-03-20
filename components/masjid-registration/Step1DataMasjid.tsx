@@ -42,8 +42,6 @@ const useDebounce = (value: string, delay: number) => {
 
   return debouncedValue
 }
-
-// Smart address parser for Indonesian addresses
 const parseIndonesianAddress = (fullAddress: string) => {
   if (!fullAddress || fullAddress.length < 10) return null
 
@@ -170,8 +168,8 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
     parsing: false
   })
 
-  // Debounced address for parsing
-  const debouncedAddress = useDebounce(formData.mosqueAddress || '', 1000)
+  // Debounced address for parsing — 1500ms to reduce cascading API calls
+  const debouncedAddress = useDebounce(formData.mosqueAddress || '', 1500)
 
   // Validate parsed address components
   const validateAddressComponents = async (components: any) => {
@@ -275,6 +273,8 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
 
   // Parse and validate address when user stops typing
   useEffect(() => {
+    let cancelled = false
+
     const parseAndValidateAddress = async () => {
       if (!debouncedAddress || debouncedAddress.length < 10) {
         setAddressValidation({
@@ -290,16 +290,14 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
       setAddressValidation(prev => ({ ...prev, parsing: true }))
 
       try {
-        // Parse address components
         const components = parseIndonesianAddress(debouncedAddress)
+        if (cancelled) return
         
         if (components) {
           console.log("Parsed components:", components)
-          
-          // Validate components against database
           const validation = await validateAddressComponents(components)
+          if (cancelled) return
           
-          // Update form data with parsed and validated components
           if (validation.province.valid && validation.province.data) {
             setFormData(prev => ({
               ...prev,
@@ -310,12 +308,9 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
             }))
           }
           
-          setAddressValidation({
-            ...validation,
-            parsing: false
-          })
+          setAddressValidation({ ...validation, parsing: false })
         } else {
-          setAddressValidation({
+          if (!cancelled) setAddressValidation({
             province: { valid: false, message: '⚠ Format alamat tidak dapat diparsing. Gunakan format: Jl. [Nama Jalan], Kec. [Kecamatan], [Kota/Kabupaten], [Provinsi]', data: null },
             regency: { valid: false, message: '', data: null },
             district: { valid: false, message: '', data: null },
@@ -325,7 +320,7 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
         }
       } catch (error) {
         console.error("Error parsing address:", error)
-        setAddressValidation({
+        if (!cancelled) setAddressValidation({
           province: { valid: false, message: '✗ Gagal memproses alamat', data: null },
           regency: { valid: false, message: '', data: null },
           district: { valid: false, message: '', data: null },
@@ -336,6 +331,7 @@ export default function Step1DataMasjid({ formData, setFormData }: Step1Props) {
     }
 
     parseAndValidateAddress()
+    return () => { cancelled = true }
   }, [debouncedAddress, provinces])
 
   const loadAllData = async () => {
