@@ -14,6 +14,18 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
   const [activeGuideline, setActiveGuideline] = useState<any>(null)
 
   const guidelines = {
+    npwpMasjid: {
+      title: "Panduan NPWP Masjid",
+      image: "/images/daftarmasjid/npwp.webp",
+      points: [
+        "NPWP Masjid adalah Nomor Pokok Wajib Pajak yang diterbitkan oleh Direktorat Jenderal Pajak untuk organisasi/badan.",
+        "Nomor NPWP terdiri dari <strong>15 digit angka</strong> dengan format: XX.XXX.XXX.X-XXX.XXX.",
+        "Untuk mendapatkan NPWP, daftarkan masjid ke <strong>Kantor Pelayanan Pajak (KPP)</strong> terdekat atau melalui ereg.pajak.go.id.",
+        "Upload <strong>foto atau scan kartu NPWP</strong> yang jelas dan tidak terpotong.",
+        "Format file yang diterima: <strong>JPG, PNG, atau PDF</strong> dengan ukuran maksimal 5MB.",
+        "Jika masjid belum memiliki NPWP, segera daftarkan ke <strong>Kantor Pelayanan Pajak (KPP)</strong> terdekat atau melalui ereg.pajak.go.id.",
+      ]
+    },
     aktaPendirian: {
       title: "Panduan Akta Pendirian",
       image: "/images/daftarmasjid/datapendirimasjid.webp",
@@ -45,7 +57,7 @@ export default function Step2DataLegalitas({ formData, setFormData }: Step2Props
         "Surat pernyataan pendirian adalah dokumen yang menyatakan keberadaan dan keabsahan masjid.",
         "Dokumen ini dapat dibuat oleh pengurus masjid dan diketahui oleh pejabat setempat (RT/RW/Kelurahan).",
         "Surat harus memuat: <strong>nama masjid, alamat, nama pengurus, dan tanda tangan</strong>.",
-        "Dokumen ini bersifat <strong>opsional</strong> namun sangat membantu proses verifikasi.",
+        "Dokumen ini <strong>wajib</strong> disertakan untuk proses verifikasi masjid.",
         "Format file yang diterima: <strong>JPG, PNG, atau PDF</strong> dengan ukuran maksimal 5MB.",
         "Pastikan dokumen <strong>ditandatangani dan distempel</strong> oleh pihak yang berwenang.",
       ]
@@ -132,9 +144,44 @@ return (
           </div>
         </div>
 
+        {/* NPWP Section */}
+        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-amber-100">
+          <div className="mb-4 sm:mb-5">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 flex-shrink-0" />
+              <span>NPWP Masjid</span>
+            </h3>
+            <p className="text-[10px] sm:text-xs text-gray-600">Nomor Pokok Wajib Pajak organisasi masjid</p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Upload Dokumen NPWP */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">Foto/scan kartu NPWP masjid</span>
+                <button
+                  type="button"
+                  onClick={() => openGuideline(guidelines.npwpMasjid)}
+                  className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors"
+                >
+                  <Eye className="w-3 h-3" />
+                  Lihat Panduan
+                </button>
+              </div>
+              <ProductionFileUpload
+                id="npwpDokumen"
+                label="Dokumen NPWP"
+                file={formData.npwpDokumen}
+                onFileChange={(file) => handleFileChange('npwpDokumen', file)}
+                required={true}
+                placeholder="Upload foto/scan kartu NPWP"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Additional Documents Section */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-blue-100">
-          <div className="mb-4 sm:mb-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2 border-blue-100">          <div className="mb-4 sm:mb-6">
             <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2 mb-2">
               <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
               <span>Dokumen Tambahan</span>
@@ -147,7 +194,7 @@ return (
           <div className="space-y-4 sm:space-y-6">
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Opsional - dokumen pendukung verifikasi</span>
+                <span className="text-xs text-gray-500">Dokumen pendukung verifikasi masjid</span>
                 <button
                   type="button"
                   onClick={() => openGuideline(guidelines.suratPernyataan)}
@@ -162,8 +209,8 @@ return (
                 label="Surat Pernyataan Pendirian"
                 file={formData.suratPernyataan}
                 onFileChange={(file) => handleFileChange('suratPernyataan', file)}
-                required={false}
-                placeholder="Upload Surat Pernyataan (opsional)"
+                required={true}
+                placeholder="Upload Surat Pernyataan Pendirian"
               />
             </div>
           </div>

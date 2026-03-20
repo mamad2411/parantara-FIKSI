@@ -17,7 +17,7 @@
     "  \u2588\u2588\u2551 \u255a\u2550\u255d \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u255a\u2588\u2588\u2588\u2588\u2588\u2554\u255d\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255d\n" +
     "  \u255a\u2550\u255d     \u255a\u2550\u255d\u255a\u2550\u255d  \u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u255d \u255a\u2550\u2550\u2550\u2550\u255d \u255a\u2550\u255d\u255a\u2550\u2550\u2550\u2550\u2550\u255d";
   var info =
-    "\n  Platform Donasi Masjid Transparan & Amanah" +
+    "\n  Platform Donasi Masjid Transparansi program keuangan & Amanah" +
     "\n  Built by Tim HidupTebe\n" +
     "\n  Ahmad Zaidan Ali       -> https://github.com/chaali03" +
     "\n  Satryo Agung Wicaksono -> https://github.com/Sazhumaa" +

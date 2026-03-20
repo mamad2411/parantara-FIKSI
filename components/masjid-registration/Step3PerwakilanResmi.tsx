@@ -81,18 +81,14 @@ export default function Step3PerwakilanResmi({ formData, setFormData, handleFile
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
                 Nama Lengkap <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.namaLengkap ?? `${formData.namaDepan ?? ''} ${formData.namaBelakang ?? ''}`.trim()}
-                  readOnly
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-28 text-sm sm:text-base bg-gray-50 border-2 border-gray-300 rounded-lg sm:rounded-xl text-gray-700 cursor-default"
-                  placeholder="Nama lengkap sesuai KTP"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                  <CheckCircle2 className="w-3 h-3" /> Dari akun
-                </span>
-              </div>
+              <input
+                type="text"
+                value={formData.namaLengkap}
+                onChange={(e) => setFormData({ ...formData, namaLengkap: e.target.value })}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base bg-white border-2 border-gray-900 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                placeholder="Nama lengkap sesuai KTP"
+                required
+              />
             </div>
           </div>
 

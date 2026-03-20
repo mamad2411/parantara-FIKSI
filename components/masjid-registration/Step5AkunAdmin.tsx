@@ -45,13 +45,16 @@ export default function Step5AkunAdmin({ formData, setFormData }: Step5Props) {
   const [totpVerifyCode, setTotpVerifyCode] = useState("")
   const [totpVerified, setTotpVerified] = useState(false)
   const [totpError, setTotpError] = useState("")
+  // Whether the app setup panel is open (pending verification — not yet checked)
+  const [appSetupOpen, setAppSetupOpen] = useState(false)
 
   const [biometricSupported, setBiometricSupported] = useState(false)
   const [biometricEnabled, setBiometricEnabled] = useState(false)
   const [biometricStatus, setBiometricStatus] = useState("")
 
   useEffect(() => {
-    const email = localStorage.getItem("userEmail") || ""
+    // Priority: formData.adminEmail (from Firestore prefill) → formData.emailPerwakilan (from Step3) → localStorage
+    const email = formData.adminEmail || formData.emailPerwakilan || localStorage.getItem("userEmail") || ""
     setUserEmail(email)
     generatePassphrase().then(words => setPassphrase(words))
     if (window.PublicKeyCredential) {
@@ -66,13 +69,15 @@ export default function Step5AkunAdmin({ formData, setFormData }: Step5Props) {
     }
   }, [userEmail, passphrase])
 
+  // Sync email if formData gets updated after mount (e.g. Firestore prefill)
   useEffect(() => {
-    if (enable2FA && methods2FA.has("app") && appSetupStep === "idle") {
-      setAppSetupStep("setup")
-      generateTOTP()
+    const email = formData.adminEmail || formData.emailPerwakilan || ""
+    if (email && email !== userEmail) {
+      setUserEmail(email)
     }
-    if (!methods2FA.has("app")) setAppSetupStep("idle")
-  }, [enable2FA, methods2FA])
+  }, [formData.adminEmail, formData.emailPerwakilan])
+
+  // appSetupStep is driven by toggleMethod — no auto-trigger needed
 
   const generateTOTP = async () => {
     try {
@@ -94,8 +99,18 @@ export default function Step5AkunAdmin({ formData, setFormData }: Step5Props) {
       const { TOTP, Secret } = await import("otpauth")
       const totp = new TOTP({ issuer: "DanaMasjid", label: userEmail, algorithm: "SHA1", digits: 6, period: 30, secret: Secret.fromBase32(totpSecret) })
       const delta = totp.validate({ token: totpVerifyCode, window: 1 })
-      if (delta !== null) { setTotpVerified(true); setTotpError(""); setAppSetupStep("done"); setFormData({ ...formData, totpVerified: true }) }
-      else setTotpError("Kode salah, coba lagi")
+      if (delta !== null) {
+        const next = new Set(methods2FA)
+        next.add("app")
+        setTotpVerified(true)
+        setTotpError("")
+        setAppSetupStep("done")
+        setAppSetupOpen(false)
+        setMethods2FA(next)
+        setFormData({ ...formData, totpVerified: true, totpSecret, methods2FA: Array.from(next) })
+      } else {
+        setTotpError("Kode salah, coba lagi")
+      }
     } catch { setTotpError("Verifikasi gagal") }
   }
 
@@ -144,17 +159,32 @@ export default function Step5AkunAdmin({ formData, setFormData }: Step5Props) {
   }
 
   const toggleMethod = (id: string) => {
-    setMethods2FA(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-        if (id === "app") { setAppSetupStep("idle"); setTotpSecret(""); setTotpQR(""); setTotpVerified(false); setTotpVerifyCode("") }
+    if (id === "app") {
+      if (methods2FA.has("app")) {
+        // Already verified — uncheck and reset
+        setMethods2FA(prev => { const next = new Set(prev); next.delete("app"); return next })
+        setAppSetupStep("idle")
+        setAppSetupOpen(false)
+        setTotpSecret(""); setTotpQR(""); setTotpVerified(false); setTotpVerifyCode("")
+        setFormData({ ...formData, methods2FA: Array.from(methods2FA).filter(m => m !== "app") })
+      } else if (appSetupOpen) {
+        // Panel already open — clicking again closes it (cancel)
+        setAppSetupOpen(false)
+        setTotpSecret(""); setTotpQR(""); setTotpVerifyCode(""); setTotpError("")
       } else {
-        next.add(id)
+        // Open setup panel — do NOT add to methods2FA yet
+        setAppSetupOpen(true)
+        setAppSetupStep("setup")
+        generateTOTP()
       }
-      setFormData({ ...formData, methods2FA: Array.from(next) })
-      return next
-    })
+      return
+    }
+    // For other methods (email), toggle normally
+    const next = new Set(methods2FA)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setMethods2FA(next)
+    setFormData({ ...formData, methods2FA: Array.from(next) })
   }
 
   const copyPassphrase = () => {
@@ -437,77 +467,96 @@ export default function Step5AkunAdmin({ formData, setFormData }: Step5Props) {
                 { id: "email", icon: Mail, label: "Email OTP", desc: "Kode dikirim ke email terdaftar" },
               ].map(({ id, icon: Icon, label, desc, badge }) => {
                 const selected = methods2FA.has(id)
+                // For "app": checked only after TOTP verified; pending = setup panel open but not yet verified
+                const appPending = id === "app" && appSetupOpen && !selected
                 return (
                   <div key={id}>
                     <button type="button" onClick={() => toggleMethod(id)}
                       className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 transition-all text-left ${
-                        selected ? "border-blue-500 bg-white" : "border-gray-200 bg-white hover:border-blue-300"
+                        selected ? "border-blue-500 bg-white" : appPending ? "border-blue-300 bg-blue-50/50" : "border-gray-200 bg-white hover:border-blue-300"
                       }`}>
-                      {/* Checkbox */}
+                      {/* Checkbox — locked for "app" until verified */}
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        selected ? "bg-blue-600 border-blue-600" : "border-gray-400"
+                        selected ? "bg-blue-600 border-blue-600"
+                        : appPending ? "border-blue-400 bg-white"
+                        : "border-gray-400"
                       }`}>
                         {selected && <Check className="w-2.5 h-2.5 text-white" />}
+                        {appPending && <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
                       </div>
-                      <Icon className={`w-4 h-4 flex-shrink-0 ${selected ? "text-blue-600" : "text-gray-400"}`} />
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${selected || appPending ? "text-blue-600" : "text-gray-400"}`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs sm:text-sm font-semibold text-gray-900">{label}</span>
                           {badge && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">{badge}</span>}
-                          {id === "app" && appSetupStep === "done" && (
+                          {id === "app" && appPending && (
+                            <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-semibold">
+                              Perlu verifikasi
+                            </span>
+                          )}
+                          {id === "app" && selected && (
                             <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                               <Check className="w-2.5 h-2.5" /> Terverifikasi
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] sm:text-xs text-gray-500">{desc}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500">
+                          {id === "app" && appPending ? "Selesaikan setup di bawah untuk mengaktifkan" : desc}
+                        </p>
                       </div>
                     </button>
 
-                    {/* Authenticator App Setup — hanya muncul kalau dipilih */}
-                    {id === "app" && selected && appSetupStep !== "idle" && (
+                    {/* Authenticator App Setup — muncul saat panel terbuka, hilang setelah verified */}
+                    {id === "app" && appSetupOpen && appSetupStep === "setup" && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.25 }}
-                        className="mt-2 ml-0 p-3 sm:p-4 bg-white border-2 border-blue-200 rounded-lg sm:rounded-xl space-y-3">
-                        {appSetupStep === "setup" && (
-                          <>
-                            <p className="text-xs text-gray-600 font-medium">1. Scan QR code dengan Google / Microsoft Authenticator</p>
-                            <div className="flex justify-center">
-                              {totpQR
-                                ? <img src={totpQR} alt="TOTP QR" className="w-36 h-36 sm:w-40 sm:h-40 rounded-xl border-2 border-gray-200" />
-                                : <div className="w-36 h-36 bg-gray-100 rounded-xl animate-pulse" />
-                              }
-                            </div>
-                            <div>
-                              <p className="text-[10px] text-gray-500 mb-1 text-center">Atau masukkan secret key manual:</p>
-                              <div className="px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-lg">
-                                <code className="text-xs font-mono text-gray-900 break-all">{totpSecret}</code>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <p className="text-xs text-gray-600 font-medium">2. Masukkan kode 6 digit dari app untuk verifikasi</p>
-                              <div className="flex gap-2">
-                                <input type="text" inputMode="numeric" maxLength={6} value={totpVerifyCode}
-                                  onChange={(e) => setTotpVerifyCode(e.target.value.replace(/\D/g, ""))}
-                                  placeholder="000000"
-                                  className="flex-1 px-3 sm:px-4 py-2.5 text-sm font-mono bg-white border-2 border-gray-900 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-center tracking-widest" />
-                                <button type="button" onClick={verifyTOTP}
-                                  className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors">
-                                  Verifikasi
-                                </button>
-                              </div>
-                              {totpError && <p className="text-xs text-red-500">{totpError}</p>}
-                            </div>
-                          </>
-                        )}
-                        {appSetupStep === "done" && (
-                          <div className="flex items-center gap-2 text-green-600 text-sm font-semibold">
-                            <Check className="w-4 h-4" /> Authenticator App berhasil diverifikasi
+                        className="mt-2 p-3 sm:p-4 bg-white border-2 border-blue-300 rounded-lg sm:rounded-xl space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">!</div>
+                          <p className="text-xs text-blue-700 font-semibold">Selesaikan setup untuk mengaktifkan metode ini</p>
+                        </div>
+                        <p className="text-xs text-gray-600 font-medium">1. Scan QR code dengan Google / Microsoft Authenticator</p>
+                        <div className="flex justify-center">
+                          {totpQR
+                            ? <img src={totpQR} alt="TOTP QR" className="w-36 h-36 sm:w-40 sm:h-40 rounded-xl border-2 border-gray-200" />
+                            : <div className="w-36 h-36 bg-gray-100 rounded-xl animate-pulse" />
+                          }
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 mb-1 text-center">Atau masukkan secret key manual:</p>
+                          <div className="px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-lg">
+                            <code className="text-xs font-mono text-gray-900 break-all">{totpSecret}</code>
                           </div>
-                        )}
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-600 font-medium">2. Masukkan kode 6 digit dari app untuk verifikasi</p>
+                          <div className="flex gap-2">
+                            <input type="text" inputMode="numeric" maxLength={6} value={totpVerifyCode}
+                              onChange={(e) => setTotpVerifyCode(e.target.value.replace(/\D/g, ""))}
+                              placeholder="000000"
+                              className="flex-1 px-3 sm:px-4 py-2.5 text-sm font-mono bg-white border-2 border-gray-900 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-center tracking-widest" />
+                            <button type="button" onClick={verifyTOTP}
+                              disabled={totpVerifyCode.length !== 6}
+                              className="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                              Verifikasi
+                            </button>
+                          </div>
+                          {totpError && <p className="text-xs text-red-500">{totpError}</p>}
+                        </div>
+                        <button type="button" onClick={() => { setAppSetupOpen(false); setTotpSecret(""); setTotpQR(""); setTotpVerifyCode(""); setTotpError("") }}
+                          className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                          Batal
+                        </button>
                       </motion.div>
                     )}
 
-
+                    {/* Success state after verified */}
+                    {id === "app" && selected && appSetupStep === "done" && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.2 }}
+                        className="mt-2 p-3 bg-green-50 border-2 border-green-200 rounded-lg sm:rounded-xl flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                        <p className="text-xs text-green-700 font-semibold">Authenticator App berhasil terhubung dan diverifikasi</p>
+                      </motion.div>
+                    )}
                   </div>
                 )
               })}

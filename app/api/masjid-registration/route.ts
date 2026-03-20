@@ -1,148 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { Pool } from 'pg'
 
-export async function POST(request: NextRequest) {
-  try {
-    const data = await request.json()
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-    // Validate required fields
-    if (!data.userId || !data.mosqueName || !data.adminEmail || !data.adminPassword) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
+// Singleton pool — reused across requests in dev (HMR safe)
+const globalForPg = globalThis as unknown as { pgPool?: Pool }
+const pool: Pool = globalForPg.pgPool ?? new Pool({ connectionString: process.env.DATABASE_URL })
+if (process.env.NODE_ENV !== 'production') globalForPg.pgPool = pool
 
-    // Hash admin password
-    const hashedPassword = await bcrypt.hash(data.adminPassword, 10)
-
-    // Create mosque registration in PostgreSQL
-    const registration = await prisma.masjidRegistration.create({
-      data: {
-        userId: data.userId,
-        
-        // Step 1: Data Masjid
-        mosqueName: data.mosqueName,
-        mosqueAddress: data.mosqueAddress,
-        province: data.province,
-        regency: data.regency,
-        district: data.district,
-        village: data.village,
-        postalCode: data.postalCode,
-        
-        // Step 2: Data Legalitas
-        aktaPendirian: data.aktaPendirian || null,
-        skKemenkumham: data.skKemenkumham || null,
-        npwpMasjid: data.npwpMasjid || null,
-        
-        // Step 3: Data Pengurus
-        namaDepan: data.namaDepan,
-        namaBelakang: data.namaBelakang,
-        jenisKelamin: data.jenisKelamin,
-        pekerjaan: data.pekerjaan,
-        isPemilikBisnis: data.isPemilikBisnis || false,
-        emailPerwakilan: data.emailPerwakilan,
-        tanggalLahir: data.tanggalLahir,
-        nomorHandphone: data.nomorHandphone,
-        alamatTempat: data.alamatTempat,
-        jenisID: data.jenisID || 'KTP',
-        fotoKTP: data.fotoKTP || null,
-        nomorKTP: data.nomorKTP,
-        suratKuasa: data.suratKuasa || null,
-        kontakPersonSama: data.kontakPersonSama !== false,
-        
-        // Step 4: Upload Dokumen
-        skKepengurusan: data.skKepengurusan || null,
-        suratRekomendasiRTRW: data.suratRekomendasiRTRW || null,
-        fotoTampakDepan: data.fotoTampakDepan || null,
-        fotoInterior: data.fotoInterior || null,
-        dokumenStatusTanah: data.dokumenStatusTanah || null,
-        ktpKetua: data.ktpKetua || null,
-        npwpDokumen: data.npwpDokumen || null,
-        
-        // Step 5: Akun Admin
-        adminEmail: data.adminEmail,
-        adminPassword: hashedPassword,
-        
-        status: 'pending'
-      }
-    })
-
-    // Send confirmation email (optional)
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/send-registration-confirmation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.emailPerwakilan,
-          mosqueName: data.mosqueName,
-          registrationId: registration.id
-        })
-      })
-    } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError)
-      // Don't fail the registration if email fails
-    }
-
-    return NextResponse.json({
-      success: true,
-      registrationId: registration.id,
-      message: 'Pendaftaran masjid berhasil dikirim dan sedang dalam proses review'
-    })
-
-  } catch (error) {
-    console.error('Error creating mosque registration:', error)
-    return NextResponse.json(
-      { error: 'Failed to create mosque registration' },
-      { status: 500 }
-    )
-  }
+const stripFile = (val: unknown): string | null => {
+  if (!val) return null
+  if (typeof val === 'string') return val
+  if (typeof val === 'object' && val !== null && 'name' in val) return (val as { name: string }).name
+  return null
 }
 
-// GET endpoint to retrieve registration status
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
-    const registrationId = searchParams.get('registrationId')
+    if (!userId) return NextResponse.json({ error: 'userId diperlukan' }, { status: 400 })
 
-    if (!userId && !registrationId) {
-      return NextResponse.json(
-        { error: 'userId or registrationId is required' },
-        { status: 400 }
-      )
-    }
-
-    let registration
-
-    if (registrationId) {
-      registration = await prisma.masjidRegistration.findUnique({
-        where: { id: registrationId },
-        include: { user: { select: { email: true, nama: true } } }
-      })
-    } else if (userId) {
-      registration = await prisma.masjidRegistration.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        include: { user: { select: { email: true, nama: true } } }
-      })
-    }
-
-    if (!registration) {
-      return NextResponse.json(
-        { error: 'Registration not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({ success: true, data: registration })
-
-  } catch (error) {
-    console.error('Error fetching mosque registration:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch mosque registration' },
-      { status: 500 }
+    const { rows } = await pool.query(
+      `SELECT id, "userId", "mosqueName", status, "rejectionReason", "fieldFeedback", "createdAt"
+       FROM masjid_registrations WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT 5`,
+      [userId]
     )
+    return NextResponse.json({ data: rows })
+  } catch (err) {
+    console.error('[GET /api/masjid-registration]', err)
+    return NextResponse.json({ error: 'Terjadi kesalahan server.' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { userId, ...formData } = body
+
+    if (!userId) return NextResponse.json({ error: 'userId diperlukan' }, { status: 400 })
+    if (!formData.mosqueName || !formData.mosqueAddress || !formData.emailPerwakilan) {
+      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 })
+    }
+
+    // Check duplicate
+    const dup = await pool.query(
+      `SELECT id FROM masjid_registrations WHERE "userId" = $1 AND status IN ('pending','approved') LIMIT 1`,
+      [userId]
+    )
+    if (dup.rows.length > 0) {
+      return NextResponse.json({ error: 'Anda sudah memiliki pendaftaran yang sedang diproses' }, { status: 409 })
+    }
+
+    const { randomUUID } = await import('crypto')
+    const id = randomUUID()
+    const userEmail = (formData.adminEmail || formData.emailPerwakilan || '').toLowerCase().trim()
+
+    await pool.query(
+      `INSERT INTO masjid_registrations (
+        id, "userId",
+        "mosqueName", "mosqueAddress", province, regency, district, village, rt, rw, "mosqueImage",
+        "aktaPendirian", "skKemenkumham", "npwpDokumen", "suratPernyataan",
+        "jenisID", "fotoKTP", "imageKTP", "namaLengkap", "jenisKelamin", pekerjaan,
+        "emailPerwakilan", "tanggalLahir", "nomorHandphone", "alamatTempat",
+        "adminEmail", "adminPassword", status, "createdAt", "updatedAt"
+      ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+        $21,$22,$23,$24,$25,$26,''::text,'pending',NOW(),NOW()
+      )`,
+      [
+        id,                                        // $1
+        userId,                                    // $2
+        formData.mosqueName,                       // $3
+        formData.mosqueAddress,                    // $4
+        formData.province || '',                   // $5
+        formData.regency || '',                    // $6
+        formData.district || '',                   // $7
+        formData.village || '',                    // $8
+        formData.rt || '',                         // $9
+        formData.rw || '',                         // $10
+        stripFile(formData.mosqueImage),           // $11
+        stripFile(formData.aktaPendirian),         // $12
+        stripFile(formData.skKemenkumham),         // $13
+        stripFile(formData.npwpDokumen),           // $14
+        stripFile(formData.suratPernyataan),       // $15
+        formData.jenisID || 'KTP',                 // $16
+        stripFile(formData.fotoKTP),               // $17
+        stripFile(formData.imageKTP),              // $18
+        formData.namaLengkap || '',                // $19
+        formData.jenisKelamin || '',               // $20
+        formData.pekerjaan || '',                  // $21
+        formData.emailPerwakilan,                  // $22
+        formData.tanggalLahir || '',               // $23
+        formData.nomorHandphone || '',             // $24
+        formData.alamatTempat || '',               // $25
+        userEmail,                                 // $26 adminEmail
+      ]
+    )
+
+    // Notify SuperAdmin (fire-and-forget)
+    const superAdminUrl = process.env.SUPERADMIN_URL || 'http://localhost:8000'
+    fetch(`${superAdminUrl}/api/registrations/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Internal-Key': process.env.INTERNAL_API_KEY || '' },
+      body: JSON.stringify({ registrationId: id }),
+    }).catch(() => {})
+
+    return NextResponse.json({ success: true, registrationId: id })
+  } catch (err: any) {
+    console.error('[POST /api/masjid-registration]', err)
+    if (err?.code === '23505') {
+      return NextResponse.json({ error: 'Pendaftaran dengan data ini sudah ada' }, { status: 409 })
+    }
+    return NextResponse.json({ error: err?.message || 'Terjadi kesalahan server.' }, { status: 500 })
   }
 }

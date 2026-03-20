@@ -131,6 +131,14 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
                   <label className="text-xs font-semibold text-gray-600 mb-1 block">Kelurahan/Desa *</label>
                   <input className={inputCls} value={localData.village || ""} onChange={e => setLocalData({...localData, village: e.target.value})} />
                 </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">RT *</label>
+                  <input className={inputCls} value={localData.rt || ""} onChange={e => setLocalData({...localData, rt: e.target.value.replace(/\D/g,'').slice(0,3)})} placeholder="001" maxLength={3} />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">RW *</label>
+                  <input className={inputCls} value={localData.rw || ""} onChange={e => setLocalData({...localData, rw: e.target.value.replace(/\D/g,'').slice(0,3)})} placeholder="001" maxLength={3} />
+                </div>
               </div>
 
             </div>
@@ -143,6 +151,8 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
               <ReviewItem label="Kota/Kabupaten" value={formData.regency} />
               <ReviewItem label="Kecamatan" value={formData.district} />
               <ReviewItem label="Kelurahan/Desa" value={formData.village} />
+              <ReviewItem label="RT" value={formData.rt} />
+              <ReviewItem label="RW" value={formData.rw} />
             </div>
           )}
         </div>
@@ -154,11 +164,14 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
             <div className="space-y-4">
               <ProductionFileUpload id="review-aktaPendirian" label="Akta Pendirian *" file={localData.aktaPendirian} onFileChange={(f) => handleLocalFile("aktaPendirian", f)} accept=".jpg,.jpeg,.png,.pdf" required placeholder="Upload Akta Pendirian" />
               <ProductionFileUpload id="review-skKemenkumham" label="SK Kemenkumham *" file={localData.skKemenkumham} onFileChange={(f) => handleLocalFile("skKemenkumham", f)} accept=".jpg,.jpeg,.png,.pdf" required placeholder="Upload SK Kemenkumham" />
+              <ProductionFileUpload id="review-npwpDokumen" label="Dokumen NPWP *" file={localData.npwpDokumen} onFileChange={(f) => handleLocalFile("npwpDokumen", f)} accept=".jpg,.jpeg,.png,.pdf" required placeholder="Upload foto/scan NPWP" />
+              <ProductionFileUpload id="review-suratPernyataan" label="Surat Pernyataan Pendirian *" file={localData.suratPernyataan} onFileChange={(f) => handleLocalFile("suratPernyataan", f)} accept=".jpg,.jpeg,.png,.pdf" required placeholder="Upload Surat Pernyataan Pendirian" />
             </div>
           ) : (
             <div>
               <ReviewFile label="Akta Pendirian" file={formData.aktaPendirian} />
               <ReviewFile label="SK Kemenkumham" file={formData.skKemenkumham} />
+              <ReviewFile label="Dokumen NPWP" file={formData.npwpDokumen} />
               <ReviewFile label="Surat Pernyataan Pendirian" file={formData.suratPernyataan} />
             </div>
           )}
@@ -199,8 +212,9 @@ export default function Step4ReviewData({ formData, setFormData, setCurrentStep 
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-600 mb-1 block">Email *</label>
-                <input type="email" className={inputCls} value={localData.emailPerwakilan || ""} onChange={e => setLocalData({...localData, emailPerwakilan: e.target.value})} />
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Email</label>
+                <input type="email" className="w-full px-3 py-2.5 text-sm bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-500 cursor-not-allowed" value={localData.emailPerwakilan || ""} readOnly />
+                <p className="text-[10px] text-gray-400 mt-1">Email tidak dapat diubah</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
