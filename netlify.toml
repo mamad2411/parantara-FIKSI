@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
@@ -8,10 +8,6 @@
   NODE_ENV = "production"
   NPM_FLAGS = "--legacy-peer-deps"
   NEXT_TELEMETRY_DISABLED = "1"
-
-# Next.js plugin for Netlify
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 # Strict Security Headers
 [[headers]]

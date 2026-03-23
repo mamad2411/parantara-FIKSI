@@ -1,16 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { Header } from "@/components/layout"
 import { Footer } from "@/components/layout"
-import { MasjidHeroV2 } from "@/components/sections"
+import { MasjidHeroV2, MasjidTerdaftarSection } from "@/components/sections"
 import { Search, MapPin, Filter, ChevronDown, BadgeCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { getAllMosques } from "@/lib/services/masjid-service"
 import { AnimatedSection, StaggerContainer, StaggerItem } from "@/components/ui/animated-section"
-import { MasjidTerdaftarSection } from "@/components/sections/masjid-terdaftar-section"
+import { AnimatedSection as AnimatedSectionV2 } from "@/components/animations/animated-section"
 
 export default function MasjidPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -18,6 +17,9 @@ export default function MasjidPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
 
   const mosques = getAllMosques()
+  
+  // Image path as constant to prevent autofix from changing it
+  const ctaImagePath = "/thubnail/thubnail.webp" as const
 
   const cities = ["all", ...Array.from(new Set(mosques.map(m => m.location)))]
   const categories = ["all", ...Array.from(new Set(mosques.map(m => m.category)))]
@@ -102,7 +104,7 @@ export default function MasjidPage() {
 
           {/* Mosque Grid */}
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMosques.map((mosque, index) => (
+            {filteredMosques.map((mosque) => (
               <StaggerItem key={mosque.id}>
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer h-full">
                 {/* Image */}
@@ -189,39 +191,33 @@ export default function MasjidPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-24 px-4 mt-16 overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/masjid/masjid.webp"
-            alt="Masjid Background"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
+      <AnimatedSectionV2 animation="slideUp" delay={0.2}>
+        <section className="relative px-4 mt-16 overflow-hidden">
+          <div className="max-w-7xl mx-auto">
+            <div className="relative h-[550px] md:h-[600px] rounded-[3rem] overflow-hidden flex items-end justify-center pb-12">
+              {/* Background Image */}
+              <div className="absolute inset-0 z-0">
+                <Image
+                  src="/images/thubnail/thubnail.png"
+                  alt="Masjid Background"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <AnimatedSection variant="fadeInUp">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Masjid Anda Belum Terdaftar?
-            </h2>
-          </AnimatedSection>
-          <AnimatedSection variant="fadeInUp" delay={0.2}>
-            <p className="text-lg text-blue-100 mb-10 max-w-2xl mx-auto">
-              Daftarkan masjid Anda sekarang dan mulai terima donasi secara transparan dan amanah
-            </p>
-          </AnimatedSection>
-          <AnimatedSection variant="scaleIn" delay={0.4}>
-            <Link
-              href="/login?redirect=/daftar-masjid&type=daftar-masjid&message=Login+dulu+sebelum+daftarkan+masjid+Anda"
-              className="inline-block px-10 py-5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
-            >
-              Daftarkan Masjid Sekarang
-            </Link>
-          </AnimatedSection>
-        </div>
-      </section>
+              <div className="relative z-10">
+                <Link
+                  href="/login?redirect=/daftar-masjid&type=daftar-masjid&message=Login+dulu+sebelum+daftarkan+masjid+Anda"
+                  className="inline-block px-10 py-5 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
+                >
+                  Daftarkan Masjid Sekarang
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </AnimatedSectionV2>
 
       {/* Spacer before Footer */}
       <div className="h-70"></div>

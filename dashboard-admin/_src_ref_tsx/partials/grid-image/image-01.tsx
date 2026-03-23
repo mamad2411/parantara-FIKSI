@@ -4,7 +4,7 @@ const PartialsGridImageImage01: React.FC = () => {
   return <div dangerouslySetInnerHTML={{ __html: `<div class="relative">
   <div id="pane" class="overflow-hidden">
     <img
-      src="./images/grid-image/image-01.png"
+      src="/images/grid-image/image-01.png"
       alt="Cover"
       class="w-full rounded-xl border border-gray-200 dark:border-gray-800"
     />

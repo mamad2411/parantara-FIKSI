@@ -39,10 +39,24 @@ export default function RegisterPage() {
     confirmPassword: "",
   })
 
-  const totalSteps = 3
+  // Auto-fill email from URL query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const emailParam = params.get('email')
+    if (emailParam) {
+      setFormData(prev => ({
+        ...prev,
+        email: decodeURIComponent(emailParam)
+      }))
+    }
+  }, [])
+
+  const totalSteps = 2
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [emailSent, setEmailSent] = useState(false) // Track if email sent
+  const [sentToEmail, setSentToEmail] = useState("") // Store email address
   const [resendCountdown, setResendCountdown] = useState(0)
   const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(null)
   const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong' | null>(null)
@@ -51,6 +65,7 @@ export default function RegisterPage() {
   const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null)
   const [emailChecking, setEmailChecking] = useState(false)
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null)
+  const [emailFormatError, setEmailFormatError] = useState<string | null>(null)
   const [otpStepStartTime, setOtpStepStartTime] = useState<number | null>(null)
 
   // OTP Step Timeout - redirect to login after 1 hour of inactivity
@@ -230,8 +245,8 @@ export default function RegisterPage() {
       }
     }
 
-    // Increase debounce to 1000ms - wait 1 second after user stops typing
-    const timer = setTimeout(checkNickname, 1000)
+    // Debounce 500ms for faster validation
+    const timer = setTimeout(checkNickname, 500)
     
     // Cleanup: cancel timer if nickname changes before timeout
     return () => {
@@ -240,11 +255,52 @@ export default function RegisterPage() {
     }
   }, [formData.nickname])
 
+  // Validate email format
+  const validateEmailFormat = (email: string): string | null => {
+    if (!email) return null
+    
+    // Basic format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return 'Format email tidak valid'
+    }
+    
+    // Check for common typos
+    const domain = email.split('@')[1]?.toLowerCase()
+    if (!domain) return 'Email harus memiliki domain (contoh: @gmail.com)'
+    
+    // Common domain typos
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com']
+    const typoSuggestions: { [key: string]: string } = {
+      'gmial.com': 'gmail.com',
+      'gmai.com': 'gmail.com',
+      'gmil.com': 'gmail.com',
+      'yahooo.com': 'yahoo.com',
+      'yaho.com': 'yahoo.com',
+      'hotmial.com': 'hotmail.com',
+      'hotmai.com': 'hotmail.com',
+    }
+    
+    if (typoSuggestions[domain]) {
+      return `Mungkin maksud Anda: ${email.split('@')[0]}@${typoSuggestions[domain]}?`
+    }
+    
+    return null
+  }
+
   // Check email availability in Firestore
   useEffect(() => {
     // Reset state when email changes
     setEmailChecking(false)
     setEmailAvailable(null)
+    setEmailFormatError(null)
+    
+    // Validate format first
+    const formatError = validateEmailFormat(formData.email)
+    if (formatError) {
+      setEmailFormatError(formatError)
+      return
+    }
     
     // Require valid email format before checking
     if (!formData.email || !formData.email.includes('@') || formData.email.length < 5) {
@@ -299,8 +355,8 @@ export default function RegisterPage() {
       }
     }
 
-    // Increase debounce to 1000ms - wait 1 second after user stops typing
-    const timer = setTimeout(checkEmail, 1000)
+    // Debounce 500ms for faster validation
+    const timer = setTimeout(checkEmail, 500)
     
     // Cleanup: cancel timer if email changes before timeout
     return () => {
@@ -354,7 +410,7 @@ export default function RegisterPage() {
         type: "spring",
         damping: 20,
         stiffness: 100,
-        delay: 0.5
+        delay: 0.2
       }
     }
   }
@@ -368,7 +424,7 @@ export default function RegisterPage() {
         type: "spring",
         damping: 20,
         stiffness: 100,
-        delay: 0.5
+        delay: 0.2
       }
     }
   }
@@ -382,7 +438,7 @@ export default function RegisterPage() {
         type: "spring",
         damping: 15,
         stiffness: 100,
-        delay: 0.9 + (custom * 0.1)
+        delay: 0.3 + (custom * 0.05)
       }
     })
   }
@@ -395,7 +451,7 @@ export default function RegisterPage() {
         type: "spring",
         damping: 25,
         stiffness: 150,
-        delay: 0.8
+        delay: 0.3
       }
     }
   }
@@ -452,8 +508,8 @@ export default function RegisterPage() {
       opacity: 1, 
       y: 0,
       transition: { 
-        delay: 1.5,
-        duration: 0.6,
+        delay: 0.5,
+        duration: 0.4,
         ease: "easeOut"
       }
     }
@@ -483,8 +539,6 @@ export default function RegisterPage() {
     console.log('Form Data:', formData)
     console.log('Nickname:', formData.nickname)
     console.log('Nickname Available:', nicknameAvailable)
-    console.log('Password Strength:', passwordStrength)
-    console.log('Password Match:', passwordMatch)
     
     setLoading(true)
 
@@ -528,22 +582,30 @@ export default function RegisterPage() {
           return
         }
         
-        // Step 1: Send OTP using TanStack Query
-        console.log('Step 1: Sending OTP...')
-        const result = await registerStep1Mutation.mutateAsync({
-          name: formData.name,
-          nickname: formData.nickname,
-          email: formData.email
+        // Step 1: Send Email Verification Link
+        console.log('Step 1: Sending email verification...')
+        const response = await fetch('/api/register-step1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            nickname: formData.nickname,
+            email: formData.email,
+          }),
         })
 
+        const result = await response.json()
+
         if (result.success) {
-          setResendCountdown(60)
-          setSuccess('Kode OTP telah dikirim ke email Anda')
-          console.log('Step 1: OTP sent successfully')
-          handleNext()
+          setSuccess(`Link verifikasi telah dikirim ke ${formData.email}. Silakan cek inbox Anda untuk melanjutkan pendaftaran.`)
+          console.log('Step 1: Email verification sent successfully')
+          // Set email sent state
+          setEmailSent(true)
+          setSentToEmail(formData.email)
+          // Don't clear form yet - keep data for potential resend
         } else {
-          setError(result.message || 'Gagal mengirim OTP')
-          console.error('Step 1: Failed to send OTP')
+          setError(result.message || 'Gagal mengirim link verifikasi')
+          console.error('Step 1: Failed to send email verification')
         }
       } else if (currentStep === 2) {
         // Step 2: Verify OTP using TanStack Query
@@ -779,7 +841,7 @@ export default function RegisterPage() {
             className="lg:hidden w-full h-48 relative rounded-2xl overflow-hidden mt-16 mb-6"
           >
             <Image
-              src="/images/login/loginnn.webp"
+              src="/images/regist/regist.webp"
               alt="DanaMasjid Register"
               fill
               className="object-cover"
@@ -808,7 +870,7 @@ export default function RegisterPage() {
               variants={itemVariants} 
               className="flex items-center justify-center gap-3 mb-6"
             >
-              {[1, 2, 3].map((step) => (
+              {[1, 2].map((step) => (
                 <div key={step} className="flex items-center">
                   <motion.div 
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${
@@ -829,7 +891,7 @@ export default function RegisterPage() {
                       step
                     )}
                   </motion.div>
-                  {step < 3 && (
+                  {step < 2 && (
                     <motion.div 
                       className={`w-12 h-1 mx-1 transition-all ${
                         currentStep > step ? "bg-green-500" : "bg-gray-200"
@@ -900,7 +962,7 @@ export default function RegisterPage() {
                   className="space-y-5 overflow-visible"
                 >
                   {/* Step 1: Personal Information */}
-                  {currentStep === 1 && (
+                  {currentStep === 1 && !emailSent && (
                     <>
                       <motion.div 
                         variants={itemVariants} 
@@ -1012,6 +1074,7 @@ export default function RegisterPage() {
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                           className={`w-full pl-5 pr-12 py-4 bg-white border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-base shadow-sm ${
+                            emailFormatError ? 'border-orange-500' :
                             emailAvailable === false ? 'border-red-500' : 
                             emailAvailable === true ? 'border-green-500' : 
                             'border-gray-900 focus:border-blue-500'
@@ -1022,6 +1085,10 @@ export default function RegisterPage() {
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                           {emailChecking ? (
                             <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                          ) : emailFormatError ? (
+                            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
                           ) : emailAvailable === false ? (
                             <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1038,14 +1105,131 @@ export default function RegisterPage() {
                         </div>
                         
                         {/* Validation messages */}
-                        {emailAvailable === false && (
+                        {emailFormatError && (
+                          <p className="text-xs text-orange-600 mt-1.5 ml-1 font-medium">{emailFormatError}</p>
+                        )}
+                        {!emailFormatError && emailAvailable === false && (
                           <p className="text-xs text-red-500 mt-1.5 ml-1">Email sudah terdaftar</p>
                         )}
-                        {emailAvailable === true && (
+                        {!emailFormatError && emailAvailable === true && (
                           <p className="text-xs text-green-500 mt-1.5 ml-1">Email tersedia</p>
                         )}
                       </motion.div>
                     </>
+                  )}
+
+                  {/* Email Sent Success View */}
+                  {currentStep === 1 && emailSent && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-center space-y-6 py-8"
+                    >
+                      {/* Success Icon */}
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.2 }}
+                        className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto"
+                      >
+                        <motion.svg
+                          className="w-12 h-12 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 0.5, delay: 0.5 }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </motion.svg>
+                      </motion.div>
+
+                      {/* Title */}
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                          Cek Email Anda!
+                        </h3>
+                        <p className="text-gray-600">
+                          Kami telah mengirim link verifikasi ke
+                        </p>
+                        <div className="mt-2 flex items-center justify-center gap-2">
+                          <p className="text-lg font-semibold text-blue-600">
+                            {sentToEmail}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEmailSent(false)
+                              setSentToEmail("")
+                              setResendCountdown(0)
+                            }}
+                            className="text-gray-500 hover:text-gray-700 transition-colors"
+                            title="Edit email"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Salah email? Klik ikon pensil untuk mengubah
+                        </p>
+                      </div>
+
+                      {/* Resend Button */}
+                      <div className="pt-4">
+                        <p className="text-sm text-gray-600 mb-3">
+                          Tidak menerima email?
+                        </p>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (resendCountdown > 0) return
+                            
+                            setLoading(true)
+                            setError("")
+                            
+                            try {
+                              const response = await fetch('/api/register-step1', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  name: formData.name,
+                                  nickname: formData.nickname,
+                                  email: formData.email,
+                                }),
+                              })
+
+                              const result = await response.json()
+
+                              if (result.success) {
+                                setSuccess('Link verifikasi telah dikirim ulang!')
+                                setResendCountdown(60)
+                              } else {
+                                setError(result.message || 'Gagal mengirim ulang')
+                              }
+                            } catch (err) {
+                              setError('Terjadi kesalahan. Silakan coba lagi.')
+                            } finally {
+                              setLoading(false)
+                            }
+                          }}
+                          disabled={resendCountdown > 0 || loading}
+                          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                            resendCountdown > 0 || loading
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                        >
+                          {resendCountdown > 0
+                            ? `Kirim Ulang dalam ${resendCountdown}s`
+                            : loading
+                            ? 'Mengirim...'
+                            : 'Kirim Ulang Link'}
+                        </button>
+                      </div>
+                    </motion.div>
                   )}
 
                   {/* Step 2: OTP Verification */}
@@ -1490,7 +1674,7 @@ export default function RegisterPage() {
           className="hidden lg:block lg:w-1/2 relative overflow-hidden"
         >
           <Image
-            src="/images/login/loginnn.webp"
+            src="/images/regist/regist.webp"
             alt="DanaMasjid Register"
             fill
             className="object-cover"

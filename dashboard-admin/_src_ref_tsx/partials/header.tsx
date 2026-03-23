@@ -71,10 +71,10 @@ const PartialsHeader: React.FC = () => {
       <!-- Hamburger Toggle BTN -->
 
       <a href="index.html" class="lg:hidden">
-        <img class="dark:hidden" src="./images/logo/logo.svg" alt="Logo" />
+        <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
         <img
           class="hidden dark:block"
-          src="./images/logo/logo-dark.svg"
+          src="/images/logo/logo-dark.svg"
           alt="Logo"
         />
       </a>
@@ -264,7 +264,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-02.jpg"
+                      src="/images/user/user-02.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -306,7 +306,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-03.jpg"
+                      src="/images/user/user-03.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -348,7 +348,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-04.jpg"
+                      src="/images/user/user-04.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -390,7 +390,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-05.jpg"
+                      src="/images/user/user-05.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -432,7 +432,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-02.jpg"
+                      src="/images/user/user-02.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -474,7 +474,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-03.jpg"
+                      src="/images/user/user-03.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -516,7 +516,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-04.jpg"
+                      src="/images/user/user-04.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -558,7 +558,7 @@ const PartialsHeader: React.FC = () => {
                     class="relative z-1 block h-10 w-full max-w-10 rounded-full"
                   >
                     <img
-                      src="./images/user/user-05.jpg"
+                      src="/images/user/user-05.jpg"
                       alt="User"
                       class="overflow-hidden rounded-full"
                     />
@@ -616,7 +616,7 @@ const PartialsHeader: React.FC = () => {
           @click.prevent="dropdownOpen = ! dropdownOpen"
         >
           <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
-            <img src="./images/user/owner.jpg" alt="User" />
+            <img src="/images/user/owner.jpg" alt="User" />
           </span>
 
           <span class="text-theme-sm mr-1 block font-medium"> Musharof </span>

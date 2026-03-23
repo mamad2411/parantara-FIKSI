@@ -178,6 +178,27 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Registration tokens (email verification)
+    match /registrationTokens/{tokenId} {
+      // Allow read for token verification (no auth required)
+      allow read: if true;
+      
+      // Allow create for new registrations (no auth required)
+      allow create: if request.resource.data.keys().hasAll(['token', 'name', 'nickname', 'email', 'expiresAt', 'used', 'createdAt']) &&
+                      isValidString(request.resource.data.name, 2, 100) &&
+                      isValidString(request.resource.data.nickname, 3, 20) &&
+                      isValidEmail(request.resource.data.email) &&
+                      request.resource.data.used == false;
+      
+      // Allow update only to mark as used
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt']) &&
+                      request.resource.data.used == true &&
+                      resource.data.used == false;
+      
+      // Prevent deletion
+      allow delete: if false;
+    }
+    
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

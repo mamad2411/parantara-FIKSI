@@ -57,7 +57,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-07.svg" alt="brand" />
+            <img src="/images/brand/brand-07.svg" alt="brand" />
           </div>
 
           <div>
@@ -111,7 +111,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-11.svg" alt="brand" />
+            <img src="/images/brand/brand-11.svg" alt="brand" />
           </div>
 
           <div>
@@ -165,7 +165,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-12.svg" alt="brand" />
+            <img src="/images/brand/brand-12.svg" alt="brand" />
           </div>
 
           <div>
@@ -219,7 +219,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-13.svg" alt="brand" />
+            <img src="/images/brand/brand-13.svg" alt="brand" />
           </div>
 
           <div>
@@ -273,7 +273,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-14.svg" alt="brand" />
+            <img src="/images/brand/brand-14.svg" alt="brand" />
           </div>
 
           <div>
@@ -327,7 +327,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-07.svg" alt="brand" />
+            <img src="/images/brand/brand-07.svg" alt="brand" />
           </div>
 
           <div>
@@ -381,7 +381,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-11.svg" alt="brand" />
+            <img src="/images/brand/brand-11.svg" alt="brand" />
           </div>
 
           <div>
@@ -435,7 +435,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-12.svg" alt="brand" />
+            <img src="/images/brand/brand-12.svg" alt="brand" />
           </div>
 
           <div>
@@ -489,7 +489,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-13.svg" alt="brand" />
+            <img src="/images/brand/brand-13.svg" alt="brand" />
           </div>
 
           <div>
@@ -543,7 +543,7 @@ const PartialsWatchlist: React.FC = () => {
       >
         <div class="flex items-center gap-3">
           <div class="h-10 w-10">
-            <img src="./images/brand/brand-14.svg" alt="brand" />
+            <img src="/images/brand/brand-14.svg" alt="brand" />
           </div>
 
           <div>

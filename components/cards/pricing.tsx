@@ -43,7 +43,11 @@ export function Pricing({
     setIsDesktop(window.innerWidth >= 768);
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      // Stop all confetti animations when component unmounts
+      confetti.reset();
+    };
   }, []);
 
   const fireConfetti = () => {

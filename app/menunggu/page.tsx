@@ -77,7 +77,7 @@ export default function MenungguPage() {
         ? import("@/lotie/Document Icon Lottie Animation.json")
         : regStatus.status === "rejected"
         ? import("@/lotie/Stressed Woman at work.json")
-        : import("@/lotie/contact us.json")
+        : import("@/lotie/wait.json")
 
     file.then((d) => setLottieData(d.default as Record<string, unknown>))
   }, [regStatus.status])

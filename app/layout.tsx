@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import Script from "next/script"
 import { CookieConsentBanner } from "@/components/cookie-consent"
 import { QueryProvider, RecaptchaProvider, SecurityProvider } from "@/components/providers"
+import { AuthProvider } from "@/lib/auth-context"
 import { ScrollProgress } from "@/components/ui/scroll-progress"
 import { BackToTop } from "@/components/ui/back-to-top"
 import { SuppressExtensionErrors } from "@/components/suppress-extension-errors"
@@ -12,8 +13,8 @@ import { LottieLoading } from "@/components/ui/lottie-loading"
 
 export const metadata: Metadata = {
   title: "DanaMasjid - Platform Donasi Masjid Transparan & Amanah",
-  description: "Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar.",
-  keywords: ["donasi masjid", "zakat", "infaq", "sedekah", "masjid", "donasi online", "transparansi donasi"],
+  description: "Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia. Salurkan zakat, infaq, dan sedekah Anda dengan amanah dan pantau penggunaan dana secara real-time. Gratis 3 bulan pertama untuk masjid yang mendaftar.",
+  keywords: ["donasi masjid", "zakat", "infaq", "sedekah", "masjid", "donasi online", "transparansi donasi", "transparansi keuangan masjid"],
   authors: [{ name: "DanaMasjid" }],
   creator: "DanaMasjid",
   publisher: "DanaMasjid",
@@ -24,13 +25,13 @@ export const metadata: Metadata = {
     locale: 'id_ID',
     url: 'https://danamasjid.com',
     title: 'DanaMasjid - Platform Donasi Masjid Transparan & Amanah',
-    description: 'Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah.',
+    description: 'Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia. Salurkan zakat, infaq, dan sedekah Anda dengan amanah dan pantau penggunaan dana secara real-time.',
     siteName: 'DanaMasjid',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'DanaMasjid - Platform Donasi Masjid Transparan & Amanah',
-    description: 'Platform donasi masjid yang transparan dan terpercaya.',
+    description: 'Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia. Pantau penggunaan dana secara real-time.',
   },
   robots: {
     index: true,
@@ -89,7 +90,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://apis.google.com" />
         
         {/* Meta Description */}
-        <meta name="description" content="Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
+        <meta name="description" content="Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia. Salurkan zakat, infaq, dan sedekah Anda dengan amanah dan pantau penggunaan dana secara real-time. Gratis 3 bulan pertama untuk masjid yang mendaftar." />
 
         {/* Scroll restoration — keep position on refresh, skip for home page */}
         <script
@@ -139,7 +140,7 @@ export default function RootLayout({
               "name": "DanaMasjid",
               "url": "https://danamasjid.com",
               "logo": "https://danamasjid.com/favicon_io/android-chrome-512x512.png",
-              "description": "Platform donasi masjid yang transparan dan terpercaya",
+              "description": "Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia",
               "sameAs": [
                 "https://www.facebook.com/danamasjid",
                 "https://www.instagram.com/danamasjid",
@@ -165,7 +166,7 @@ export default function RootLayout({
               "@type": "WebSite",
               "name": "DanaMasjid",
               "url": "https://danamasjid.com",
-              "description": "Platform donasi masjid yang transparan dan terpercaya. Salurkan zakat, infaq, dan sedekah Anda dengan amanah.",
+              "description": "Platform donasi masjid dengan transparansi keuangan pada program masjid-masjid yang ada di Indonesia. Salurkan zakat, infaq, dan sedekah Anda dengan amanah dan pantau penggunaan dana secara real-time.",
               "potentialAction": {
                 "@type": "SearchAction",
                 "target": "https://danamasjid.com/search?q={search_term_string}",
@@ -203,9 +204,11 @@ export default function RootLayout({
         <SecurityProvider>
           <QueryProvider>
             <RecaptchaProvider>
-              {children}
-              <CookieConsentBanner />
-              {/* <BackToTop /> - Temporarily disabled to fix hydration issues */}
+              <AuthProvider>
+                {children}
+                <CookieConsentBanner />
+                {/* <BackToTop /> - Temporarily disabled to fix hydration issues */}
+              </AuthProvider>
             </RecaptchaProvider>
           </QueryProvider>
         </SecurityProvider>

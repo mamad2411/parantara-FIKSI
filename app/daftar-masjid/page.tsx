@@ -17,6 +17,7 @@ import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
 import { uploadAllFiles } from "@/lib/upload-file"
 import { LottieLoading } from "@/components/ui/lottie-loading"
+import { RateLimitModal } from "@/components/ui/rate-limit-modal"
 
 // Lazy load each step — only Step1 is needed on initial render
 const Step1DataMasjid = dynamic(
@@ -90,6 +91,8 @@ export default function DaftarMasjidPage() {
   const [honeypot, setHoneypot] = useState("") // Bot detection
   const [sessionInitialized, setSessionInitialized] = useState(false)
   const [formStartTime, setFormStartTime] = useState<number | null>(null)
+  const [showRateLimitModal, setShowRateLimitModal] = useState(false)
+  const [rateLimitInfo, setRateLimitInfo] = useState({ hoursLeft: 24, nextAllowedTime: "" })
   const lastActivityTime = useRef<number>(Date.now())
 
   // Clear any stored registration data on page load (fresh start every time)
@@ -521,6 +524,22 @@ export default function DaftarMasjidPage() {
       
       const data = await response.json()
       
+      if (response.status === 429) {
+        // Rate limit exceeded
+        toast.dismiss(toastId)
+        const hoursLeft = data.nextAllowedTime 
+          ? Math.ceil((new Date(data.nextAllowedTime).getTime() - Date.now()) / (1000 * 60 * 60))
+          : 24
+        
+        setRateLimitInfo({
+          hoursLeft,
+          nextAllowedTime: data.nextAllowedTime || ""
+        })
+        setShowRateLimitModal(true)
+        setLoading(false)
+        return
+      }
+      
       if (data.success) {
         toast.dismiss(toastId)
         // Save registration completion status to localStorage
@@ -587,6 +606,14 @@ export default function DaftarMasjidPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 py-2 sm:py-3 md:py-6 lg:py-8 px-2 sm:px-3 md:px-4 lg:px-6 xl:px-8">
       {/* Toast Container */}
       <Toaster />
+      
+      {/* Rate Limit Modal */}
+      <RateLimitModal
+        isOpen={showRateLimitModal}
+        onClose={() => setShowRateLimitModal(false)}
+        hoursLeft={rateLimitInfo.hoursLeft}
+        nextAllowedTime={rateLimitInfo.nextAllowedTime}
+      />
       
       {/* Session Timer - Temporarily disabled */}
       {/* {sessionInitialized && <SessionTimer />} */}

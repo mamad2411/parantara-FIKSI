@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { memo, useMemo, useCallback } from "react";
+import { CheckCircle2 } from "lucide-react";
 
 interface ProductPanelProps {
   title: string;
@@ -22,18 +23,9 @@ interface ProductPanelProps {
   bgImage?: string;
 }
 
-// Memoize CheckIcon to prevent re-creation
+// Inline SVG with legacy icon markup was replaced with Lucide for smaller bundle and a11y.
 const CheckIcon = memo(function CheckIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-      <mask id="mask0_4421_4808" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24" style={{ maskType: "alpha" }}>
-        <rect width="24" height="24" fill="#D9D9D9" />
-      </mask>
-      <g mask="url(#mask0_4421_4808)">
-        <path d="M10.5575 16.8786L17.8195 9.61687L16.038 7.82112L10.5575 13.3016L7.87728 10.6211L6.09578 12.4169L10.5575 16.8786ZM12 22.4766C10.5414 22.4766 9.17545 22.202 7.90228 21.6526C6.62928 21.1033 5.52195 20.3577 4.58028 19.4159C3.63845 18.4742 2.89286 17.3669 2.34353 16.0939C1.7942 14.8207 1.51953 13.4548 1.51953 11.9961C1.51953 10.5375 1.7942 9.17154 2.34353 7.89838C2.89286 6.62537 3.63845 5.51804 4.58028 4.57637C5.52195 3.63454 6.62928 2.88896 7.90228 2.33962C9.17545 1.79029 10.5414 1.51562 12 1.51562C13.4587 1.51562 14.8246 1.79029 16.0978 2.33962C17.3708 2.88896 18.4781 3.63454 19.4198 4.57637C20.3616 5.51804 21.1072 6.62537 21.6565 7.89838C22.2059 9.17154 22.4805 10.5375 22.4805 11.9961C22.4805 13.4548 22.2059 14.8207 21.6565 16.0939C21.1072 17.3669 20.3616 18.4742 19.4198 19.4159C18.4781 20.3577 17.3708 21.1033 16.0978 21.6526C14.8246 22.202 13.4587 22.4766 12 22.4766Z" fill="currentColor" />
-      </g>
-    </svg>
-  );
+  return <CheckCircle2 className="shrink-0 size-6" aria-hidden />;
 });
 
 // Product Panel Component - Memoized for better performance

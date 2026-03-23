@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Eye, Lock, Users, Database, Mail } from "lucide-react"
-import { Hero03 } from "@/components/sections/hero-03"
+import { LegalHero } from "@/components/sections/legal-hero"
 import { Header, Footer } from "@/components/layout"
 
 export default function KebijakanPrivasiPage() {
@@ -11,15 +11,15 @@ export default function KebijakanPrivasiPage() {
       <Header />
 
       {/* Hero Section */}
-      <Hero03
+      <LegalHero
         variant="privacy"
-        title={
-          <>
-            Kebijakan <br className="hidden md:block" />
-            Privasi
-          </>
-        }
-        subtitle="Kami menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi Anda"
+        title="Kebijakan Privasi"
+        subtitle="Komitmen Kami untuk Melindungi Data Anda"
+        description="Kami menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi Anda dengan standar keamanan tertinggi."
+        stats={[
+          { value: "256-bit", label: "SSL Encryption" },
+          { value: "24/7", label: "Security Monitor" }
+        ]}
       />
 
       <div className="max-w-4xl mx-auto px-6 pb-12 pt-16">

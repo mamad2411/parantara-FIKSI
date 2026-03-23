@@ -13,10 +13,10 @@ const Sidebar: React.FC = () => {
   >
     <a href="index.html">
       <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
-        <img class="dark:hidden" src="./images/logo/logo.svg" alt="Logo" />
+        <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
         <img
           class="hidden dark:block"
-          src="./images/logo/logo-dark.svg"
+          src="/images/logo/logo-dark.svg"
           alt="Logo"
         />
       </span>
@@ -24,7 +24,7 @@ const Sidebar: React.FC = () => {
       <img
         class="logo-icon"
         :class="sidebarToggle ? 'lg:block' : 'hidden'"
-        src="./images/logo/logo-icon.svg"
+        src="/images/logo/logo-icon.svg"
         alt="Logo"
       />
     </a>

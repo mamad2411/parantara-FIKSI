@@ -469,11 +469,14 @@ export const sendWelcomeEmail = async (email: string, name: string, mosqueName: 
 };
 
 export const sendSubscriptionEmail = async (email: string): Promise<EmailResult> => {
+  // Generate voucher code
+  const voucherCode = `MASJID${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  
   try {
     const mailOptions = {
       from: `"DanaMasjid" <${process.env.SMTP_FROM}>`,
       to: email,
-      subject: 'Daftarkan Masjid Anda di DanaMasjid',
+      subject: '🎉 Kode Voucher Spesial - Daftarkan Masjid Anda di DanaMasjid',
       html: `
         <!DOCTYPE html>
         <html>
@@ -537,6 +540,47 @@ export const sendSubscriptionEmail = async (email: string): Promise<EmailResult>
               margin-bottom: 25px;
               font-size: 15px;
             }
+            .voucher-box {
+              background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+              border: 3px dashed #f59e0b;
+              border-radius: 16px;
+              padding: 30px;
+              text-align: center;
+              margin: 30px 0;
+              box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+            }
+            .voucher-title {
+              color: #92400e;
+              font-weight: 700;
+              font-size: 20px;
+              margin-bottom: 15px;
+            }
+            .voucher-code {
+              background: white;
+              border: 2px solid #f59e0b;
+              border-radius: 12px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .voucher-code-label {
+              color: #78350f;
+              font-size: 14px;
+              font-weight: 600;
+              margin-bottom: 10px;
+            }
+            .voucher-code-text {
+              font-size: 32px;
+              font-weight: 700;
+              color: #f59e0b;
+              letter-spacing: 4px;
+              font-family: 'Courier New', monospace;
+            }
+            .voucher-benefit {
+              color: #78350f;
+              font-size: 16px;
+              font-weight: 600;
+              margin-top: 15px;
+            }
             .benefits {
               background: #f0f9ff;
               padding: 25px;
@@ -579,23 +623,37 @@ export const sendSubscriptionEmail = async (email: string): Promise<EmailResult>
             .button-container {
               text-align: center;
             }
-            .promo {
-              background: #fef3c7;
-              border: 2px dashed #f59e0b;
-              padding: 20px;
+            .steps {
+              background: #f9fafb;
+              padding: 25px;
               border-radius: 12px;
-              text-align: center;
               margin: 30px 0;
             }
-            .promo-title {
-              color: #92400e;
-              font-weight: 700;
-              font-size: 18px;
-              margin-bottom: 10px;
+            .steps h3 {
+              color: #1f2937;
+              margin: 0 0 20px;
+              font-size: 17px;
             }
-            .promo-text {
-              color: #78350f;
+            .step-item {
+              margin: 15px 0;
+              padding-left: 35px;
+              position: relative;
+              color: #4b5563;
               font-size: 14px;
+            }
+            .step-number {
+              position: absolute;
+              left: 0;
+              width: 24px;
+              height: 24px;
+              background: #3b82f6;
+              color: white;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+              font-size: 12px;
             }
             .footer {
               background: #f9fafb;
@@ -638,18 +696,42 @@ export const sendSubscriptionEmail = async (email: string): Promise<EmailResult>
               <div class="greeting">Assalamu'alaikum!</div>
               
               <div class="message">
-                Terima kasih atas minat Anda untuk mendaftarkan masjid di platform DanaMasjid. 
-                Kami sangat senang dapat membantu masjid Anda menerima donasi secara transparan dan amanah.
+                Terima kasih telah subscribe di DanaMasjid! Kami sangat senang dapat membantu masjid Anda 
+                menerima donasi secara transparan dan amanah.
               </div>
 
-              <div class="promo">
-                <div class="promo-title">🎉 Promo Spesial!</div>
-                <div class="promo-text">
-                  <strong>GRATIS 3 Bulan Pertama</strong><br>
-                  Tanpa biaya setup • Tanpa biaya bulanan
+              <div class="voucher-box">
+                <div class="voucher-title">🎉 Kode Voucher Spesial Anda</div>
+                <div class="voucher-code">
+                  <div class="voucher-code-label">KODE VOUCHER</div>
+                  <div class="voucher-code-text">${voucherCode}</div>
+                </div>
+                <div class="voucher-benefit">
+                  ✨ GRATIS 3 Bulan Pertama ✨<br>
+                  <span style="font-size: 14px; font-weight: normal;">Tanpa biaya setup • Tanpa biaya bulanan</span>
                 </div>
               </div>
               
+              <div class="steps">
+                <h3>Cara Menggunakan Voucher:</h3>
+                <div class="step-item">
+                  <div class="step-number">1</div>
+                  Klik tombol "Daftar Sekarang" di bawah
+                </div>
+                <div class="step-item">
+                  <div class="step-number">2</div>
+                  Login atau buat akun baru
+                </div>
+                <div class="step-item">
+                  <div class="step-number">3</div>
+                  Isi formulir pendaftaran masjid
+                </div>
+                <div class="step-item">
+                  <div class="step-number">4</div>
+                  Masukkan kode voucher saat checkout
+                </div>
+              </div>
+
               <div class="benefits">
                 <h3>Keuntungan Bergabung dengan DanaMasjid:</h3>
                 <div class="benefit-item">Dashboard lengkap untuk kelola donasi</div>
@@ -657,15 +739,15 @@ export const sendSubscriptionEmail = async (email: string): Promise<EmailResult>
                 <div class="benefit-item">Sistem pembayaran aman & mudah</div>
                 <div class="benefit-item">Notifikasi otomatis untuk setiap donasi</div>
                 <div class="benefit-item">Support 24/7 dari tim kami</div>
-                <div class="benefit-item">Gratis 3 bulan pertama!</div>
+                <div class="benefit-item">Gratis 3 bulan pertama dengan voucher!</div>
               </div>
 
               <div class="button-container">
-                <a href="http://localhost:3000/login" class="button">Daftar Sekarang →</a>
+                <a href="http://localhost:3000/login?redirect=/daftar-masjid&type=daftar-masjid&message=Login+dulu+sebelum+daftarkan+masjid+Anda" class="button">Daftar Sekarang →</a>
               </div>
 
               <div class="message">
-                Klik tombol di atas untuk memulai proses pendaftaran. Proses pendaftaran hanya membutuhkan waktu 5 menit!
+                Voucher ini berlaku untuk pendaftaran masjid baru. Jangan lewatkan kesempatan ini!
               </div>
 
               <div class="message">
@@ -689,7 +771,8 @@ export const sendSubscriptionEmail = async (email: string): Promise<EmailResult>
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Subscription email sent:', info.messageId);
+    console.log('✅ Subscription email sent with voucher:', voucherCode);
+    console.log('Message ID:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('❌ Error sending subscription email:', error);

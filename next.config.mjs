@@ -29,6 +29,7 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    qualities: [50, 75, 80, 90, 100],
     remotePatterns: [
       {
         protocol: 'https',
@@ -81,6 +82,28 @@ const nextConfig = {
   
   // Optimize webpack
   webpack: (config, { isServer, dev }) => {
+    // Support Vite-style SVG React imports used by dashboard-component:
+    // import Icon from "./icon.svg?react"
+    const assetRule = config.module.rules.find((rule) => rule?.test?.test?.(".svg"))
+    if (assetRule) {
+      assetRule.exclude = /\.svg$/i
+    }
+
+    config.module.rules.push({
+      test: /\.svg$/i,
+      resourceQuery: /react/,
+      use: [
+        {
+          loader: "@svgr/webpack",
+          options: {
+            exportType: "default",
+            svgo: true,
+            titleProp: true,
+          },
+        },
+      ],
+    })
+
     // Optimize module resolution
     config.resolve.modules = ['node_modules'];
     config.resolve.symlinks = false;

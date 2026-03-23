@@ -23,6 +23,7 @@ export { DonationProgramsSection } from "./donation-programs-section"
 export { TestimonialsSection } from "./testimonials-section"
 export { FAQSection } from "./faq-section"
 export { BlogSection } from "./blog-section"
+export { MasjidTerdaftarSection } from "./masjid-terdaftar-section"
 
 // Team Sections
 export { TeamInfoSection } from "./team-info-section"
@@ -30,3 +31,6 @@ export { TeamMembersSection } from "./team-members-section"
 
 // CTA Section
 export { CTASection } from "./cta-section"
+
+// Subscribe Section
+export { SubscribeSection } from "./subscribe-section"

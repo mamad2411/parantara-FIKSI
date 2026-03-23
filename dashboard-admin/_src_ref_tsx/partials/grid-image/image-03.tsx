@@ -4,7 +4,7 @@ const PartialsGridImageImage03: React.FC = () => {
   return <div dangerouslySetInnerHTML={{ __html: `<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
   <div>
     <img
-      src="./images/grid-image/image-04.png"
+      src="/images/grid-image/image-04.png"
       alt="image grid"
       class="rounded-xl border border-gray-200 dark:border-gray-800"
     />
@@ -12,7 +12,7 @@ const PartialsGridImageImage03: React.FC = () => {
 
   <div>
     <img
-      src="./images/grid-image/image-05.png"
+      src="/images/grid-image/image-05.png"
       alt="image grid"
       class="rounded-xl border border-gray-200 dark:border-gray-800"
     />
@@ -20,7 +20,7 @@ const PartialsGridImageImage03: React.FC = () => {
 
   <div>
     <img
-      src="./images/grid-image/image-06.png"
+      src="/images/grid-image/image-06.png"
       alt="image grid"
       class="rounded-xl border border-gray-200 dark:border-gray-800"
     />

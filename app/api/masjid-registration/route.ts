@@ -53,6 +53,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Anda sudah memiliki pendaftaran yang sedang diproses' }, { status: 409 })
     }
 
+    // Rate limiting: Check if user has submitted in the last 24 hours
+    const rateLimitCheck = await pool.query(
+      `SELECT id, "createdAt" FROM masjid_registrations 
+       WHERE "userId" = $1 
+       AND "createdAt" > NOW() - INTERVAL '24 hours'
+       ORDER BY "createdAt" DESC LIMIT 1`,
+      [userId]
+    )
+    
+    if (rateLimitCheck.rows.length > 0) {
+      const lastSubmission = new Date(rateLimitCheck.rows[0].createdAt)
+      const nextAllowedTime = new Date(lastSubmission.getTime() + 24 * 60 * 60 * 1000)
+      const hoursLeft = Math.ceil((nextAllowedTime.getTime() - Date.now()) / (1000 * 60 * 60))
+      
+      return NextResponse.json({ 
+        error: `Anda hanya dapat mendaftar 1 kali per hari. Silakan coba lagi dalam ${hoursLeft} jam.`,
+        nextAllowedTime: nextAllowedTime.toISOString()
+      }, { status: 429 })
+    }
+
     const { randomUUID } = await import('crypto')
     const id = randomUUID()
     const userEmail = (formData.adminEmail || formData.emailPerwakilan || '').toLowerCase().trim()

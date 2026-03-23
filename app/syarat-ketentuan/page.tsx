@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { CheckCircle, AlertTriangle, Scale, CreditCard, Users } from "lucide-react"
-import { Hero03 } from "@/components/sections/hero-03"
+import { LegalHero } from "@/components/sections/legal-hero"
 import { Header, Footer } from "@/components/layout"
 
 export default function SyaratKetentuanPage() {
@@ -11,15 +11,15 @@ export default function SyaratKetentuanPage() {
       <Header />
 
       {/* Hero Section */}
-      <Hero03
+      <LegalHero
         variant="terms"
-        title={
-          <>
-            Syarat & <br className="hidden md:block" />
-            Ketentuan
-          </>
-        }
-        subtitle="Aturan dan ketentuan penggunaan platform DanaMasjid"
+        title="Syarat & Ketentuan"
+        subtitle="Aturan Penggunaan Platform"
+        description="Ketentuan dan aturan yang mengatur penggunaan platform DanaMasjid untuk memastikan transparansi dan keamanan bagi semua pengguna."
+        stats={[
+          { value: "100%", label: "Transparansi" },
+          { value: "2.5%", label: "Admin Fee" }
+        ]}
       />
 
       <div className="max-w-4xl mx-auto px-6 pb-12 pt-16">

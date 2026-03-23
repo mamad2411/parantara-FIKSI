@@ -102,7 +102,7 @@ export const authApi = {
 // Subscribe API
 export const subscribeApi = {
   subscribe: async (payload: { email: string }) => {
-    const response = await fetch(`${API_URL}/api/subscribe`, {
+    const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

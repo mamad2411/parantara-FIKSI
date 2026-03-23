@@ -18,6 +18,11 @@ export function markPageLoadingDone(): void {
   window.__pageLoadingDoneListeners = []
 }
 
+export function resetPageLoadingDone(): void {
+  if (typeof window === "undefined") return
+  window.__pageLoadingDone = false
+}
+
 export function onPageLoadingDone(cb: () => void): () => void {
   if (typeof window === "undefined") return () => {}
   if (window.__pageLoadingDone) {

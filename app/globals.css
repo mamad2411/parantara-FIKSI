@@ -1,13 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import "./tailwind-setup.css";
 
-@custom-variant dark (&:is(.dark *));
-
-/* Font optimization */
-@font-face {
-  font-family: system-ui;
-  font-display: swap;
-}
+/* system-ui is a generic family — no @font-face needed */
 
 @font-face {
   font-family: 'KultumRamadhan';
@@ -81,11 +74,6 @@ main {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-/* Font optimization - defer non-critical font loading */
-@font-face {
-  font-display: swap;
 }
 
 /* Custom scrollbar styling - only on html */

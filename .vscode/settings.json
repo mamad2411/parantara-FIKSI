@@ -1,4 +1,15 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-"typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "css.customData": [".vscode/tailwind-v4.css-data.json"],
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+
+  "tailwindCSS.experimental.configFile": "app/globals.css",
+
+  // VS Code/Cursor CSS language service tidak mengenal sintaks Tailwind v4 di @import
+  // (mis. source(none)). Matikan validasi bawaan; PostCSS + Tailwind tetap memvalidasi saat build.
+  "css.validate": false
 }
